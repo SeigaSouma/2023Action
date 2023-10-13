@@ -29,6 +29,10 @@ public:
 	static CSlash *Create(D3DXVECTOR3 pos, D3DXVECTOR3 Parentrot, D3DXVECTOR3 rot, D3DXCOLOR col, float fWidth, float fCenterDistance, int nLife, float fAddSizeValue, int nTexType, bool bAddBlend, ANGLE angle);
 
 private:
+
+	void Collision(void);	// 当たり判定
+	bool IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius);	// 角度付きの判定
+
 	int m_nTexIdx;	// テクスチャのインデックス番号
 	D3DXCOLOR m_colOrigin;	// 元の色
 	float m_fSizeDest;		// 目標のサイズ

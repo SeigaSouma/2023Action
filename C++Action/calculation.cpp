@@ -719,10 +719,10 @@ bool CollisionCircleSquare2D(D3DXVECTOR3 &posCircle, D3DXVECTOR3 &posSquare, D3D
 	float fAngle = atan2f(SquareSize.x, SquareSize.y);									// 対角線の向き
 
 	// 判定する四角の4頂点
-	D3DXVECTOR3 LeftUp = D3DXVECTOR3(posSquare.x + sinf(rotSquare.y - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.y - fAngle) * fLength);
-	D3DXVECTOR3 RightUp = D3DXVECTOR3(posSquare.x + sinf(rotSquare.y + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.y + fAngle) * fLength);
-	D3DXVECTOR3 LeftDown = D3DXVECTOR3(posSquare.x + sinf(rotSquare.y - D3DX_PI + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.y - D3DX_PI + fAngle) * fLength);
-	D3DXVECTOR3 RightDown = D3DXVECTOR3(posSquare.x + sinf(rotSquare.y + D3DX_PI - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.y + D3DX_PI - fAngle) * fLength);
+	D3DXVECTOR3 LeftUp = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y - fAngle) * fLength);
+	D3DXVECTOR3 RightUp = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y + fAngle) * fLength);
+	D3DXVECTOR3 LeftDown = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y - D3DX_PI + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y - D3DX_PI + fAngle) * fLength);
+	D3DXVECTOR3 RightDown = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y + D3DX_PI - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y + D3DX_PI - fAngle) * fLength);
 
 	//***********************
 	// 矩形の判定
@@ -773,16 +773,6 @@ bool CollisionLine(D3DXVECTOR3 pos0, D3DXVECTOR3 pos1, D3DXVECTOR3 MainPos, D3DX
 	D3DXVECTOR3 vecToPos;
 	vecToPos.x = MainPos.x - pos0.x;
 	vecToPos.z = MainPos.z - pos0.z;
-
-	//// 前回の弾と壁のベクトル
-	//D3DXVECTOR3 vecToPosOld;
-	//vecToPosOld.x = MainPosOld.x - pos0.x;
-	//vecToPosOld.z = MainPosOld.z - pos0.z;
-
-	//// 対象の移動ベクトル
-	//D3DXVECTOR3 vecMove;
-	//vecMove.x = MainPos.x - MainPosOld.x;
-	//vecMove.z = MainPos.z - MainPosOld.z;
 
 	if ((vecLine.z * vecToPos.x) - (vecLine.x * vecToPos.z) <= 0)
 	{// 線を超えた

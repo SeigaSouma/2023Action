@@ -12,6 +12,7 @@
 #include "bulletmanager.h"
 #include "calculation.h"
 #include "camera.h"
+#include "debugproc.h"
 
 //==========================================================================
 // マクロ定義
@@ -147,6 +148,19 @@ void CSlash::Update(void)
 	// 外側の幅
 	SetOutWidth(fOutWidth);
 
+	// 当たり判定
+	Collision();
+}
+
+//==========================================================================
+// 当たり判定
+//==========================================================================
+void  CSlash::Collision(void)
+{
+
+	// 外側の幅
+	float fOutWidth = GetOutWidth();
+
 	CBullet **ppBullet = CGame::GetBulletManager()->GetBullet();
 	int nNumAll = CGame::GetBulletManager()->GetNumAll();
 
@@ -166,7 +180,7 @@ void CSlash::Update(void)
 		// 弾との判定
 		float fBulletRadius = ppBullet[nCntBullet]->GetRadius();
 
-		if (ppBullet[nCntBullet]->GetState() == CBullet::STATE_NONE && 
+		if (ppBullet[nCntBullet]->GetState() == CBullet::STATE_NONE &&
 			ppBullet[nCntBullet]->GetType() == CBullet::TYPE_ENEMY &&
 			SphereRange(pos, BulletPosition, fOutWidth, fBulletRadius) == true)
 		{// 球の判定
@@ -202,7 +216,7 @@ void CSlash::Update(void)
 					0.0f,
 					cosf(D3DX_PI + fRot) * 5.0f));
 			}
-				break;
+			break;
 
 			default:
 
@@ -234,6 +248,79 @@ void CSlash::Update(void)
 			CManager::GetCamera()->SetShake(12, 25.0f, 0.0f);
 		}
 	}
+}
+
+//==========================================================================
+// 角度付きの判定
+//==========================================================================
+bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
+{
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+
+	// 外側の幅
+	float fOutWidth = GetOutWidth();
+
+	if (SphereRange(pos, TargetPos, fOutWidth, fTargetRadius) == false)
+	{// 大きい球の判定
+		return false;
+	}
+
+	// 向き取得
+	D3DXVECTOR3 rot = GetRotation();
+	float RotX = GetOriginRotation().x;
+
+	float fLength = sqrtf(fOutWidth * fOutWidth + fOutWidth * fOutWidth);	// 対角線の長さ
+	float fAngle = atan2f(fOutWidth, fOutWidth);									// 対角線の向き
+
+	float fPosY = sinf(GetOriginRotation().x) * fOutWidth;
+
+	// 判定する四角の4頂点
+	bool bLine1 = false, bLine2 = false, bLine3 = false, bLine4 = false;
+	
+	D3DXVECTOR3 LeftUp = D3DXVECTOR3(
+		pos.x + cosf(RotX) * sinf(rot.y - fAngle) * fLength,
+		pos.y + fPosY,
+		pos.z + cosf(RotX) * cosf(rot.y - fAngle) * fLength);
+
+	D3DXVECTOR3 RightUp = D3DXVECTOR3(
+		pos.x + cosf(RotX) * sinf(rot.y + fAngle) * fLength,
+		pos.y - fPosY,
+		pos.z + cosf(RotX) * cosf(rot.y + fAngle) * fLength);
+
+	D3DXVECTOR3 LeftDown = D3DXVECTOR3(
+		pos.x + cosf(RotX) * sinf(rot.y - D3DX_PI + fAngle) * fLength,
+		pos.y + fPosY,
+		pos.z + cosf(RotX) * cosf(rot.y - D3DX_PI + fAngle) * fLength);
+
+	D3DXVECTOR3 RightDown = D3DXVECTOR3(
+		pos.x + cosf(RotX) * sinf(rot.y + D3DX_PI - fAngle) * fLength,
+		pos.y - fPosY,
+		pos.z + cosf(RotX) * cosf(rot.y + D3DX_PI - fAngle) * fLength);
+
+	if (SphereRange(LeftUp, TargetPos, 1.0f, fTargetRadius) == true)
+	{// 球の判定
+		bLine1 = true;
+	}
+	if (SphereRange(RightUp, TargetPos, 1.0f, fTargetRadius) == true)
+	{// 球の判定
+		bLine2 = true;
+	}
+	if (SphereRange(LeftDown, TargetPos, 1.0f, fTargetRadius) == true)
+	{// 球の判定
+		bLine3 = true;
+	}
+	if (SphereRange(RightDown, TargetPos, 1.0f, fTargetRadius) == true)
+	{// 球の判定
+		bLine4 = true;
+	}
+
+	if (bLine1 || bLine2 || bLine3 || bLine4)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 //==========================================================================

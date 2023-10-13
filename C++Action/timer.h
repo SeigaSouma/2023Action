@@ -26,8 +26,6 @@ public:
 	CTimer(int nPriority = 6);
 	~CTimer();
 
-	static HRESULT Load(void);
-	static void Unload(void);
 	static CTimer *Create(void);
 	static CTimer *Create(D3DXVECTOR3 pos);
 
@@ -46,7 +44,7 @@ private:
 	//=============================
 #define NUM_TIMER	(4)			// 桁数
 #define MAX_TIME	(60 * 99)	// タイマーの最大数
-#define START_TIME	(60 * 50)	// タイマーの初期値
+#define START_TIME	(60 * 30)	// タイマーの初期値
 
 	void SetValue(void);
 
