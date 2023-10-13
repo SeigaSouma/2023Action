@@ -1,0 +1,437 @@
+#===================================================================================================
+#
+# 『敵のマネージャ』スクリプトファイル [set_enemy_info.txt]
+# Author : 相馬 靜雅
+#
+#===================================================================================================
+SCRIPT			# この行は絶対消さないこと！
+
+#-----------------------------------------
+# 配置する敵の種類
+#-----------------------------------------
+# パワー+3単騎
+# 群体+3
+# 群体+2
+# パワー+3と群体ちょこっと
+# ジャンプ単騎
+# ボム
+# スピード
+# 波お越し
+# センター波起こし
+# ジャンプ(隊列)
+# 円形隊列
+# 横隊列(群体)
+# V字隊列(群体)
+＃12
+
+#-----------------------------------------
+# 配置する波の種類
+#-----------------------------------------
+# 盛り上げ
+# 直線
+
+#-----------------------------------------
+# 行動の種類
+#-----------------------------------------
+# ランダム = 0
+# くるくる = 1
+# 隊列 = 2
+
+#-----------------------------------------
+# 出現の種類
+#-----------------------------------------
+# 通常 = 0
+# 先頭から順番 = 1
+# 一気に円 = 2
+# 時計回り = 3
+# 両回り = 4
+
+#===================================================================================================
+# 設置情報
+#===================================================================================================
+STAGESET
+	
+	
+	# ウェーブ4
+	WAVESET
+		ENEMYSET
+			TYPE = 12	# どの種類か
+			BASE = 6
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 0.00 0.00 -500.00
+		END_ENEMYSET
+	END_WAVESET
+	
+	# ウェーブ4
+	WAVESET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 6
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 0.00 0.00 200.00
+		END_ENEMYSET
+	END_WAVESET
+	
+	# ウェーブ4
+	WAVESET
+		
+		ENEMYSET
+			TYPE = 10	# どの種類か
+			BASE = 9
+			SPAWNNUM = 20	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 4	# 出現の種類
+			POS = 600.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 0	# どの種類か
+			BASE = 6
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 0.00 0.00 800.00
+		END_ENEMYSET
+	END_WAVESET
+	
+	# ウェーブ4
+	WAVESET
+		
+		ENEMYSET
+			TYPE = 11	# どの種類か
+			BASE = 4
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+	END_WAVESET
+	
+	# ウェーブ4
+	WAVESET
+		ENEMYSET
+			TYPE = 11	# どの種類か
+			BASE = 5
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = -100.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 4	# どの種類か
+			BASE = 3
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 4	# どの種類か
+			BASE = 3
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 400.00 0.00 400.00
+		END_ENEMYSET
+	END_WAVESET
+	
+	# ウェーブ4
+	WAVESET
+		ENEMYSET
+			TYPE = 7	# どの種類か
+			BASE = 6
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 10	# どの種類か
+			BASE = 0
+			SPAWNNUM = 30	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 3	# 出現の種類
+			POS = 600.00 0.00 0.00
+		END_ENEMYSET
+		
+	END_WAVESET
+	
+END_STAGESET
+
+STAGESET
+	# ウェーブ4
+	WAVESET
+		ENEMYSET
+			TYPE = 9	# どの種類か
+			BASE = 0
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 0.00 0.00 300.00
+		END_ENEMYSET
+	END_WAVESET
+	
+	# ウェーブ4
+	WAVESET
+		ENEMYSET
+			TYPE = 0	# どの種類か
+			BASE = 0
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 0	# どの種類か
+			BASE = 0
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 0	# 出現の種類
+			POS = 400.00 0.00 -400.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 10
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+	END_WAVESET
+
+	# ウェーブ0
+	WAVESET
+		ENEMYSET
+			TYPE = 0	# どの種類か
+			BASE = 0
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 1
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 2
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 3
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 4
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 5
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 6
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 7
+			MOVETYPE = 1	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 8
+			MOVETYPE = 1	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 9
+			MOVETYPE = 1	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 10
+			MOVETYPE = 1	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 11
+			MOVETYPE = 1	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+	
+	END_WAVESET
+	
+END_STAGESET
+
+STAGESET
+	# ウェーブ0
+	WAVESET
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 0
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 1
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 2
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 3
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 4
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 5
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 6
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 7
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 8
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 9
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 10
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 11
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 12
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 13
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 14
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 15
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 16
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 17
+			MOVETYPE = 0	# 行動の種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+	END_WAVESET
+	
+END_STAGESET
+
+
+
+END_SCRIPT		# この行は絶対消さないこと！

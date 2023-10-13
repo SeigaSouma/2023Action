@@ -1,0 +1,398 @@
+#===================================================================================================
+#
+# 『敵のマネージャ』スクリプトファイル [set_enemy_info_title.txt]
+# Author : 相馬 靜雅
+#
+#===================================================================================================
+SCRIPT			# この行は絶対消さないこと！
+
+#-----------------------------------------
+# 配置する敵の種類
+#-----------------------------------------
+# パワー+3単騎
+# 群体+3	(9体)
+# 群体+2	(4体)
+# パワー+3と群体ちょこっと
+# ジャンプ単騎
+# ボム
+# スピード
+# 波お越し
+# センター波起こし
+# ジャンプ(隊列)
+# 円形隊列	(n体)
+# 横隊列(群体)		(9体)
+# V字隊列(群体)		(9体)
+# 群体単騎
+＃13
+
+#-----------------------------------------
+# 配置する波の種類
+#-----------------------------------------
+# 盛り上げ
+# 直線
+
+#-----------------------------------------
+# 行動の種類
+#-----------------------------------------
+# ランダム = 0
+# くるくる = 1
+# 隊列 = 2
+# プレイヤー突進 = 3
+
+#-----------------------------------------
+# 出現の種類
+#-----------------------------------------
+# ノーマル = -1
+# 紫 = 7
+# 緑 = 8
+# 白 = 9
+# 青 = 10
+
+#-----------------------------------------
+# 出現の種類
+#-----------------------------------------
+# 通常 = 0
+# 先頭から順番 = 1
+# 一気に円 = 2
+# 時計回り = 3
+# 両回り = 4
+
+#===================================================================================================
+# 設置情報
+#===================================================================================================
+STAGESET
+	
+	# ウェーブ0
+	WAVESET
+		
+		RESPAWNNUM = 0	# リスポーンする規定値
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 12
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 6
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 8	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 4
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 10	# キャラクターの種類
+			POS = 0.00 0.00 -400.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 11
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 7	# キャラクターの種類
+			POS = -400.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 3
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 9	# キャラクターの種類
+			POS = 300.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 3
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 8	# キャラクターの種類
+			POS = -300.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 8
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 10	# キャラクターの種類
+			POS = -300.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 1
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 7	# キャラクターの種類
+			POS = 300.00 0.00 0.00
+		END_ENEMYSET
+		
+	END_WAVESET
+END_STAGESET
+
+#------------------------------[2]------------------------------
+STAGESET
+	
+	# ウェーブ0
+	WAVESET
+		
+		RESPAWNNUM = 0	# リスポーンする規定値
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 0
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 2
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 2
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 9	# キャラクターの種類
+			POS = 300.00 0.00 -300.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 12	# どの種類か
+			BASE = 11
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 9	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 11
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 10	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 9
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = -600.00 0.00 200.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 9
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 10	# キャラクターの種類
+			POS = 500.00 0.00 200.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 11	# どの種類か
+			BASE = 6
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 7	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 6
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 8	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 4
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 8	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 8
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 400.00
+		END_ENEMYSET
+		
+	END_WAVESET
+	
+END_STAGESET
+
+#------------------------------[3]------------------------------
+STAGESET
+	
+	# ウェーブ0
+	WAVESET
+		
+		RESPAWNNUM = 0	# リスポーンする規定値
+		
+		ENEMYSET
+			TYPE = 12	# どの種類か
+			BASE = 16
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 16
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 4
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 9	# キャラクターの種類
+			POS = -700.00 0.00 400.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 12	# どの種類か
+			BASE = 9
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 2	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 9	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 9
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 300.00 0.00 -300.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 5
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = -100.00 0.00 800.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 12
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 10	# キャラクターの種類
+			POS = 0.00 0.00 0.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 0
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = 8	# キャラクターの種類
+			POS = 0.00 0.00 400.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 1	# どの種類か
+			BASE = 0
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 0	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 400.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 8
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 -800.00
+		END_ENEMYSET
+		
+		ENEMYSET
+			TYPE = 2	# どの種類か
+			BASE = 14
+			SPAWNNUM = -1	# 出現する数
+			MOVETYPE = 1	# 行動の種類
+			SPAWNTYPE = 1	# 出現の種類
+			CHARACTER = -1	# キャラクターの種類
+			POS = 0.00 0.00 500.00
+		END_ENEMYSET
+		
+	END_WAVESET
+	
+END_STAGESET
+
+
+END_SCRIPT		# この行は絶対消さないこと！
