@@ -17,7 +17,7 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
-
+DWORD dwGameStartsTime = 0;
 //==========================================================================
 // 静的メンバ変数宣言
 //==========================================================================
@@ -30,7 +30,7 @@ CDebugPointNumber::CDebugPointNumber(int nPriority) : CObject(nPriority)
 	// ゼロクリア
 	m_nIdxParent = 0;		// 親の番号
 	m_pMultiNumber = NULL;	// 数字のオブジェクト
-
+	dwGameStartsTime = timeGetTime();
 }
 
 //==========================================================================
@@ -137,6 +137,21 @@ void CDebugPointNumber::Update(void)
 	D3DXVECTOR3 pos = pMapManager->GetControlPoint(m_nIdxParent + 1);
 	pos.y += 50.0f;
 	m_pMultiNumber->SetPosition(pos);
+
+	//D3DXCOLOR col = m_pMultiNumber->GetColor();
+
+	//DWORD dwGameTime = timeGetTime();	// 現在時刻を取得
+	//float fTime = (float)(dwGameTime - dwGameStartsTime);
+	//fTime *= 0.001f;
+
+	//if (fTime >= 1.0f)
+	//{
+	//	dwGameStartsTime = timeGetTime();	// 現在時刻を取得
+	//}
+
+	//col.a = Lerp(0.0f, 1.0f, fTime);
+
+	//m_pMultiNumber->SetColor(col);
 }
 
 //==========================================================================

@@ -713,6 +713,8 @@ void CObject3DMesh::Draw(void)
 		m_nNumVertex,
 		0,
 		m_nNumIndex - 2);
+
+	SetWorldMtx(m_mtxWorld);
 }
 
 //==========================================================================

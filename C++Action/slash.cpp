@@ -182,7 +182,7 @@ void  CSlash::Collision(void)
 
 		if (ppBullet[nCntBullet]->GetState() == CBullet::STATE_NONE &&
 			ppBullet[nCntBullet]->GetType() == CBullet::TYPE_ENEMY &&
-			SphereRange(pos, BulletPosition, fOutWidth, fBulletRadius) == true)
+			IsHit(BulletPosition, fBulletRadius) == true)
 		{// 球の判定
 
 			float fRot = 0.0f;
@@ -261,6 +261,8 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 	// 外側の幅
 	float fOutWidth = GetOutWidth();
 
+#if 0
+
 	if (SphereRange(pos, TargetPos, fOutWidth, fTargetRadius) == false)
 	{// 大きい球の判定
 		return false;
@@ -269,6 +271,11 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 	// 向き取得
 	D3DXVECTOR3 rot = GetRotation();
 	float RotX = GetOriginRotation().x;
+
+	if (GetMoveAngle() == ANGLE_LEFT)
+	{
+		RotX += D3DX_PI;
+	}
 
 	float fLength = sqrtf(fOutWidth * fOutWidth + fOutWidth * fOutWidth);	// 対角線の長さ
 	float fAngle = atan2f(fOutWidth, fOutWidth);									// 対角線の向き
@@ -280,23 +287,80 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 	
 	D3DXVECTOR3 LeftUp = D3DXVECTOR3(
 		pos.x + cosf(RotX) * sinf(rot.y - fAngle) * fLength,
-		pos.y,
+		pos.y + fPosY,
 		pos.z + cosf(RotX) * cosf(rot.y - fAngle) * fLength);
 
 	D3DXVECTOR3 RightUp = D3DXVECTOR3(
 		pos.x + cosf(RotX) * sinf(rot.y + fAngle) * fLength,
-		pos.y,
+		pos.y + fPosY,
 		pos.z + cosf(RotX) * cosf(rot.y + fAngle) * fLength);
 
 	D3DXVECTOR3 LeftDown = D3DXVECTOR3(
 		pos.x + cosf(RotX) * sinf(rot.y - D3DX_PI + fAngle) * fLength,
-		pos.y ,
+		pos.y - fPosY,
 		pos.z + cosf(RotX) * cosf(rot.y - D3DX_PI + fAngle) * fLength);
 
 	D3DXVECTOR3 RightDown = D3DXVECTOR3(
 		pos.x + cosf(RotX) * sinf(rot.y + D3DX_PI - fAngle) * fLength,
-		pos.y,
+		pos.y - fPosY,
 		pos.z + cosf(RotX) * cosf(rot.y + D3DX_PI - fAngle) * fLength);
+
+	if (CollisionCircleSquare2D(TargetPos, D3DXVECTOR3(pos.x, TargetPos.y, pos.z), D3DXVECTOR3(RotX, rot.y, rot.z), fTargetRadius, D3DXVECTOR2(fOutWidth, fOutWidth)))
+	{
+		return true;
+	}
+
+
+#else
+
+	// 向き取得
+	D3DXVECTOR3 rot = GetRotation();
+
+	{
+
+		D3DXVECTOR3 rectCenter = pos; // 回転した矩形の中心座標
+		D3DXVECTOR3 rectRotation = D3DXVECTOR3(D3DX_PI - GetOriginRotation().x, rot.y, rot.z);
+		D3DXVECTOR3 rectSize(fOutWidth, 1.0f, fOutWidth); // 回転した矩形の幅、高さ、奥行き
+		D3DXMATRIX rectWorldMatrix = GetWorldMtx(); // 回転した矩形のワールド変換行列
+		D3DXVECTOR3 sphereCenter = TargetPos; // 球の中心座標
+		float sphereRadius = fTargetRadius; // 球の半径
+
+		// 回転した矩形の半幅を計算
+		float halfWidth = rectSize.x;
+		float halfHeight = rectSize.y;
+		float halfDepth = rectSize.z;
+
+		// 球の中心を回転した座標系に変換
+		D3DXMATRIX rotationMatrix;
+		D3DXMatrixRotationYawPitchRoll(&rotationMatrix, rectRotation.y, rectRotation.x, rectRotation.z);
+		D3DXVECTOR3 transformedSphereCenter = sphereCenter - rectCenter;
+		D3DXVec3TransformCoord(&transformedSphereCenter, &transformedSphereCenter, &rotationMatrix);
+
+		// 移動する球の新しい位置を計算
+		D3DXVECTOR3 newSphereCenter = sphereCenter;
+
+		// 球の中心と矩形の内部の最も近い点を求める
+		float closestX = max(-halfWidth, min(transformedSphereCenter.x, halfWidth));
+		float closestY = max(-halfHeight, min(transformedSphereCenter.y, halfHeight));
+		float closestZ = max(-halfDepth, min(transformedSphereCenter.z, halfDepth));
+
+		// 最も近い点と球の中心との距離を計算
+		float distanceSquared = 
+			(closestX - transformedSphereCenter.x) * (closestX - transformedSphereCenter.x) +
+			(closestY - transformedSphereCenter.y) * (closestY - transformedSphereCenter.y) +
+			(closestZ - transformedSphereCenter.z) * (closestZ - transformedSphereCenter.z);
+
+		float sphereRadiusWithMargin = sphereRadius;  // 球の半径に追加のマージンを考慮する場合、適切な値に変更
+
+		// 球が新しい位置で矩形と交差している場合、当たり判定
+		if (distanceSquared <= (sphereRadiusWithMargin * sphereRadiusWithMargin)) {
+			return true;
+		}
+
+		return false;
+	}
+
+#endif
 
 	
 

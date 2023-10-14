@@ -146,6 +146,18 @@ void InertiaCorrection(float &fMain, float fTarget, float fCntCorrection)
 }
 
 //==================================================================================
+// 線形補正
+//==================================================================================
+float Lerp(float start, float end, float time)
+{
+	// 範囲外補正
+	ValueNormalize(time, 1.0f, 0.0f);
+	float fValue = start + time * (end - start);
+
+	return fValue;
+}
+
+//==================================================================================
 // ランダム
 //==================================================================================
 int Random(int nMinNum, int nMaxNum)
@@ -708,32 +720,60 @@ bool CollisionSquareSquare2D(D3DXVECTOR3 &MainPos, D3DXVECTOR3 &TargetPos, D3DXV
 //==================================================================================
 bool CollisionCircleSquare2D(D3DXVECTOR3 &posCircle, D3DXVECTOR3 &posSquare, D3DXVECTOR3 rotSquare, float fCircleRadius, D3DXVECTOR2 SquareSize)
 {
-	bool bHit = false;			// 当たったかの判定
-	bool bSquareHit = false;	// 四角の中にいるかの判定
 
-	// 判定する円の分矩形の大きさに足す
-	SquareSize.x += fCircleRadius;
-	SquareSize.y += fCircleRadius;
+	float fSquareSizeX = SquareSize.x;	// 矩形のサイズX
+	float fSquareSizeY = SquareSize.y;	// 矩形のサイズY
 
-	float fLength = sqrtf(SquareSize.x * SquareSize.x + SquareSize.y * SquareSize.y);	// 対角線の長さ
-	float fAngle = atan2f(SquareSize.x, SquareSize.y);									// 対角線の向き
+	float fLength = 0.0f;	// 対角線の長さ
+	float fAngle = 0.0f;	// 対角線の向き
+
+	D3DXVECTOR3 LeftUp, RightUp, LeftDown, RightDown;
+
+	//****************************************************
+	// Xのサイズに円の半径を足した矩形の判定
+	//****************************************************
+	fSquareSizeX += fCircleRadius;	// 矩形のサイズX
+	fSquareSizeY = SquareSize.y;	// 矩形のサイズY
+
+	fLength = sqrtf(fSquareSizeX * fSquareSizeX + fSquareSizeY * fSquareSizeY);	// 対角線の長さ
+	fAngle = atan2f(fSquareSizeX, fSquareSizeY);								// 対角線の向き
 
 	// 判定する四角の4頂点
-	D3DXVECTOR3 LeftUp = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y - fAngle) * fLength);
-	D3DXVECTOR3 RightUp = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y + fAngle) * fLength);
-	D3DXVECTOR3 LeftDown = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y - D3DX_PI + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y - D3DX_PI + fAngle) * fLength);
-	D3DXVECTOR3 RightDown = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y + D3DX_PI - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y + D3DX_PI - fAngle) * fLength);
+	LeftUp = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y - fAngle) * fLength);
+	RightUp = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y + fAngle) * fLength);
+	LeftDown = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y - D3DX_PI + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y - D3DX_PI + fAngle) * fLength);
+	RightDown = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y + D3DX_PI - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y + D3DX_PI - fAngle) * fLength);
 
-	//***********************
 	// 矩形の判定
-	//***********************
-	if (CollisionSquare(LeftUp, RightUp, LeftDown, RightDown, posCircle) == false)
-	{// 矩形にも当たらなかった場合
-		return false;
+	if (CollisionSquare(LeftUp, RightUp, LeftDown, RightDown, posCircle) == true)
+	{// 矩形に当たった場合
+		return true;
 	}
 
+	//****************************************************
+	// Yのサイズに円の半径を足した矩形の判定
+	//****************************************************
+	fSquareSizeX = SquareSize.x;	// 矩形のサイズX
+	fSquareSizeY += fCircleRadius;	// 矩形のサイズY
+
+	fLength = sqrtf(fSquareSizeX * fSquareSizeX + fSquareSizeY * fSquareSizeY);	// 対角線の長さ
+	fAngle = atan2f(fSquareSizeX, fSquareSizeY);								// 対角線の向き
+
+	// 判定する四角の4頂点
+	LeftUp = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y - fAngle) * fLength);
+	RightUp = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y + fAngle) * fLength);
+	LeftDown = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y - D3DX_PI + fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y - D3DX_PI + fAngle) * fLength);
+	RightDown = D3DXVECTOR3(posSquare.x + cosf(rotSquare.x) * sinf(rotSquare.y + D3DX_PI - fAngle) * fLength, posSquare.y, posSquare.z + cosf(rotSquare.x) * cosf(rotSquare.y + D3DX_PI - fAngle) * fLength);
+
+	// 矩形の判定
+	if (CollisionSquare(LeftUp, RightUp, LeftDown, RightDown, posCircle) == true)
+	{// 矩形に当たった場合
+		return true;
+	}
+
+
 	//***********************
-	// 円の判定
+	// 各頂点毎の円の判定
 	//***********************
 	if (CircleRange(posCircle, LeftUp, fCircleRadius, fCircleRadius) == true)
 	{// 左上

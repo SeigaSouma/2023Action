@@ -41,12 +41,15 @@ public:
 	void SetValue(int nValue);	// 値の設定処理(オーバーロード)
 	void SetPosition(const D3DXVECTOR3 pos);	// 位置設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
+	void SetColor(const D3DXCOLOR col);			// 色設定
+	D3DXCOLOR GetColor(void) const;				// 色取得
 	void Release(void);	// 開放処理
 
 private:
 
 	// メンバ変数
 	D3DXVECTOR3 m_pos;				// 位置
+	D3DXCOLOR m_col;				// 色
 	D3DXVECTOR2 size;				// 数字のサイズ
 	int m_nNum;						// 数字
 	int m_nNumNumber;				// 数字の数

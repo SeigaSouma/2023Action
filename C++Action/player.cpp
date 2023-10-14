@@ -553,9 +553,11 @@ void CPlayer::Controll(void)
 			m_bMove = false;
 		}
 
-		if (pInputKeyboard->GetTrigger(DIK_SPACE) == true)
+		if (pInputKeyboard->GetTrigger(DIK_SPACE) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_LB, 0))
 		{//SPACEが押された,ジャンプ
-			CGame::GetScore()->Add(10);
+
+			m_bJump = true;
+			move.y += 17.0f;
 		}
 	}
 	//else
@@ -617,118 +619,6 @@ void CPlayer::Controll(void)
 	// 移動した量加算
 	fMoveValue += move.x;
 
-#if 0
-	// 曲線作る為の4点
-	int nIdxMapPoint = GetMapIndex();
-	int nP0, nP1, nP2, nP3;
-	nP0 = nIdxMapPoint;
-	nP1 = nIdxMapPoint + 1;
-	nP2 = nIdxMapPoint + 2;
-	nP3 = nIdxMapPoint + 3;
-
-	// 目標地点
-	D3DXVECTOR3 TargetPoint0 = pMapManager->GetControlPoint(nP0);
-	D3DXVECTOR3 TargetPoint1 = pMapManager->GetControlPoint(nP1);
-	D3DXVECTOR3 TargetPoint2 = pMapManager->GetControlPoint(nP2);
-	D3DXVECTOR3 TargetPoint3 = pMapManager->GetControlPoint(nP3);
-
-	// 2点間の距離取得
-	float fPosLength = GetPosLength(TargetPoint1, TargetPoint2);
-
-	// 位置の割合取得
-	float fPointRatio = GetMapPointRatio();
-
-	// 位置の割合
-	if (fPosLength != 0.0f)
-	{
-		fPointRatio = fMoveValue / fPosLength;
-
-		fTimeDest = (fMoveValue + fMove * m_nAngle) / fPosLength;
-	}
-	else if (nIdxMapPoint >= pMapManager->GetControlPointNum() - 1 && move.x < 0)
-	{// 最後
-
-		fPointRatio = 1.0f;
-		fTimeDest = 0.05f;
-	}
-
-	bool bLeftArrival = false, bRightArrival = false;
-	if (fPointRatio >= 1.0f && nIdxMapPoint < pMapManager->GetControlPointNum() - 1)
-	{
-		// マップの位置加算
-		nIdxMapPoint++;
-		if (nP1 < pMapManager->GetControlPointNum() - 1)
-		{
-			fMoveValue = fMoveValue - fPosLength;
-			fPointRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
-			bRightArrival = true;
-		}
-	}
-	else if (fPointRatio < 0.0f)
-	{
-		// マップの位置減算
-		nIdxMapPoint--;
-
-		if (nIdxMapPoint < -1)
-		{
-			nIdxMapPoint = -1;
-		}
-		fMoveValue = GetPosLength(TargetPoint0, TargetPoint1);
-		fPointRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
-		bLeftArrival = true;
-	}
-
-	if (bLeftArrival == true || bRightArrival == true)
-	{// 左右どっちか到着
-
-		// 補正の4点更新
-		nP0 = nIdxMapPoint;
-		nP1 = nIdxMapPoint + 1;
-		nP2 = nIdxMapPoint + 2;
-		nP3 = nIdxMapPoint + 3;
-
-		// 4点の位置も更新
-		TargetPoint0 = pMapManager->GetControlPoint(nP0);
-		TargetPoint1 = pMapManager->GetControlPoint(nP1);
-		TargetPoint2 = pMapManager->GetControlPoint(nP2);
-		TargetPoint3 = pMapManager->GetControlPoint(nP3);
-
-		if (bLeftArrival == true)
-		{
-			// 移動の値を終端
-			int nIdx1 = nP1, nIdx2 = nP2;
-			fMoveValue = GetPosLength(pMapManager->GetControlPoint(nIdx1), pMapManager->GetControlPoint(nIdx2));
-			if (nIdxMapPoint <= -1)
-			{
-				nIdx1 = nP0 + 1, nIdx2 = nP1 + 1;
-				TargetPoint0 = pMapManager->GetControlPoint(0);
-				TargetPoint1 = pMapManager->GetControlPoint(0);
-				TargetPoint2 = pMapManager->GetControlPoint(1);
-				TargetPoint3 = pMapManager->GetControlPoint(2);
-				fMoveValue = GetPosLength(pMapManager->GetControlPoint(nIdx1), pMapManager->GetControlPoint(nIdx2));
-			}
-		}
-	}
-
-	if (nIdxMapPoint <= -1 && fPointRatio < 1.0f && fPointRatio > 0.0f)
-	{
-		fPointRatio = 1.0f;
-		int nIdx1 = nP0 + 1, nIdx2 = nP1 + 1;
-		fMoveValue = fPosLength;
-	}
-	else if (nIdxMapPoint >= pMapManager->GetControlPointNum() - 1)
-	{
-		fPointRatio = 0.0f;
-		fMoveValue = 0.0f;
-	}
-
-	// 曲線の位置
-	float posY = pos.y;
-	pos = CatmullRomSplineInterp(TargetPoint0, TargetPoint1, TargetPoint2, TargetPoint3, fPointRatio);
-	sakiPos = CatmullRomSplineInterp(TargetPoint0, TargetPoint1, TargetPoint2, TargetPoint3, fTimeDest);
-	pos.y = posY;
-#else
-
 	// 曲線作る為の4点
 	int nIdxMapPoint = GetMapIndex();
 
@@ -744,7 +634,6 @@ void CPlayer::Controll(void)
 	float fDestPointRatio = fPointRatio;
 	sakiPos = pMapManager->UpdateNowPosition(nDestIdx, fDestPointRatio, fDest, pos.y);
 
-#endif
 
 	// 目標の角度を求める
 	fRotDest = atan2f((pos.x - sakiPos.x), (pos.z - sakiPos.z));
@@ -1037,7 +926,7 @@ void CPlayer::Atack(void)
 				// 斬撃生成
 				CSlash::Create
 				(
-					D3DXVECTOR3(pos.x, 100.0f, pos.z),	// 位置
+					D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),	// 位置
 					D3DXVECTOR3(m_fAtkStickRot, 0.0f, 0.0f),		// 向き
 					D3DXVECTOR3(0.0f, D3DX_PI + rot.y, 0.0f),		// 向き
 					D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f),	// 色

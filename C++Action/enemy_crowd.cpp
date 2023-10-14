@@ -594,6 +594,32 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	pBullet->SetMapMoveValue(GetMapMoveValue());
 	pBullet->SetMapPointRatio(GetMapPointRatio());
 	pBullet->SetMoveAngle(setAngle);
+
+
+	pBullet = CBullet::Create(
+		CBullet::TYPE_ENEMY,
+		CBullet::MOVETYPE_NORMAL,
+		D3DXVECTOR3(pos.x, pos.y + 150.0f, pos.z),
+		rot,
+		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
+		40.0f);
+	pBullet->SetMapIndex(GetMapIndex());
+	pBullet->SetMapMoveValue(GetMapMoveValue());
+	pBullet->SetMapPointRatio(GetMapPointRatio());
+	pBullet->SetMoveAngle(setAngle);
+
+
+	pBullet = CBullet::Create(
+		CBullet::TYPE_ENEMY,
+		CBullet::MOVETYPE_NORMAL,
+		D3DXVECTOR3(pos.x, pos.y + 250.0f, pos.z),
+		rot,
+		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
+		40.0f);
+	pBullet->SetMapIndex(GetMapIndex());
+	pBullet->SetMapMoveValue(GetMapMoveValue());
+	pBullet->SetMapPointRatio(GetMapPointRatio());
+	pBullet->SetMoveAngle(setAngle);
 }
 
 //==========================================================================

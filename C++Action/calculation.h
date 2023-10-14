@@ -42,6 +42,7 @@ void RotNormalize(float &fRot);												// Šp“x‚Ì³‹K‰»(-3.14 || 3.14’´‚¦‚½‚ç
 void RotNormalize(D3DXVECTOR3 &rot);										// Šp“x‚Ì³‹K‰»(-3.14 || 3.14’´‚¦‚½‚ç•â³)
 template<class T> void ValueNormalize(T &Value, T MaxValue, T MinValue);	// ’l‚Ì³‹K‰»ˆ—
 void InertiaCorrection(float &fMain, float fTarget, float fCntCorrection);	// Šµ«•â³
+float Lerp(float start, float end, float time);								// üŒ`•â³
 template<class T> void CuadricCurveComp(T& Value, const int nRange, T RangeOrigin, T Max, int& nAlphaCnt);	// “ñŸ‹Èü•â³
 int Random(int nMinNum, int nMaxNum);										// ƒ‰ƒ“ƒ_ƒ€¶¬
 int GetDigit(int nNum);														// Œ…”æ“¾

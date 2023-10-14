@@ -32,6 +32,7 @@ CMultiNumber::CMultiNumber(int nPriority)
 	m_nNumNumber = 0;	// 数字の数
 	m_ppMultiNumber = NULL;	// 数字のオブジェクト
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 位置
+	m_col =mylib_const::DEFAULT_COLOR;		// 色
 	size = D3DXVECTOR2(0.0f, 0.0f);	// 数字のサイズ
 	m_objType = CNumber::OBJECTTYPE_2D;	// オブジェクトの種類
 }
@@ -321,4 +322,43 @@ void CMultiNumber::SetPosition(const D3DXVECTOR3 pos)
 D3DXVECTOR3 CMultiNumber::GetPosition(void) const
 {
 	return m_pos;
+}
+
+//==========================================================================
+// 色設定
+//==========================================================================
+void CMultiNumber::SetColor(const D3DXCOLOR col)
+{
+	m_col = col;
+
+	switch (m_objType)
+	{
+	case CNumber::OBJECTTYPE_2D:
+		for (int nCntNum = 0; nCntNum < m_nNumNumber; nCntNum++)
+		{
+			if (m_ppMultiNumber[nCntNum] != NULL)
+			{
+				m_ppMultiNumber[nCntNum]->GetObject2D()->SetColor(m_col);	// 色
+			}
+		}
+		break;
+
+	case CNumber::OBJECTTYPE_BILLBOARD:
+		for (int nCntNum = 0; nCntNum < m_nNumNumber; nCntNum++)
+		{
+			if (m_ppMultiNumber[nCntNum] != NULL)
+			{
+				m_ppMultiNumber[nCntNum]->GetObjectBillboard()->SetColor(m_col);	// 色
+			}
+		}
+		break;
+	}
+}
+
+//==========================================================================
+// 色取得
+//==========================================================================
+D3DXCOLOR CMultiNumber::GetColor(void) const
+{
+	return m_col;
 }
