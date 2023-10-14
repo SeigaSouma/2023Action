@@ -280,45 +280,25 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 	
 	D3DXVECTOR3 LeftUp = D3DXVECTOR3(
 		pos.x + cosf(RotX) * sinf(rot.y - fAngle) * fLength,
-		pos.y + fPosY,
+		pos.y,
 		pos.z + cosf(RotX) * cosf(rot.y - fAngle) * fLength);
 
 	D3DXVECTOR3 RightUp = D3DXVECTOR3(
 		pos.x + cosf(RotX) * sinf(rot.y + fAngle) * fLength,
-		pos.y - fPosY,
+		pos.y,
 		pos.z + cosf(RotX) * cosf(rot.y + fAngle) * fLength);
 
 	D3DXVECTOR3 LeftDown = D3DXVECTOR3(
 		pos.x + cosf(RotX) * sinf(rot.y - D3DX_PI + fAngle) * fLength,
-		pos.y + fPosY,
+		pos.y ,
 		pos.z + cosf(RotX) * cosf(rot.y - D3DX_PI + fAngle) * fLength);
 
 	D3DXVECTOR3 RightDown = D3DXVECTOR3(
 		pos.x + cosf(RotX) * sinf(rot.y + D3DX_PI - fAngle) * fLength,
-		pos.y - fPosY,
+		pos.y,
 		pos.z + cosf(RotX) * cosf(rot.y + D3DX_PI - fAngle) * fLength);
 
-	if (SphereRange(LeftUp, TargetPos, 1.0f, fTargetRadius) == true)
-	{// ‹…‚Ì”»’è
-		bLine1 = true;
-	}
-	if (SphereRange(RightUp, TargetPos, 1.0f, fTargetRadius) == true)
-	{// ‹…‚Ì”»’è
-		bLine2 = true;
-	}
-	if (SphereRange(LeftDown, TargetPos, 1.0f, fTargetRadius) == true)
-	{// ‹…‚Ì”»’è
-		bLine3 = true;
-	}
-	if (SphereRange(RightDown, TargetPos, 1.0f, fTargetRadius) == true)
-	{// ‹…‚Ì”»’è
-		bLine4 = true;
-	}
-
-	if (bLine1 || bLine2 || bLine3 || bLine4)
-	{
-		return true;
-	}
+	
 
 	return false;
 }
