@@ -81,6 +81,7 @@ CEditControlPoint *CEditControlPoint::Create(void)
 //==========================================================================
 HRESULT CEditControlPoint::Init(void)
 {
+	m_pos = CManager::GetInstance()->GetCamera()->GetPositionR();
 	return S_OK;
 }
 
@@ -319,13 +320,19 @@ void CEditControlPoint::Grab(void)
 		return;
 	}
 
+	bool bAll = false;
+	if (pInputKeyboard->GetPress(DIK_RCONTROL) == true)
+	{// 右コントロールで全選択
+		bAll = true;
+	}
+
 	// マップマネージャ取得
 	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 
 	for (int i = 0; i < pMapManager->GetNumAll(); i++)
 	{
 		D3DXVECTOR3 TargetPoint = pMapManager->GetControlPoint(i);
-		if (SphereRange(m_pos, TargetPoint, 50.0f, 50.0f))
+		if (bAll == true || SphereRange(m_pos, TargetPoint, 50.0f, 50.0f))
 		{// 球に当たってたら
 
 			// 操作

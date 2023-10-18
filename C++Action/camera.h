@@ -44,6 +44,7 @@ public:
 	void SetRotation(const D3DXVECTOR3 rot);	// 向き設定
 	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
 	D3DXVECTOR3 GetPositionV(void) const;		// カメラの位置取得
+	D3DXVECTOR3 GetPositionR(void) const;		// カメラの注視点取得
 	float GetOriginDistance(void);				// 元になるカメラの距離取得
 	void SetShake(int nTime, float fLength, float fLengthY);	// 振動設定
 	void SetLenDest(float fLength, int nCntTime = 120, float DecrementValue = 2.0f, float fCorrection = 0.1f);	// 目標の長さ設定
