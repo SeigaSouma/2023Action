@@ -69,7 +69,7 @@ HRESULT CEnemyCrowd::Init(void)
 	//m_pHPGauge = CHP_Gauge::Create(80.0f, nLife, 0.8f);
 	m_state = STATE_SPAWN;	// 親追い掛け状態
 	m_Oldstate = STATE_PLAYERCHASE;
-
+	m_ActType = ACTTYPE_CHASE;
 	//if (m_pHPGauge == NULL)
 	//{// NULLだったら
 	//	m_pHPGauge = NULL;
@@ -331,6 +331,7 @@ void CEnemyCrowd::MotionSet(void)
 //==========================================================================
 void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 {
+	return;
 	D3DXMATRIX mtxTrans;	// 計算用マトリックス宣言
 
 	// 攻撃時処理

@@ -792,6 +792,19 @@ void CEnemy::StateNone(void)
 		break;
 
 	case CEnemy::ACTTYPE_CHASE:
+
+		m_state = STATE_PLAYERCHASE;
+
+		//// 位置取得
+		//D3DXVECTOR3 pos = GetPosition();
+
+		//if (CircleRange(pos, PlayerPos, 200.0f, PLAYER_SERCH) == true)
+		//{// プレイヤーが視界に入った
+		//	m_state = STATE_PLAYERCHASE;
+		//}
+
+		//// 位置設定
+		//SetPosition(pos);
 		break;
 
 	case CEnemy::ACTTYPE_TURRET:
@@ -808,17 +821,6 @@ void CEnemy::StateNone(void)
 	{// 遷移カウンターが0になったら
 		m_nCntState = 0;
 	}
-
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
-
-	if (CircleRange(pos, PlayerPos, 200.0f, PLAYER_SERCH) == true)
-	{// プレイヤーが視界に入った
-		//m_state = STATE_PLAYERCHASE;
-	}
-
-	// 位置設定
-	SetPosition(pos);
 }
 
 //==========================================================================

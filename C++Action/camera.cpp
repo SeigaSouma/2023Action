@@ -181,7 +181,7 @@ void CCamera::Update(void)
 		m_bFollow = m_bFollow ? false : true;
 	}
 
-	if (pInputKeyboard->GetTrigger(DIK_RIGHT) == true)
+	if (pInputKeyboard->GetTrigger(DIK_C) == true)
 	{
 		m_ChaseType = (CHASETYPE)(((int)m_ChaseType + 1) % (int)CHASETYPE_MAX);	// ’Ç]‚Ìí—Ş
 	}
