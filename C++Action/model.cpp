@@ -162,7 +162,7 @@ void CModel::Update(void)
 void CModel::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス宣言
 	D3DXMATRIX mtxRotOrigin;		// 計算用マトリックス宣言
@@ -225,7 +225,7 @@ void CModel::Draw(void)
 		pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, CManager::GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
+		pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
 
 		// パーツの描画
 		pXData->pMesh->DrawSubset(nCntMat);
@@ -241,7 +241,7 @@ void CModel::Draw(void)
 void CModel::Draw(D3DXCOLOR col)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス宣言
 	D3DXMATRIX mtxRotOrigin;		// 計算用マトリックス宣言
@@ -311,7 +311,7 @@ void CModel::Draw(D3DXCOLOR col)
 		pDevice->SetMaterial(&matNow.MatD3D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, CManager::GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
+		pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
 
 		// パーツの描画
 		pXData->pMesh->DrawSubset(nCntMat);

@@ -67,7 +67,7 @@ CMeshCylinder *CMeshCylinder::Create(void)
 			pObjMeshCylinder->SetHeightLen(POS_MESHCYLINDER_Y);
 
 			// テクスチャの割り当て
-			pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(TEXTURE);
+			pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 
 			// テクスチャの割り当て
 			pObjMeshCylinder->BindTexture(pObjMeshCylinder->m_nTexIdx);
@@ -117,13 +117,13 @@ CMeshCylinder *CMeshCylinder::Create(const char *aFileName)
 			{// NULLだったら
 
 				// テクスチャの割り当て
-				pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(TEXTURE);
+				pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 			}
 			else
 			{// ファイル名が入っていたら
 
 				// テクスチャの割り当て
-				pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(aFileName);
+				pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(aFileName);
 			}
 
 			// テクスチャの割り当て
@@ -147,7 +147,7 @@ HRESULT CMeshCylinder::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 種類設定
 	SetType(TYPE_MESHCYLINDER);
@@ -187,7 +187,7 @@ void CMeshCylinder::Update(void)
 void CMeshCylinder::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	//// テクスチャの繰り返しを元に戻す
 	//pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);

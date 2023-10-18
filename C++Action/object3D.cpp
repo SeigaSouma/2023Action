@@ -65,6 +65,65 @@ void CObject3D::BindTexture(int nIdx)
 }
 
 //==========================================================================
+// 生成処理
+//==========================================================================
+CObject3D *CObject3D::Create(void)
+{
+	// 生成用のオブジェクト
+	CObject3D *pObject3D = NULL;
+
+	if (pObject3D == NULL)
+	{// NULLだったら
+
+		// メモリの確保
+		pObject3D = DEBUG_NEW CObject3D;
+
+		if (pObject3D != NULL)
+		{// メモリの確保が出来ていたら
+
+			// 初期化処理
+			pObject3D->Init();
+		}
+
+		return pObject3D;
+	}
+
+	return NULL;
+}
+
+//==========================================================================
+// 生成処理
+//==========================================================================
+CObject3D *CObject3D::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot)
+{
+	// 生成用のオブジェクト
+	CObject3D *pObject3D = NULL;
+
+	if (pObject3D == NULL)
+	{// NULLだったら
+
+		// メモリの確保
+		pObject3D = DEBUG_NEW CObject3D;
+
+		if (pObject3D != NULL)
+		{// メモリの確保が出来ていたら
+
+			// 初期化処理
+			pObject3D->Init();
+
+			// 位置・向き
+			pObject3D->SetPosition(pos);
+			pObject3D->SetOriginPosition(pos);
+			pObject3D->SetRotation(rot);
+		}
+
+		return pObject3D;
+	}
+
+	return NULL;
+}
+
+//==========================================================================
 // 初期化処理
 //==========================================================================
 HRESULT CObject3D::Init(void)
@@ -72,7 +131,7 @@ HRESULT CObject3D::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 頂点バッファの生成
 	if (m_pVtxBuff != NULL)
@@ -90,7 +149,6 @@ HRESULT CObject3D::Init(void)
 
 	if (FAILED(hr))
 	{// 失敗したとき
-
 		return E_FAIL;
 	}
 
@@ -131,9 +189,9 @@ void CObject3D::Update(void)
 void CObject3D::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
-	//計算用マトリックス宣言
+	// 計算用マトリックス宣言
 	D3DXMATRIX mtxRot, mtxTrans, mtxRotOrigin;
 	D3DXMatrixIdentity(&mtxRotOrigin);
 
@@ -142,11 +200,11 @@ void CObject3D::Draw(void)
 
 	// 元の向きを反映する
 	D3DXMatrixRotationYawPitchRoll(&mtxRotOrigin, m_rotOrigin.y, m_rotOrigin.x, m_rotOrigin.z);
+	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRotOrigin);
 
 	// 向きを反映する
 	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
 	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRotOrigin);
 
 	// 位置を反映する
 	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
@@ -162,83 +220,10 @@ void CObject3D::Draw(void)
 	pDevice->SetFVF(FVF_VERTEX_3D);
 
 	// テクスチャの設定
-	pDevice->SetTexture(0, CManager::GetTexture()->GetAdress(m_nTexIdx));
+	pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(m_nTexIdx));
 
 	// ポリゴンの描画
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);
-}
-
-//==========================================================================
-// 生成処理
-//==========================================================================
-CObject3D *CObject3D::Create(void)
-{
-	// 生成用のオブジェクト
-	CObject3D *pObject3D = NULL;
-
-	if (pObject3D == NULL)
-	{// NULLだったら
-
-		// メモリの確保
-		pObject3D = DEBUG_NEW CObject3D;
-
-		//if (pObject3D->GetID() < 0)
-		//{// メモリ確保に失敗していたら
-
-		//	delete pObject3D;
-		//	return NULL;
-		//}
-
-		if (pObject3D != NULL)
-		{// メモリの確保が出来ていたら
-
-			// 初期化処理
-			pObject3D->Init();
-		}
-
-		return pObject3D;
-	}
-
-	return NULL;
-}
-
-//==========================================================================
-// 生成処理
-//==========================================================================
-CObject3D *CObject3D::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot)
-{
-	// 生成用のオブジェクト
-	CObject3D *pObject3D = NULL;
-
-	if (pObject3D == NULL)
-	{// NULLだったら
-
-		// メモリの確保
-		pObject3D = DEBUG_NEW CObject3D;
-
-		//if (pObject3D->GetID() < 0)
-		//{// メモリ確保に失敗していたら
-
-		//	delete pObject3D;
-		//	return NULL;
-		//}
-
-		if (pObject3D != NULL)
-		{// メモリの確保が出来ていたら
-
-			// 初期化処理
-			pObject3D->Init();
-
-			// 位置・向き
-			pObject3D->SetPosition(pos);
-			pObject3D->SetOriginPosition(pos);
-			pObject3D->SetRotation(rot);
-		}
-
-		return pObject3D;
-	}
-
-	return NULL;
 }
 
 //==========================================================================

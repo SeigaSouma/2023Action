@@ -73,7 +73,7 @@ CTargetPoint *CTargetPoint::Create(D3DXVECTOR3 pos, float fWidthLen, float fHeig
 			pObjMeshCylinder->SetHeightLen(fHeightLen);
 
 			// テクスチャの割り当て
-			pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(TEXTURE);
+			pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 
 			// テクスチャの割り当て
 			pObjMeshCylinder->BindTexture(pObjMeshCylinder->m_nTexIdx);
@@ -96,7 +96,7 @@ HRESULT CTargetPoint::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 種類設定
 	SetType(TYPE_TARGETPOINT);
@@ -159,16 +159,16 @@ void CTargetPoint::Control(void)
 	D3DXVECTOR3 rot = GetRotation();
 
 	// カメラの情報取得
-	CCamera *pCamera = CManager::GetCamera();
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 	// カメラの向き取得
 	D3DXVECTOR3 Camerarot = pCamera->GetRotation();
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
 	{//←キーが押された,左移動
@@ -251,7 +251,7 @@ void CTargetPoint::Control(void)
 void CTargetPoint::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 背面のカリングなし
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);

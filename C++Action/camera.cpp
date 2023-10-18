@@ -16,6 +16,8 @@
 #include "enemymanager.h"
 #include "title.h"
 #include "instantfade.h"
+#include "mapmanager.h"
+#include "calculation.h"
 
 //==========================================================================
 // マクロ定義
@@ -82,6 +84,7 @@ CCamera::CCamera()
 	m_nOriginCntDistance = 0;					// 元の距離カウンター
 	m_fDistanceCorrection = 0.0f;				// 距離の慣性補正係数
 	m_fDistanceDecrementValue = 0.0f;			// 距離の減少係数
+	m_ChaseType = CHASETYPE_NORMAL;				// 追従の種類
 }
 
 //==========================================================================
@@ -147,7 +150,7 @@ void CCamera::Uninit(void)
 void CCamera::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	//if (m_state == CAMERASTATE_NONE)
 	{
@@ -178,6 +181,12 @@ void CCamera::Update(void)
 		m_bFollow = m_bFollow ? false : true;
 	}
 
+	if (pInputKeyboard->GetTrigger(DIK_RIGHT) == true)
+	{
+		m_ChaseType = (CHASETYPE)(((int)m_ChaseType + 1) % (int)CHASETYPE_MAX);	// 追従の種類
+	}
+
+
 	if (pInputKeyboard->GetTrigger(DIK_F5) == true)
 	{// F7が押された,追従切り替え
 		//m_posR = D3DXVECTOR3(0.0f, 100.0f, 0.0f);				// 注視点(見たい場所)
@@ -200,7 +209,7 @@ void CCamera::Update(void)
 //#endif
 
 	// テキストの描画
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"---------------- カメラ情報 ----------------\n"
 		"【向き】[X：%f Y：%f Z：%f]\n"
 		"【距離】[%f]\n"
@@ -217,7 +226,7 @@ void CCamera::Update(void)
 //==================================================================================
 void CCamera::UpdateByMode(void)
 {
-	switch (CManager::GetMode())
+	switch (CManager::GetInstance()->GetMode())
 	{
 	case CScene::MODE_TITLE:
 		
@@ -254,7 +263,7 @@ void CCamera::MoveCameraInput(void)
 void CCamera::MoveCameraStick(void)
 {
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 #if 0
 	m_rot.y += pInputGamepad->GetStickMoveR(0).x * ROT_MOVE_STICK;
@@ -274,10 +283,10 @@ void CCamera::MoveCameraStick(void)
 void CCamera::MoveCameraMouse(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// キーボード情報取得
-	CInputMouse *pInputMouse = CManager::GetInputMouse();
+	CInputMouse *pInputMouse = CManager::GetInstance()->GetInputMouse();
 
 	if (pInputMouse->GetPress(CInputMouse::BUTTON_LEFT) == true &&
 		pInputMouse->GetPress(CInputMouse::BUTTON_RIGHT) == true)
@@ -357,7 +366,7 @@ void CCamera::MoveCameraMouse(void)
 void CCamera::MoveCameraV(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 #ifdef _DEBUG
 	// 視点移動
@@ -416,7 +425,7 @@ void CCamera::MoveCameraV(void)
 void CCamera::MoveCameraR(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 #ifdef _DEBUG
 	// 旋回
@@ -517,7 +526,7 @@ void CCamera::MoveCameraDistance(void)
 void CCamera::SetCameraV(void)
 {
 
-	switch (CManager::GetMode())
+	switch (CManager::GetInstance()->GetMode())
 	{
 	case CScene::MODE_TITLE:
 		SetCameraVTitle();
@@ -629,91 +638,19 @@ void CCamera::SetCameraVGame(void)
 	else if (m_bFollow == true)
 	{// 追従ON
 
-		// プレイヤーの情報取得
-		CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
-
-		if (pPlayer == NULL)
+		switch (m_ChaseType)
 		{
-			return;
+		case CCamera::CHASETYPE_NORMAL:
+			ChaseNormal();
+			break;
+
+		case CCamera::CHASETYPE_MAP:
+			ChaseMap();
+			break;
+
+		default:
+			break;
 		}
-
-		D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
-		D3DXVECTOR3 PlayerRot = pPlayer->GetRotation();
-
-		float fYcamera = 100.0f;
-
-		// 目標の視点の向き
-		m_rotVDest.y = atan2f((0.0f - PlayerPos.x), (0.0f - PlayerPos.z));
-
-		//現在と目標の差分を求める
-		float fRotDiff = m_rotVDest.y - m_rot.y;
-		RotNormalize(fRotDiff);
-
-		m_rot.y += fRotDiff * 0.025f;
-		RotNormalize(m_rot.y);
-
-		// 視点の代入処理
-		m_posVDest.x = m_posR.x + cosf(m_rot.z) * sinf(m_rot.y) * -m_fDistance;
-		m_posVDest.z = m_posR.z + cosf(m_rot.z) * cosf(m_rot.y) * -m_fDistance;
-		m_posVDest.y = m_posR.y + sinf(m_rot.z) * -m_fDistance;
-
-		float fDistance = 0.0f;
-		m_fHeightMaxDest = m_posVDest.y;
-		// 目標の角度を求める
-		float fRotDest = atan2f((m_posVDest.x - m_posR.x), (m_posVDest.z - m_posR.z));
-		while (1)
-		{
-			// プレイヤーの情報取得
-			CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
-
-			if (pPlayer == NULL)
-			{
-				return;
-			}
-
-			D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
-
-			// 仮想の弾の位置
-			float fPosBulletX = PlayerPos.x + cosf(m_rot.z) * sinf(m_rot.y) * -fDistance;
-			float fPosBulletZ = PlayerPos.z + cosf(m_rot.z) * cosf(m_rot.y) * -fDistance;
-
-			// 高さ取得
-			bool bLand = false;
-			float fHeight = CGame::GetElevation()->GetHeight(D3DXVECTOR3(fPosBulletX, 0.0f, fPosBulletZ), bLand);
-
-			if (m_fHeightMaxDest <= fHeight)
-			{// 最大の高さを更新したら
-
-				// 距離の応じた割合保存
-				float fDistanceRatio = fDistance / (m_fDistance);
-
-				// 目標の最大高さ保存
-				m_fHeightMaxDest = fHeight * (fDistanceRatio + 1.0f);
-			}
-
-			// 長さ加算
-			fDistance += 10.0f;
-
-			if (fDistance >= m_fDistance)
-			{// 長さを超えたら終わり
-				break;
-			}
-		}
-
-		// 目標の視点更新
-		if (m_fHeightMaxDest > m_posVDest.y)
-		{
-			// 最大の高さ補正
-			m_fHeightMax += (m_fHeightMaxDest - m_fHeightMax) * 0.08f;
-
-			m_posVDest.y = m_fHeightMax;
-
-			// 高さの差分
-			m_fDiffHeightSave += m_fHeightMax - m_posV.y;
-		}
-
-		// 補正する
-		m_posV += (m_posVDest - m_posV) * 0.12f;
 	}
 }
 
@@ -734,7 +671,7 @@ void CCamera::SetCameraVResult(void)
 void CCamera::SetCameraR(void)
 {
 
-	switch (CManager::GetMode())
+	switch (CManager::GetInstance()->GetMode())
 	{
 	case CScene::MODE_TITLE:
 		SetCameraRTitle();
@@ -826,10 +763,9 @@ void CCamera::SetCameraRGame(void)
 	{// 追従ON
 
 		// プレイヤーの情報取得
-		CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
-
+		CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 		if (pPlayer == NULL)
-		{
+		{// NULLだったら
 			return;
 		}
 
@@ -844,7 +780,6 @@ void CCamera::SetCameraRGame(void)
 		else if (PlayerPos.y <= -50.0f)
 		{
 			fYcamera = (PlayerPos.y + 50.0f) + 100.0f;
-			//fYcamera = (PlayerPos.y + 20.0f) + 100.0f;
 		}
 
 		fYcamera = PlayerPos.y + 100.0f;
@@ -868,6 +803,7 @@ void CCamera::SetCameraRGame(void)
 
 		// 補正する
 		m_posR += (m_posRDest - m_posR) * 0.08f;
+
 	}
 }
 
@@ -883,6 +819,224 @@ void CCamera::SetCameraRResult(void)
 }
 
 //==================================================================================
+// 通常の追従
+//==================================================================================
+void CCamera::ChaseNormal(void)
+{
+	// プレイヤーの情報取得
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+
+	if (pPlayer == NULL)
+	{
+		return;
+	}
+
+	D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
+	D3DXVECTOR3 PlayerRot = pPlayer->GetRotation();
+
+	float fYcamera = 100.0f;
+
+	// 目標の視点の向き
+	m_rotVDest.y = atan2f((0.0f - PlayerPos.x), (0.0f - PlayerPos.z));
+
+	//現在と目標の差分を求める
+	float fRotDiff = m_rotVDest.y - m_rot.y;
+	RotNormalize(fRotDiff);
+
+	m_rot.y += fRotDiff * 0.025f;
+	RotNormalize(m_rot.y);
+
+	// 視点の代入処理
+	m_posVDest.x = m_posR.x + cosf(m_rot.z) * sinf(m_rot.y) * -m_fDistance;
+	m_posVDest.z = m_posR.z + cosf(m_rot.z) * cosf(m_rot.y) * -m_fDistance;
+	m_posVDest.y = m_posR.y + sinf(m_rot.z) * -m_fDistance;
+
+	float fDistance = 0.0f;
+	m_fHeightMaxDest = m_posVDest.y;
+	// 目標の角度を求める
+	float fRotDest = atan2f((m_posVDest.x - m_posR.x), (m_posVDest.z - m_posR.z));
+	while (1)
+	{
+		// プレイヤーの情報取得
+		CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+
+		if (pPlayer == NULL)
+		{
+			return;
+		}
+
+		D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
+
+		// 仮想の弾の位置
+		float fPosBulletX = PlayerPos.x + cosf(m_rot.z) * sinf(m_rot.y) * -fDistance;
+		float fPosBulletZ = PlayerPos.z + cosf(m_rot.z) * cosf(m_rot.y) * -fDistance;
+
+		// 高さ取得
+		bool bLand = false;
+		float fHeight = CGame::GetElevation()->GetHeight(D3DXVECTOR3(fPosBulletX, 0.0f, fPosBulletZ), bLand);
+
+		if (m_fHeightMaxDest <= fHeight)
+		{// 最大の高さを更新したら
+
+			// 距離の応じた割合保存
+			float fDistanceRatio = fDistance / (m_fDistance);
+
+			// 目標の最大高さ保存
+			m_fHeightMaxDest = fHeight * (fDistanceRatio + 1.0f);
+		}
+
+		// 長さ加算
+		fDistance += 10.0f;
+
+		if (fDistance >= m_fDistance)
+		{// 長さを超えたら終わり
+			break;
+		}
+	}
+
+	// 目標の視点更新
+	if (m_fHeightMaxDest > m_posVDest.y)
+	{
+		// 最大の高さ補正
+		m_fHeightMax += (m_fHeightMaxDest - m_fHeightMax) * 0.08f;
+
+		m_posVDest.y = m_fHeightMax;
+
+		// 高さの差分
+		m_fDiffHeightSave += m_fHeightMax - m_posV.y;
+	}
+
+	// 補正する
+	m_posV += (m_posVDest - m_posV) * 0.12f;
+}
+
+//==================================================================================
+// マップに沿った追従
+//==================================================================================
+void CCamera::ChaseMap(void)
+{
+	// プレイヤーの情報取得
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	if (pPlayer == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
+	// マップマネージャの取得
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	// マップ情報取得
+	int nMapIdx = pPlayer->GetMapIndex();
+
+	// 曲線作る為の4点
+	int nP0 = nMapIdx;
+	int nP1 = nMapIdx + 1;
+	int nP2 = nMapIdx + 2;
+
+	// 目標地点
+	D3DXVECTOR3 TargetPoint0 = pMapManager->GetControlPoint(nP0);
+	D3DXVECTOR3 TargetPoint1 = pMapManager->GetControlPoint(nP1);
+	D3DXVECTOR3 TargetPoint2 = pMapManager->GetControlPoint(nP2);
+
+	// ベクトル
+	D3DXVECTOR3 vec = mylib_const::DEFAULT_VECTOR3;
+	D3DXVECTOR3 newvec = mylib_const::DEFAULT_VECTOR3;
+
+	// 2点間の距離取得
+	float fPosLength = GetPosLength(TargetPoint1, TargetPoint2);
+
+	// ベクトル
+	vec = TargetPoint2 - TargetPoint1;
+	D3DXVec3Normalize(&vec, &vec);
+
+	// 90度傾ける
+	newvec.x = vec.z;
+	newvec.z = -vec.x;
+
+	// 目標の視点の向き
+	m_rotVDest.y = atan2f((0.0f - newvec.x), (0.0f - newvec.z));
+
+	//現在と目標の差分を求める
+	float fRotDiff = m_rotVDest.y - m_rot.y;
+	RotNormalize(fRotDiff);
+
+	m_rot.y += fRotDiff * 0.025f;
+	RotNormalize(m_rot.y);
+
+	// 視点の代入処理
+	m_posVDest.x = m_posR.x + cosf(m_rot.z) * sinf(m_rot.y) * -m_fDistance;
+	m_posVDest.z = m_posR.z + cosf(m_rot.z) * cosf(m_rot.y) * -m_fDistance;
+	m_posVDest.y = m_posR.y + sinf(m_rot.z) * -m_fDistance;
+
+
+	float fDistance = 0.0f;
+	m_fHeightMaxDest = m_posVDest.y;
+	// 目標の角度を求める
+	float fRotDest = atan2f((m_posVDest.x - m_posR.x), (m_posVDest.z - m_posR.z));
+
+	// 地面との接触判定
+	while (1)
+	{
+		// プレイヤーの情報取得
+		CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+
+		if (pPlayer == NULL)
+		{
+			return;
+		}
+
+		D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
+
+		// 仮想の弾の位置
+		float fPosBulletX = PlayerPos.x + cosf(m_rot.z) * sinf(m_rot.y) * -fDistance;
+		float fPosBulletZ = PlayerPos.z + cosf(m_rot.z) * cosf(m_rot.y) * -fDistance;
+
+		// 高さ取得
+		bool bLand = false;
+		float fHeight = CGame::GetElevation()->GetHeight(D3DXVECTOR3(fPosBulletX, 0.0f, fPosBulletZ), bLand);
+
+		if (m_fHeightMaxDest <= fHeight)
+		{// 最大の高さを更新したら
+
+			// 距離の応じた割合保存
+			float fDistanceRatio = fDistance / (m_fDistance);
+
+			// 目標の最大高さ保存
+			m_fHeightMaxDest = fHeight * (fDistanceRatio + 1.0f);
+		}
+
+		// 長さ加算
+		fDistance += 10.0f;
+
+		if (fDistance >= m_fDistance)
+		{// 長さを超えたら終わり
+			break;
+		}
+	}
+
+	// 目標の視点更新
+	if (m_fHeightMaxDest > m_posVDest.y)
+	{
+		// 最大の高さ補正
+		m_fHeightMax += (m_fHeightMaxDest - m_fHeightMax) * 0.08f;
+
+		m_posVDest.y = m_fHeightMax;
+
+		// 高さの差分
+		m_fDiffHeightSave += m_fHeightMax - m_posV.y;
+	}
+
+	// 補正する
+	m_posV += (m_posVDest - m_posV) * 0.12f;
+
+}
+
+//==================================================================================
 // カメラの背面自動追従
 //==================================================================================
 void CCamera::MoveCameraFollow(void)
@@ -895,9 +1049,8 @@ void CCamera::MoveCameraFollow(void)
 //==================================================================================
 void CCamera::SetCamera(void)
 {
-
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// ビューポートの設定
 	pDevice->SetViewport(&m_viewport);
@@ -959,7 +1112,7 @@ void CCamera::SetShake(int nTime, float fLength, float fLengthY)
 //==================================================================================
 void CCamera::SetTargetPos(const D3DXVECTOR3 pos)
 {
-	if (CManager::GetMode() == CScene::MODE_TITLE)
+	if (CManager::GetInstance()->GetMode() == CScene::MODE_TITLE)
 	{
 		// 目標の位置
 		m_TargetPos = pos;

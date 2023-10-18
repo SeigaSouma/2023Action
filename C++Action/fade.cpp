@@ -92,7 +92,7 @@ HRESULT CFade::Init(void)
 	m_aObject2D->SetColor(D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f));	// FÝ’è
 
 	// Å‰‚¾‚¯ŽŸ‚Ì‰æ–Ê‚Ö
-	CManager::SetMode(m_ModeNext);
+	CManager::GetInstance()->SetMode(m_ModeNext);
 
 	return S_OK;
 }
@@ -136,7 +136,7 @@ void CFade::Update(void)
 			m_state = STATE_FADEIN;
 
 			// ŽŸ‚Ì‰æ–Ê‚Ö
-			CManager::SetMode(m_ModeNext);
+			CManager::GetInstance()->SetMode(m_ModeNext);
 		}
 		break;
 

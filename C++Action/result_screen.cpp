@@ -111,7 +111,7 @@ HRESULT CResultScreen::Init(void)
 		m_pObj2D[nCntSelect]->SetType(TYPE_RESULTSELECT);
 
 		// テクスチャの割り当て
-		m_nTexIdx[nCntSelect] = CManager::GetTexture()->Regist(m_apTextureFile[nCntSelect]);
+		m_nTexIdx[nCntSelect] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[nCntSelect]);
 
 		// テクスチャの割り当て
 		m_pObj2D[nCntSelect]->BindTexture(m_nTexIdx[nCntSelect]);
@@ -129,22 +129,22 @@ HRESULT CResultScreen::Init(void)
 		switch (nCntSelect)
 		{
 		case VTX_LOGO:
-			m_pObj2D[nCntSelect]->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]) * 0.4f);	// サイズ
+			m_pObj2D[nCntSelect]->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]) * 0.4f);	// サイズ
 			m_pObj2D[nCntSelect]->SetPosition(D3DXVECTOR3(640.0f, 150.0f, 0.0f));	// 位置
 			break;
 
 		case VTX_RESULTSCORE_NORMAL:
-			m_pObj2D[nCntSelect]->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]) * 0.25f);	// サイズ
+			m_pObj2D[nCntSelect]->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]) * 0.25f);	// サイズ
 			m_pObj2D[nCntSelect]->SetPosition(D3DXVECTOR3(INIT_POSX, DETAILSCORE_POSY, 0.0f));	// 位置
 			break;
 
 		case VTX_RESULTSCORE_RED:
-			m_pObj2D[nCntSelect]->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]) * 0.25f);	// サイズ
+			m_pObj2D[nCntSelect]->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]) * 0.25f);	// サイズ
 			m_pObj2D[nCntSelect]->SetPosition(D3DXVECTOR3(INIT_POSX, DETAILSCORE_POSY, 0.0f));	// 位置
 			break;
 
 		case VTX_RESULTSCORE_GOLD:
-			m_pObj2D[nCntSelect]->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]) * 0.25f);	// サイズ
+			m_pObj2D[nCntSelect]->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]) * 0.25f);	// サイズ
 			m_pObj2D[nCntSelect]->SetPosition(D3DXVECTOR3(INIT_POSX, DETAILSCORE_POSY, 0.0f));	// 位置
 			break;
 		}
@@ -152,7 +152,7 @@ HRESULT CResultScreen::Init(void)
 
 
 	// 数字テクスチャの割り当て
-	m_nTexIdxNumber = CManager::GetTexture()->Regist(NUMBERTEX);
+	m_nTexIdxNumber = CManager::GetInstance()->GetTexture()->Regist(NUMBERTEX);
 
 	for (int nCntType = 0; nCntType < MAX_SCORETYPE; nCntType++)
 	{
@@ -278,7 +278,7 @@ void CResultScreen::MoveNumber(int nCntType)
 	if (pos.x == INIT_POSX)
 	{
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
 	}
 
 	// 移動
@@ -299,13 +299,13 @@ void CResultScreen::MoveNumber(int nCntType)
 #if _DEBUG
 		m_nNumDest[nCntType] = 100;
 #else
-		m_nNumDest[nCntType] = CManager::GetResultManager()->GetScoreTypeNum((CResultManager::ADDTYPE)(nCntType + 1));
+		m_nNumDest[nCntType] = CManager::GetInstance()->GetResultManager()->GetScoreTypeNum((CResultManager::ADDTYPE)(nCntType + 1));
 #endif
 		if (m_nNumDest[nCntType] > m_fNum[nCntType])
 		{// 規定時間かけて補正
 
 			// サウンド再生
-			CManager::GetSound()->PlaySound(CSound::LABEL_SE_NUMBER);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_NUMBER);
 
 			m_fNum[nCntType] += ((float)m_nNumDest[nCntType] / (float)INT_NUMBERSET);
 		}
@@ -363,7 +363,7 @@ void CResultScreen::SetAllArrival(void)
 		m_apNumber[nCntType]->SetPosition(pos);
 
 		// 目標の値取得
-		m_nNumDest[nCntType] = CManager::GetResultManager()->GetScoreTypeNum((CResultManager::ADDTYPE)(nCntType + 1));
+		m_nNumDest[nCntType] = CManager::GetInstance()->GetResultManager()->GetScoreTypeNum((CResultManager::ADDTYPE)(nCntType + 1));
 		m_fNum[nCntType] = (float)m_nNumDest[nCntType];
 
 		// 情報削除
@@ -378,7 +378,7 @@ void CResultScreen::SetAllArrival(void)
 void CResultScreen::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	//// アルファテストを有効にする
 	//pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);

@@ -162,11 +162,11 @@ void CRenderer::Draw(void)
 	static bool bDisp = true;
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 //#if _DEBUG
 	if (pInputKeyboard->GetTrigger(DIK_F1) == true)
-	{// F2でワイヤーフレーム切り替え
+	{// F1でデバッグ表示切替
 		bDisp = bDisp ? false : true;
 	}
 //#endif
@@ -190,13 +190,13 @@ void CRenderer::Draw(void)
 		m_pD3DDevice->GetViewport(&viewportDef);
 
 		// カメラの設定
-		CManager::GetCamera()->SetCamera();
+		CManager::GetInstance()->GetCamera()->SetCamera();
 
 		// 全ての描画
 		CObject::DrawAll();
 
 		// デバッグ表示の描画処理
-		CManager::GetDebugProc()->Draw();
+		CManager::GetInstance()->GetDebugProc()->Draw();
 
 		// テキストの設定
 		CDebugProc::SetText();
@@ -204,14 +204,14 @@ void CRenderer::Draw(void)
 		// ポーズ描画処理
 		if (bDisp)
 		{
-			CManager::GetPause()->Draw();
+			CManager::GetInstance()->GetPause()->Draw();
 		}
 
 		// 遷移なしフェード描画処理
-		CManager::GetInstantFade()->Draw();
+		CManager::GetInstance()->GetInstantFade()->Draw();
 
 		// フェード描画処理
-		CManager::GetFade()->Draw();
+		CManager::GetInstance()->GetFade()->Draw();
 
 		//ビューポートを元に戻す
 		m_pD3DDevice->SetViewport(&viewportDef);

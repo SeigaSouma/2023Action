@@ -1,10 +1,10 @@
 //=============================================================================
 // 
-//  群体敵処理 [enemy_crowd.cpp]
+//  飛行敵処理 [enemy_fly.cpp]
 //  Author : 相馬靜雅
 // 
 //=============================================================================
-#include "enemy_crowd.h"
+#include "enemy_fly.h"
 #include "manager.h"
 #include "renderer.h"
 #include "game.h"
@@ -30,9 +30,12 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
+#define WIDTH			(60.0f)							// 横幅
+#define HEIGHT			(60.0f)							// 縦幅
+#define MAX_LIFE		(5)								// 体力
 #define PLAYER_SERCH	(800.0f)	// プレイヤー探索範囲
 #define CHACE_DISTABCE	(50.0f)		// 追い掛ける時の間隔
-#define JUMP			(18.0f)		// ジャンプ力初期値
+#define JUMP			(18.0f)					// ジャンプ力初期値
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -41,7 +44,7 @@
 //==========================================================================
 // コンストラクタ
 //==========================================================================
-CEnemyCrowd::CEnemyCrowd(int nPriority) : CEnemy(nPriority)
+CEnemyFly::CEnemyFly(int nPriority) : CEnemy(nPriority)
 {
 	// 値のクリア
 }
@@ -49,42 +52,54 @@ CEnemyCrowd::CEnemyCrowd(int nPriority) : CEnemy(nPriority)
 //==========================================================================
 // デストラクタ
 //==========================================================================
-CEnemyCrowd::~CEnemyCrowd()
+CEnemyFly::~CEnemyFly()
 {
 
 }
 
+
 //==========================================================================
 // 初期化処理
 //==========================================================================
-HRESULT CEnemyCrowd::Init(void)
+HRESULT CEnemyFly::Init(void)
 {
 	// 初期化処理
 	CEnemy::Init();
 
-	// 体力取得
-	int nLife = GetLife();
+	m_state = STATE_NONE;	// 親追い掛け状態
+	m_Oldstate = STATE_NONE;
 
-	//// 体力ゲージ
-	//m_pHPGauge = CHP_Gauge::Create(80.0f, nLife, 0.8f);
-	m_state = STATE_SPAWN;	// 親追い掛け状態
-	m_Oldstate = STATE_PLAYERCHASE;
+	switch (m_colorType)
+	{
+	case COLORTYPE_NORMAL:
+		break;
 
-	//if (m_pHPGauge == NULL)
-	//{// NULLだったら
-	//	m_pHPGauge = NULL;
-	//}
+	case COLORTYPE_POISON:
+		break;
 
-	
-	// 生存時間
-	m_nSurvivalLifeOrigin = m_nSurvivalLife;
+	case COLORTYPE_LUCKY:
+		break;
+
+	case COLORTYPE_CONFUSION:
+		break;
+
+	case COLORTYPE_SWIFTFOOT:
+		break;
+
+	case COLORTYPE_TUTORIAL:
+		m_Oldstate = STATE_WAIT;
+		break;
+
+	default:
+		break;
+	}
 	return S_OK;
 }
 
 //==========================================================================
 // 終了処理
 //==========================================================================
-void CEnemyCrowd::Uninit(void)
+void CEnemyFly::Uninit(void)
 {
 	// 終了処理
 	CEnemy::Uninit();
@@ -93,7 +108,7 @@ void CEnemyCrowd::Uninit(void)
 //==========================================================================
 // 死亡処理
 //==========================================================================
-void CEnemyCrowd::Kill(void)
+void CEnemyFly::Kill(void)
 {
 	// 死亡処理
 	CEnemy::Kill();
@@ -102,7 +117,7 @@ void CEnemyCrowd::Kill(void)
 //==========================================================================
 // 更新処理
 //==========================================================================
-void CEnemyCrowd::Update(void)
+void CEnemyFly::Update(void)
 {
 	// 死亡の判定
 	if (IsDeath() == true)
@@ -118,12 +133,16 @@ void CEnemyCrowd::Update(void)
 		return;
 	}
 
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+	D3DXVECTOR3 rot = GetRotation();
+
 }
 
 //==========================================================================
 // 着地時の処理
 //==========================================================================
-void CEnemyCrowd::ProcessLanding(void)
+void CEnemyFly::ProcessLanding(void)
 {
 	// 着地時の処理
 	CEnemy::ProcessLanding();
@@ -132,7 +151,7 @@ void CEnemyCrowd::ProcessLanding(void)
 //==========================================================================
 // 攻撃状態移行処理
 //==========================================================================
-void CEnemyCrowd::ChangeToAttackState(void)
+void CEnemyFly::ChangeToAttackState(void)
 {
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -162,7 +181,7 @@ void CEnemyCrowd::ChangeToAttackState(void)
 //==========================================================================
 // 出現
 //==========================================================================
-void CEnemyCrowd::Spawn(void)
+void CEnemyFly::Spawn(void)
 {
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -194,7 +213,7 @@ void CEnemyCrowd::Spawn(void)
 //==========================================================================
 // 攻撃処理
 //==========================================================================
-void CEnemyCrowd::StateAttack(void)
+void CEnemyFly::StateAttack(void)
 {
 	// 攻撃処理
 	CEnemy::StateAttack();
@@ -228,48 +247,48 @@ void CEnemyCrowd::StateAttack(void)
 	}
 
 
-	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
-	if (pPlayer == NULL)
-	{// NULLだったら
-		return;
-	}
+	//// プレイヤー情報
+	//CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	//if (pPlayer == NULL)
+	//{// NULLだったら
+	//	return;
+	//}
 
-	// 親の位置取得
-	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
+	//// 親の位置取得
+	//D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
 
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
+	//// 位置取得
+	//D3DXVECTOR3 pos = GetPosition();
 
-	// 向き取得
-	D3DXVECTOR3 rot = GetRotation();
+	//// 向き取得
+	//D3DXVECTOR3 rot = GetRotation();
 
-	// 目標の向き取得
-	float fRotDest = GetRotDest();
+	//// 目標の向き取得
+	//float fRotDest = GetRotDest();
 
-	// 目標の角度を求める
-	fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
+	//// 目標の角度を求める
+	//fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
 
-	// 目標との差分
-	float fRotDiff = fRotDest - rot.y;
+	//// 目標との差分
+	//float fRotDiff = fRotDest - rot.y;
 
-	//角度の正規化
-	RotNormalize(fRotDiff);
+	////角度の正規化
+	//RotNormalize(fRotDiff);
 
-	//角度の補正をする
-	rot.y += fRotDiff * 0.025f;
+	////角度の補正をする
+	//rot.y += fRotDiff * 0.025f;
 
-	// 角度の正規化
-	RotNormalize(rot.y);
+	//// 角度の正規化
+	//RotNormalize(rot.y);
 
-	// 向き設定
-	SetRotation(rot);
+	//// 向き設定
+	//SetRotation(rot);
 }
 
 //==========================================================================
 // 追い掛け移動
 //==========================================================================
-void CEnemyCrowd::ChaseMove(float fMove)
+void CEnemyFly::ChaseMove(float fMove)
 {
 	// 向き取得
 	D3DXVECTOR3 rot = GetRotation();
@@ -288,7 +307,7 @@ void CEnemyCrowd::ChaseMove(float fMove)
 //==========================================================================
 // モーションの設定
 //==========================================================================
-void CEnemyCrowd::MotionSet(void)
+void CEnemyFly::MotionSet(void)
 {
 	if (m_pMotion->IsFinish() == true)
 	{// 終了していたら
@@ -329,7 +348,7 @@ void CEnemyCrowd::MotionSet(void)
 //==========================================================================
 // 攻撃時処理
 //==========================================================================
-void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
+void CEnemyFly::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 {
 	D3DXMATRIX mtxTrans;	// 計算用マトリックス宣言
 
@@ -423,7 +442,7 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 //==========================================================================
 // 描画処理
 //==========================================================================
-void CEnemyCrowd::Draw(void)
+void CEnemyFly::Draw(void)
 {
 	// 描画処理
 	CEnemy::Draw();
@@ -432,7 +451,7 @@ void CEnemyCrowd::Draw(void)
 //==========================================================================
 // 敵の情報取得
 //==========================================================================
-CEnemyCrowd *CEnemyCrowd::GetEnemy(void)
+CEnemyFly *CEnemyFly::GetEnemy(void)
 {
 	// 自分自身のポインタを取得
 	return this;

@@ -111,10 +111,13 @@ private:
 	int m_nAngle;				// 向き
 	int m_nCntState;			// 状態遷移カウンター
 	int m_nCntConfusion;		// 混乱カウンター
-	int m_nLife;				// 体力
 	int m_nTexIdx;				// テクスチャのインデックス番号
 	int m_nIdxXFile;			// Xファイルのインデックス番号
 	float m_fAtkStickRot;		// 攻撃時のスティック向き
+	float m_fBodyRot;			// 攻撃時の身体向き
+	bool m_bStick;				// スティック倒した判定
+	ANGLE m_StickAngle;			// スティックの向き
+	ANGLE m_OldStickAngle;		// 前回のスティックの向き
 	CShadow *m_pShadow;			// 影の情報
 	CTargetPoint *m_pTargetP;	// 目標の地点
 	CHP_Gauge *m_pHPGauge;		// HPゲージの情報

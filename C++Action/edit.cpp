@@ -99,7 +99,7 @@ CEdit *CEdit::Create(void)
 HRESULT CEdit::Init(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 生成処理
 	m_pObjX = m_pObjX->Create(CScene::GetXLoad()->GetObjectX(m_nType)->acFilename);
@@ -119,7 +119,7 @@ HRESULT CEdit::Init(void)
 HRESULT CEdit::Init(const char *pFileName)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 	
 	// 生成処理
 	m_pObjX = m_pObjX->Create(pFileName);
@@ -152,7 +152,7 @@ void CEdit::Release(void)
 void CEdit::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 位置取得
 	D3DXVECTOR3 pos = m_pObjX->GetPosition();
@@ -185,7 +185,7 @@ void CEdit::Update(void)
 	}
 
 	// デバッグ情報
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"------------------[ エディット情報 ]------------------\n"
 		"<モデル配置>   [ENTER]\n"
 		"<ファイル保存> [F9] 【data/TEXT/edit_info.txt】\n"
@@ -207,13 +207,13 @@ void CEdit::Update(void)
 void CEdit::Control(CObjectX *pObjX)
 {
 	// カメラの情報取得
-	CCamera *pCamera = CManager::GetCamera();
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 	// カメラの向き取得
 	D3DXVECTOR3 Camerarot = pCamera->GetRotation();
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 位置取得
 	D3DXVECTOR3 pos = pObjX->GetPosition();
@@ -392,7 +392,7 @@ void CEdit::ChangeType(void)
 	int nNumAll = map::GetNumModelAll();
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 配置するオブジェクト変更
 	if (pInputKeyboard->GetTrigger(DIK_1) == true)
@@ -430,7 +430,7 @@ void CEdit::GrabModel(void)
 {
 #if TOPCUR
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	for (int nCntPriority = 0; nCntPriority < mylib_const::PRIORITY_NUM; nCntPriority++)
 	{

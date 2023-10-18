@@ -82,6 +82,7 @@ private:
 	void SetVtxDonuts(void);
 	void SetVtxSphere(void);
 	void UPVtxField(D3DXVECTOR3 pos);
+	void CalWorldMtx(void);	// ワールドマトリックスの計算処理
 
 	D3DXVECTOR3 *m_pVtxPos;	// 頂点座標
 	D3DXVECTOR3 *m_pVtxNor;	// 頂点法線

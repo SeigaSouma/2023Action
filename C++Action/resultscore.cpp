@@ -122,11 +122,11 @@ HRESULT CResultScore::Init(void)
 
 
 	// 元のスコア取得
-	m_nBaseNumDest = CManager::GetResultManager()->GetBaseScore();
+	m_nBaseNumDest = CManager::GetInstance()->GetResultManager()->GetBaseScore();
 
 	// 目標のスコア取得
-	m_nToatalNumDest = CManager::GetResultManager()->GetToatalScore();
-	CManager::GetRankingManager()->SetNowScore(m_nToatalNumDest);
+	m_nToatalNumDest = CManager::GetInstance()->GetResultManager()->GetToatalScore();
+	CManager::GetInstance()->GetRankingManager()->SetNowScore(m_nToatalNumDest);
 	
 	return S_OK;
 }
@@ -140,13 +140,13 @@ void CResultScore::CreateBaseScore(void)
 	m_pBaseObj2D = CObject2D::Create(7);
 
 	// テクスチャの割り当て
-	m_nTexIdx = CManager::GetTexture()->Regist(BASETEXT_TEXTURE);
+	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(BASETEXT_TEXTURE);
 
 	// テクスチャの割り当て
 	m_pBaseObj2D->GetObject2D()->BindTexture(m_nTexIdx);
 
 	// 各種変数の初期化
-	m_pBaseObj2D->GetObject2D()->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx) * 0.3f);	// サイズ
+	m_pBaseObj2D->GetObject2D()->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx) * 0.3f);	// サイズ
 	m_pBaseObj2D->GetObject2D()->SetPosition(D3DXVECTOR3(INIT_POSX, POSY_BASE, 0.0f));	// 位置
 
 	// 種類の設定
@@ -166,13 +166,13 @@ void CResultScore::CreateToatalScore(void)
 	m_pToatalObj2D = CObject2D::Create(7);
 
 	// テクスチャの割り当て
-	m_nTexIdx = CManager::GetTexture()->Regist(TEXTURE);
+	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 
 	// テクスチャの割り当て
 	m_pToatalObj2D->GetObject2D()->BindTexture(m_nTexIdx);
 
 	// 各種変数の初期化
-	m_pToatalObj2D->GetObject2D()->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx) * 0.4f);	// サイズ
+	m_pToatalObj2D->GetObject2D()->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx) * 0.4f);	// サイズ
 	m_pToatalObj2D->GetObject2D()->SetPosition(D3DXVECTOR3(INIT_POSX, POSY, 0.0f));	// 位置
 
 	// 種類の設定
@@ -270,7 +270,7 @@ void CResultScore::MoveBaseScore(void)
 	if (pos.x == INIT_POSX)
 	{
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
 	}
 
 	// 移動
@@ -307,7 +307,7 @@ void CResultScore::MoveBaseScore(void)
 #if _DEBUG
 		m_nBaseNumDest = 1000;
 #else
-		m_nBaseNumDest = CManager::GetResultManager()->GetBaseScore();
+		m_nBaseNumDest = CManager::GetInstance()->GetResultManager()->GetBaseScore();
 #endif
 
 		if (m_nBaseNumDest > m_nBaseNum)
@@ -315,7 +315,7 @@ void CResultScore::MoveBaseScore(void)
 			m_nBaseNum += (int)((float)m_nBaseNumDest / (float)INT_BASESCORESET);
 
 			// サウンド再生
-			CManager::GetSound()->PlaySound(CSound::LABEL_SE_NUMBER);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_NUMBER);
 		}
 		else
 		{// 目標の値で固定
@@ -341,7 +341,7 @@ void CResultScore::MoveToatalScore(void)
 	if (pos.x == INIT_POSX)
 	{
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
 	}
 
 	// 移動
@@ -377,16 +377,16 @@ void CResultScore::MoveToatalScore(void)
 #if _DEBUG
 		m_nToatalNumDest = 1000;
 #else
-		m_nToatalNumDest = CManager::GetResultManager()->GetToatalScore();
+		m_nToatalNumDest = CManager::GetInstance()->GetResultManager()->GetToatalScore();
 #endif
-		CManager::GetRankingManager()->SetNowScore(m_nToatalNumDest);
+		CManager::GetInstance()->GetRankingManager()->SetNowScore(m_nToatalNumDest);
 
 		if (m_nToatalNumDest > m_nToatalNum)
 		{// 規定時間かけて補正
 			m_nToatalNum += (int)((float)m_nToatalNumDest / (float)INT_SCORESET);
 
 			// サウンド再生
-			CManager::GetSound()->PlaySound(CSound::LABEL_SE_NUMBER);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_NUMBER);
 		}
 		else
 		{// 目標の値で固定

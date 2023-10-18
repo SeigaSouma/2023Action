@@ -270,9 +270,6 @@
     <ClCompile Include="bullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="meshsphere.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="slash.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -280,6 +277,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="bulletmanager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="meshsphere.cpp">
+      <Filter>ソース ファイル\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="enemy_fly.cpp">
+      <Filter>ソース ファイル\enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="enemyfixedmove_manager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -500,9 +506,6 @@
     <ClInclude Include="bullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="meshsphere.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="slash.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -510,6 +513,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="bulletmanager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="meshsphere.h">
+      <Filter>ヘッダー ファイル\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="enemy_fly.h">
+      <Filter>ヘッダー ファイル\enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="enemyfixedmove_manager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

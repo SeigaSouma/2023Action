@@ -170,7 +170,7 @@ HRESULT CEffect3D::Init(void)
 	// テクスチャの割り当て
 	if (m_nTexIdx[m_nType] == 0)
 	{
-		m_nTexIdx[m_nType] = CManager::GetTexture()->Regist(m_apTextureFile[m_nType]);
+		m_nTexIdx[m_nType] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_nType]);
 	}
 
 	// テクスチャの割り当て
@@ -271,7 +271,7 @@ HRESULT CEffect3D::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3D
 	// テクスチャの割り当て
 	if (m_nTexIdx[m_nType] == 0)
 	{
-		m_nTexIdx[m_nType] = CManager::GetTexture()->Regist(m_apTextureFile[m_nType]);
+		m_nTexIdx[m_nType] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_nType]);
 	}
 
 	// テクスチャの割り当て
@@ -478,7 +478,7 @@ void CEffect3D::AddSize(void)
 void CEffect3D::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// ライティングを無効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);

@@ -62,10 +62,10 @@ void CTutorialPlayer::UninitByMode(void)
 
 	// プレイヤー情報
 	//CPlayer **ppPlayer = CTutorial::GetPlayer(0);
-	CScene *pScene = CManager::GetScene();
+	CScene *pScene = CManager::GetInstance()->GetScene();
 	if (pScene != NULL)
 	{
-		CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+		CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 		CPlayer **ppPlayer = &pPlayer;
 
 		// プレイヤーをNULL
@@ -113,13 +113,13 @@ void CTutorialPlayer::UpdateByStep(void)
 void CTutorialPlayer::Controll(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	// カメラの情報取得
-	CCamera *pCamera = CManager::GetCamera();
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 	// カメラの向き取得
 	D3DXVECTOR3 Camerarot = pCamera->GetRotation();

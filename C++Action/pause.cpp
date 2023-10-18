@@ -106,7 +106,7 @@ HRESULT CPause::Init(void)
 		}
 
 		// テクスチャの割り当て
-		m_nTexIdx[nCntVtx] = CManager::GetTexture()->Regist(m_apTextureFile[nCntVtx]);
+		m_nTexIdx[nCntVtx] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[nCntVtx]);
 
 		// テクスチャの割り当て
 		m_aObject2D[nCntVtx]->BindTexture(m_nTexIdx[nCntVtx]);
@@ -125,7 +125,7 @@ HRESULT CPause::Init(void)
 		}
 		else
 		{// 選択肢
-			m_aObject2D[nCntVtx]->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntVtx]) * 0.45f);	// サイズ
+			m_aObject2D[nCntVtx]->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntVtx]) * 0.45f);	// サイズ
 			m_aObject2D[nCntVtx]->SetPosition(D3DXVECTOR3(640.0f, 410.0f + ((nCntVtx - VTX_RETRY) * DIS_POSY), 0.0f));	// 位置
 			m_aObject2D[nCntVtx]->SetColor(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));	// 色設定
 		}
@@ -165,7 +165,7 @@ void CPause::Update(void)
 		return;
 	}
 
-	if (CManager::GetFade()->GetState() != CFade::STATE_NONE)
+	if (CManager::GetInstance()->GetFade()->GetState() != CFade::STATE_NONE)
 	{// フェード中じゃない時
 		return;
 	}
@@ -174,10 +174,10 @@ void CPause::Update(void)
 	UpdateSelect(m_nSelect);
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	if (pInputKeyboard->GetTrigger(DIK_W) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_UP, 0))
 	{// 上系が押された
@@ -186,7 +186,7 @@ void CPause::Update(void)
 		m_nSelect = (m_nSelect + (MENU_MAX - 1)) % MENU_MAX;
 
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_CURSOR);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_CURSOR);
 	}
 	else if (pInputKeyboard->GetTrigger(DIK_S) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_DOWN, 0))
 	{// 下系が押された
@@ -195,7 +195,7 @@ void CPause::Update(void)
 		m_nSelect = (m_nSelect + 1) % MENU_MAX;
 
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_CURSOR);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_CURSOR);
 	}
 
 
@@ -209,7 +209,7 @@ void CPause::Update(void)
 		m_nSelect = (m_nSelect + (MENU_MAX - 1)) % MENU_MAX;
 
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_CURSOR);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_CURSOR);
 	}
 	else if (pInputGamepad->GetStickSelect(CInputGamepad::STICK_Y) == false && pInputGamepad->GetStickMoveL(0).y < 0)
 	{// 下に倒された, スティックの判定がOFFの場合
@@ -221,7 +221,7 @@ void CPause::Update(void)
 		m_nSelect = (m_nSelect + 1) % MENU_MAX;
 
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_CURSOR);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_CURSOR);
 	}
 
 
@@ -237,19 +237,19 @@ void CPause::Update(void)
 		case MENU_RETRY:
 
 			// サウンド再生
-			CManager::GetSound()->PlaySound(CSound::LABEL_SE_DONE);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_DONE);
 
 			// ゲームをリトライする
-			CManager::GetFade()->SetFade(CScene::MODE_GAME);
+			CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_GAME);
 			break;
 
 		case MENU_RETURNTITLE:
 
 			// サウンド再生
-			CManager::GetSound()->PlaySound(CSound::LABEL_SE_DONE);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_DONE);
 
 			// タイトルに戻る
-			CManager::GetFade()->SetFade(CScene::MODE_TITLE);
+			CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_TITLE);
 			break;
 		}
 	}

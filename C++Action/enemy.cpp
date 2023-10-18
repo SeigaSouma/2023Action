@@ -27,10 +27,12 @@
 #include "score.h"
 #include "bullet.h"
 #include "mapmanager.h"
+#include "enemyfixedmove_manager.h"
 
 // 子クラス
 #include "enemy_power.h"
 #include "enemy_crowd.h"
+#include "enemy_fly.h"
 
 //==========================================================================
 // マクロ定義
@@ -64,6 +66,8 @@ CEnemy::CEnemy(int nPriority) : CObjectChara(nPriority)
 	m_Oldstate = m_state;	// 前回の状態
 	m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// マテリアルの色
 	m_nCntState = 0;		// 状態遷移カウンター
+	m_nMapIdxOrigin = 0;		// 元のマップインデックス
+	m_fMoveValueOrigin = 0.0f;	// 元の移動量
 	m_nTexIdx = 0;			// テクスチャのインデックス番号
 	m_nNumChild = 0;		// この数
 	m_nIdxManager = 0;		// マネージャのインデックス番号
@@ -79,7 +83,9 @@ CEnemy::CEnemy(int nPriority) : CObjectChara(nPriority)
 	m_pParent = NULL;					// 親のポインタ
 	m_pHPGauge = NULL;					// HPゲージの情報
 	m_pMotion = NULL;					// モーションの情報
+	m_pFixedMoveManager = NULL;			// 一定の動きマネージャ
 	m_colorType = COLORTYPE_NORMAL;		// 色ごとの種類
+	m_ActType = ACTTYPE_FIXED;			// 行動の種類
 
 	memset(&m_pChild[0], NULL, sizeof(m_pChild));	// 子のポインタ
 }
@@ -112,6 +118,10 @@ CEnemy *CEnemy::Create(int nIdx, const char *pFileName, D3DXVECTOR3 pos, TYPE ty
 
 		case TYPE_CROUWD:
 			pEnemy = DEBUG_NEW CEnemyCrowd;
+			break;
+
+		case TYPE_FLY:
+			pEnemy = DEBUG_NEW CEnemyFly;
 			break;
 
 		default:
@@ -184,18 +194,15 @@ HRESULT CEnemy::Init(void)
 	// 向き設定
 	SetRotation(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 
-	// 移動量設定
-	SetMove(D3DXVECTOR3(0.0f, JUMP, 0.0f));
-
 	// 影の生成
 	m_pShadow = CShadow::Create(GetPosition(), GetRadius() * 0.5f);
 
-	// 高さ取得
-	bool bLand = false;
-	m_posOrigin.y = CGame::GetElevation()->GetHeight(m_posOrigin, bLand);
-
-	// 位置設定
-	SetPosition(m_posOrigin);
+	// 一定の動き生成
+	m_pFixedMoveManager = CEnemyFixedMoveManager::Create();
+	if (m_pFixedMoveManager == NULL)
+	{// NULLだったら
+		return E_FAIL;
+	}
 
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
@@ -221,18 +228,11 @@ HRESULT CEnemy::RoadText(const char *pFileName)
 	}
 
 	// モーションの生成処理
-	if (m_pMotion == NULL)
-	{
-		m_pMotion = CMotion::Create(pFileName);
-	}
-
+	m_pMotion = CMotion::Create(pFileName);
 	if (m_pMotion == NULL)
 	{
 		return E_FAIL;
 	}
-
-	// モーションのファイル読み込み
-	//m_pMotion->ReadText(pFileName);
 
 	// オブジェクトキャラクターの情報取得
 	CObjectChara *pObjChar = GetObjectChara();
@@ -324,6 +324,14 @@ void CEnemy::Uninit(void)
 		m_pMotion = NULL;
 	}
 
+	// 終了処理
+	if (m_pFixedMoveManager != NULL)
+	{
+		m_pFixedMoveManager->Uninit();
+		delete m_pFixedMoveManager;
+		m_pFixedMoveManager = NULL;
+	}
+
 	// 影を消す
 	if (m_pShadow != NULL)
 	{
@@ -344,7 +352,7 @@ void CEnemy::Kill(void)
 {
 
 	// スコア加算
-	if (m_AddType != CResultManager::ADDTYPE_NONE && CManager::GetMode() == CScene::MODE_GAME)
+	if (m_AddType != CResultManager::ADDTYPE_NONE && CManager::GetInstance()->GetMode() == CScene::MODE_GAME)
 	{
 		CGame::GetScore()->Add(m_AddType);
 
@@ -489,43 +497,23 @@ void CEnemy::Collision(void)
 	D3DXVECTOR3 rot = GetRotation();
 
 	// 重力処理
-	move.y -= mylib_const::GRAVITY;
+	if (m_type != TYPE_FLY)
+	{
+		move.y -= mylib_const::GRAVITY;
+	}
 
 	// 位置更新
 	pos += move;
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
 	}
 
-	// 位置更新
-	int nIdxMapPoint = GetMapIndex();
-	float fPointRatio = GetMapPointRatio();
-	float fMoveValue = GetMapMoveValue();
-
-
-	// 移動量取得
-	float fMove = GetVelocity();
-
-	// 移動した量加算
-	fMoveValue += fMove;
-
-	pos = pMapManager->UpdateNowPosition(nIdxMapPoint, fPointRatio, fMoveValue, pos.y);
-
-	// マップのインデックス番号設定
-	SetMapIndex(nIdxMapPoint);
-
-	// マップポイント間の割合設定
-	SetMapPointRatio(fPointRatio);
-
-	// マップポイント間の移動量設定
-	SetMapMoveValue(fMoveValue);
-
 	// 慣性補正
-	if (m_state != STATE_KNOCKBACK && m_state != STATE_SPAWN && m_state != STATE_DMG && m_state != STATE_DEAD)
+	if (m_state != STATE_SPAWN && m_state != STATE_DMG && m_state != STATE_DEAD)
 	{
 		move.x += (0.0f - move.x) * 0.25f;
 		move.z += (0.0f - move.z) * 0.25f;
@@ -561,7 +549,7 @@ void CEnemy::Collision(void)
 			ProcessLanding();
 
 			// ジャンプ使用可能にする
-			if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG && m_state != STATE_DEAD)
+			if (m_state != STATE_DMG && m_state != STATE_DEAD)
 			{
 				move.y = 0.0f;
 			}
@@ -569,45 +557,21 @@ void CEnemy::Collision(void)
 		}
 	}
 
-	if (m_state != STATE_FADEOUT)
-	{
-		// 箱
-		float fLen = CGame::GetElevation()->GetWidthLen();
-		int nBlock = CGame::GetElevation()->GetWidthBlock();
-		nBlock /= 2;
-		bool bHit = false;
-		if (pos.x + GetRadius() > fLen * nBlock) { pos.x = fLen * nBlock - GetRadius(); bHit = true; }
-		if (pos.x - GetRadius() < -fLen * nBlock) { pos.x = -fLen * nBlock + GetRadius(); bHit = true; }
-		if (pos.z + GetRadius() > fLen * nBlock) { pos.z = fLen * nBlock - GetRadius(); bHit = true; }
-		if (pos.z - GetRadius() < -fLen * nBlock) { pos.z = -fLen * nBlock + GetRadius(); bHit = true; }
 
-		if (bHit == true && m_pParent == NULL)
-		{// 限界まで行ってて親だったら
-			float fRotDest = GetRotDest();
-			fRotDest += D3DX_PI * 0.5f;
-			SetRotDest(fRotDest);
-		}
+	// 箱
+	float fLen = CGame::GetElevation()->GetWidthLen();
+	int nBlock = CGame::GetElevation()->GetWidthBlock();
+	nBlock /= 2;
+	if (pos.x + GetRadius() > fLen * nBlock) { pos.x = fLen * nBlock - GetRadius();}
+	if (pos.x - GetRadius() < -fLen * nBlock) { pos.x = -fLen * nBlock + GetRadius(); }
+	if (pos.z + GetRadius() > fLen * nBlock) { pos.z = fLen * nBlock - GetRadius(); }
+	if (pos.z - GetRadius() < -fLen * nBlock) { pos.z = -fLen * nBlock + GetRadius(); }
 
-		if (CManager::GetMode() == CScene::MODE_GAME && 
-			bHit == true && m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_KNOCKBACK && m_state != STATE_FADEOUT)
-		{
-			// フェードアウト状態にする
-			m_state = STATE_FADEOUT;
-			m_nCntState = 0;
-		}
-	}
-
-	if (pos.y <= -100.0f)
-	{
-		pos.y = -100.0f;
-	}
 
 	if (pos.y <= -800.0f)
 	{
 		pos.y = -800.0f;
 	}
-
-
 
 	// 位置設定
 	SetPosition(pos);
@@ -625,7 +589,7 @@ void CEnemy::ProcessLanding(void)
 	D3DXVECTOR3 move = GetMove();
 
 	// ジャンプ使用可能にする
-	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG && m_state != STATE_DEAD)
+	if (m_state != STATE_DMG && m_state != STATE_DEAD)
 	{
 		move.y = 0.0f;
 	}
@@ -647,80 +611,33 @@ bool CEnemy::Hit(const int nValue)
 	// 体力取得
 	int nLife = GetLife();
 
-	if (nValue == 0 && m_state != STATE_KNOCKBACK)
-	{// ノーダメージの場合
 
-		// 過去の状態保存
-		m_Oldstate = m_state;
+	if (m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_SPAWN)
+	{// なにもない状態の時
 
-		// ノックバック状態
-		m_state = STATE_KNOCKBACK;
+		CManager::GetInstance()->SetEnableHitStop(5);
 
-		// 遷移カウンター設定
-		m_nCntState = 30;
+		// 振動
+		CManager::GetInstance()->GetCamera()->SetShake(5, 10.0f, 0.0f);
 
-		D3DXVECTOR3 move = GetMove();
-		move.y = 0.0f;
-		move.y += 10.5f;
-		SetMove(move);
-	}
-	else if (nValue == 0 && m_state == STATE_KNOCKBACK)
-	{
-		return true;
-	}
-	else
-	{
-		if (m_state != STATE_DMG && m_state != STATE_KNOCKBACK && m_state != STATE_DEAD && m_state != STATE_SPAWN)
-		{// なにもない状態の時
+		// 体力減らす
+		nLife -= nValue;
 
-			CManager::SetEnableHitStop(5);
+		// 体力設定
+		SetLife(nLife);
 
-			// 振動
-			CManager::GetCamera()->SetShake(5, 10.0f, 0.0f);
+		if (nLife > 0)
+		{// 体力がなくなってなかったら
 
-			// 体力減らす
-			nLife -= nValue;
+			// ダメージ音再生
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_DMG01);
+		}
 
-			// 体力設定
-			SetLife(nLife);
+		if (nLife <= 0)
+		{// 体力がなくなったら
 
-			if (nLife > 0)
-			{// 体力がなくなってなかったら
-
-				// ダメージ音再生
-				CManager::GetSound()->PlaySound(CSound::LABEL_SE_DMG01);
-			}
-
-			if (nLife <= 0)
-			{// 体力がなくなったら
-
-				// 死亡状態にする
-				m_state = STATE_DEAD;
-
-				// 遷移カウンター設定
-				m_nCntState = 0;
-
-				// ノックバックの位置更新
-				m_posKnokBack = GetPosition();
-
-				// ノックバック判定にする
-				m_sMotionFrag.bKnockback = true;
-
-				// やられモーション
-				m_pMotion->Set(MOTION_KNOCKBACK);
-
-				// 死んだ
-				return true;
-			}
-
-			// 補正
-			ValueNormalize(nLife, GetLifeOrigin(), 0);
-
-			// 過去の状態保存
-			m_Oldstate = m_state;
-
-			// ダメージ状態にする
-			m_state = STATE_DMG;
+			// 死亡状態にする
+			m_state = STATE_DEAD;
 
 			// 遷移カウンター設定
 			m_nCntState = 0;
@@ -734,7 +651,24 @@ bool CEnemy::Hit(const int nValue)
 			// やられモーション
 			m_pMotion->Set(MOTION_KNOCKBACK);
 
+			// 死んだ
+			return true;
 		}
+
+		// 補正
+		ValueNormalize(nLife, GetLifeOrigin(), 0);
+
+		// 過去の状態保存
+		m_Oldstate = m_state;
+
+		// ダメージ状態にする
+		m_state = STATE_DMG;
+
+		// 遷移カウンター設定
+		m_nCntState = 0;
+
+		// ノックバックの位置更新
+		m_posKnokBack = GetPosition();
 	}
 
 	// 死んでない
@@ -781,20 +715,7 @@ void CEnemy::UpdateState(void)
 	switch (m_state)
 	{
 	case STATE_NONE:
-
-		// 状態遷移カウンター減算
-		m_nCntState--;
-
-		if (m_nCntState <= 0)
-		{// 遷移カウンターが0になったら
-
-			// プレイヤー探索状態にする
-			m_state = STATE_PLAYERSEARCH;
-			m_nCntState = 60 * 8;
-		}
-
-		// 色設定
-		m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		StateNone();
 		break;
 
 	case STATE_SPAWN:
@@ -813,20 +734,8 @@ void CEnemy::UpdateState(void)
 		FadeOut();
 		break;
 
-	case STATE_KNOCKBACK:
-		KnockBack();
-		break;
-
 	case STATE_PLAYERCHASE:
 		PlayerChase();
-		break;
-
-	case STATE_RETURNBASE:
-		ReturnBase();
-		break;
-
-	case STATE_PLAYERSEARCH:
-		PlayerSearch();
 		break;
 
 	case STATE_PARENTCHASE:
@@ -851,6 +760,80 @@ void CEnemy::UpdateState(void)
 void CEnemy::UpdateStateByType(void)
 {
 	return;
+}
+
+//==========================================================================
+// 何もない状態
+//==========================================================================
+void CEnemy::StateNone(void)
+{
+	
+	// 色設定
+	m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// プレイヤー情報
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+
+	if (pPlayer == NULL)
+	{// NULLのとき
+		return;
+	}
+
+	// 親の位置取得
+	D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
+
+	// 状態遷移カウンター減算
+	m_nCntState--;
+
+	switch (m_ActType)
+	{
+	case CEnemy::ACTTYPE_FIXED:
+		FixedMove();
+		break;
+
+	case CEnemy::ACTTYPE_CHASE:
+		break;
+
+	case CEnemy::ACTTYPE_TURRET:
+		break;
+
+	case CEnemy::ACTTYPE_MAX:
+		break;
+
+	default:
+		break;
+	}
+
+	if (m_nCntState <= 0)
+	{// 遷移カウンターが0になったら
+		m_nCntState = 0;
+	}
+
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+
+	if (CircleRange(pos, PlayerPos, 200.0f, PLAYER_SERCH) == true)
+	{// プレイヤーが視界に入った
+		//m_state = STATE_PLAYERCHASE;
+	}
+
+	// 位置設定
+	SetPosition(pos);
+}
+
+//==========================================================================
+// 一定の動き
+//==========================================================================
+void CEnemy::FixedMove(void)
+{
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+
+	// 一定の動きの位置取得
+	pos = m_pFixedMoveManager->UpdatePosition(this);
+
+	// 位置設定
+	SetPosition(pos);
 }
 
 //==========================================================================
@@ -912,7 +895,7 @@ void CEnemy::Damage(void)
 	bool bLen = false;
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 #if _DEBUG
 	// 色設定
@@ -922,32 +905,11 @@ void CEnemy::Damage(void)
 	// 状態遷移カウンター減算
 	m_nCntState++;
 
-	// 位置更新
-#if 0
-	pos = (D3DXVECTOR3(0.0f, -0.4f, 0.0f) * (float)(m_nCntState * m_nCntState) + move * (float)m_nCntState) + m_posKnokBack;
-#else
-	pos.y = (-0.4f * (float)(m_nCntState * m_nCntState) + move.y * (float)m_nCntState) + m_posKnokBack.y;
-	pos.x += move.x;
-	pos.z += move.z;
-#endif
-
-	// 起伏との判定
-	if (CGame::GetElevation()->IsHit(pos) && m_nCntState >= 20)
-	{// 地面と当たっていたら
-		m_state = m_Oldstate;
-		m_nCntState = 0;
-		move.y = 0.0f;			// 移動量ゼロ
-		
-		// ノックバック判定消す
-		m_sMotionFrag.bKnockback = false;
-		m_pMotion->ToggleFinish(true);
-	}
-
 	if (m_nCntState >= 30)
 	{// 遷移カウンターが20になったら
 
 		// ノックバック状態にする
-		m_state = STATE_KNOCKBACK;
+		m_state = m_Oldstate;
 	}
 
 	// 位置設定
@@ -990,7 +952,7 @@ void CEnemy::Dead(void)
 	bool bLen = false;
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 	// 状態遷移カウンター減算
 	m_nCntState++;
@@ -999,10 +961,7 @@ void CEnemy::Dead(void)
 	m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, m_mMatcol.a);
 	m_mMatcol.a -= 1.0f / 80.0f;
 
-	// 位置更新
-	pos = (D3DXVECTOR3(0.0f, -0.15f, 0.0f) * (float)(m_nCntState * m_nCntState) + move * (float)m_nCntState) + m_posKnokBack;
-
-	if (m_nCntState >= 40 || (CGame::GetElevation()->IsHit(pos) && m_nCntState >= 20))
+	if (m_nCntState >= 40)
 	{// 遷移カウンターが0になったら or 地面に接触
 
 		// パーティクル生成
@@ -1075,197 +1034,6 @@ void CEnemy::FadeOut(void)
 }
 
 //==========================================================================
-// ノックバック
-//==========================================================================
-void CEnemy::KnockBack(void)
-{
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
-
-	// 移動量取得
-	D3DXVECTOR3 move = GetMove();
-
-	// 向き取得
-	D3DXVECTOR3 rot = GetRotation();
-
-	// 目標の向き取得
-	float fRotDest = GetRotDest();
-
-	// 移動量取得
-	float fMove = GetVelocity();
-
-	// 現在と目標の差分
-	float fRotDiff = 0.0f;
-
-	// 距離の判定
-	bool bLen = false;
-
-	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
-
-
-	// 状態遷移カウンター減算
-	m_nCntState++;
-
-	// 位置更新
-#if 0
-	pos = (D3DXVECTOR3(0.0f, -0.4f, 0.0f) * (float)(m_nCntState * m_nCntState) + move * (float)m_nCntState) + m_posKnokBack;
-#else
-	pos.y = (-0.4f * (float)(m_nCntState * m_nCntState) + move.y * (float)m_nCntState) + m_posKnokBack.y;
-	pos.x += move.x;
-	pos.z += move.z;
-#endif
-
-	// 起伏との判定
-	if (CGame::GetElevation()->IsHit(pos) && m_nCntState >= 20)
-	{// 地面と当たっていたら
-		m_state = m_Oldstate;
-		m_nCntState = 0;
-		move.y = 0.0f;	// 移動量ゼロ
-		
-		// ノックバック判定消す
-		m_sMotionFrag.bKnockback = false;
-		m_pMotion->ToggleFinish(true);
-	}
-
-
-	// 位置設定
-	SetPosition(pos);
-
-	// 移動量設定
-	SetMove(move);
-
-	// 向き設定
-	SetRotation(rot);
-
-	// 目標の向き設定
-	SetRotDest(fRotDest);
-}
-
-//==========================================================================
-// プレイヤー探索
-//==========================================================================
-void CEnemy::PlayerSearch(void)
-{
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
-
-	// 向き取得
-	D3DXVECTOR3 rot = GetRotation();
-
-	// 目標の向き取得
-	float fRotDest = GetRotDest();
-
-	// 移動量取得
-	float fMove = GetVelocity();
-
-	// 現在と目標の差分
-	float fRotDiff = 0.0f;
-
-	// 距離の判定
-	bool bLen = false;
-
-	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
-
-
-	// 状態遷移カウンター減算
-	m_nCntState--;
-
-	if (m_nCntState <= 0)
-	{// 遷移カウンターが0になったら
-		m_nCntState = 0;
-		m_state = STATE_RETURNBASE;
-	}
-
-	if (m_pParent != NULL)
-	{// 親がいる場合
-
-		// 親の移動量取得
-		D3DXVECTOR3 moveParent = m_pParent->GetMove();
-
-		// 親の位置取得
-		D3DXVECTOR3 posParent = m_pParent->GetPosition();
-
-		// 目標の角度を求める
-		fRotDest = atan2f((pos.x - posParent.x), (pos.z - posParent.z));
-
-		// 目標との差分
-		fRotDiff = fRotDest - rot.y;
-
-		//角度の正規化
-		RotNormalize(fRotDiff);
-
-		//角度の補正をする
-		rot.y += fRotDiff * 0.025f;
-
-		// 角度の正規化
-		RotNormalize(rot.y);
-
-		if (CircleRange(pos, posParent, CHACE_DISTABCE, CHACE_DISTABCE) == true)
-		{// 一定距離間に親が入ったら
-			bLen = true;	// 長さ判定
-		}
-
-		// 向いてる方向にダッシュ
-		if (bLen == false)
-		{// 距離が保たれていたら
-
-			// 追い掛け移動処理
-			ChaseMove(fMove * 1.5f);
-		}
-	}
-	else
-	{// 自分自身が親の時
-
-		static int nCnt = 0;
-
-		float fRotDiff = 0.0f;	// 現在と目標の差分
-
-		nCnt = (nCnt + 1) % 120;
-
-		// 目標の角度を求める
-		if (nCnt == 0)
-		{
-			fRotDest = Random(-31, 31) * 0.1f;
-		}
-
-		// 目標との差分
-		fRotDiff = fRotDest - rot.y;
-
-		//角度の正規化
-		RotNormalize(fRotDiff);
-
-		//角度の補正をする
-		rot.y += fRotDiff * 0.025f;
-
-		// 角度の正規化
-		RotNormalize(rot.y);
-
-		// 追い掛け移動処理
-		ChaseMove(fMove);
-
-#if _DEBUG
-		// 色設定
-		m_mMatcol = D3DXCOLOR(1.0f, 0.5f, 1.0f, 1.0f);
-#endif
-	}
-
-	// プレイヤー追従の判定
-	TriggerChasePlayer();
-
-
-	// 位置設定
-	SetPosition(pos);
-
-	// 向き設定
-	SetRotation(rot);
-
-	// 目標の向き設定
-	SetRotDest(fRotDest);
-}
-
-//==========================================================================
 // プレイヤー追従
 //==========================================================================
 void CEnemy::PlayerChase(void)
@@ -1289,10 +1057,17 @@ void CEnemy::PlayerChase(void)
 	bool bLen = false;
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 	// オブジェクト情報
 	CObject *pObj = NULL;
+
+	// マップマネージャの取得
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return;
+	}
 
 
 	// 状態遷移カウンター減算
@@ -1308,6 +1083,10 @@ void CEnemy::PlayerChase(void)
 
 		// 親の位置取得
 		D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
+		CObject *pMyObj = GetObject();
+
+		// 目標が自分のどっちにいるかを求める
+		ANGLE TargetAngle = pMapManager->GetTargetAngle(pPlayer, pMyObj);
 
 		// 目標の角度を求める
 		fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
@@ -1338,12 +1117,9 @@ void CEnemy::PlayerChase(void)
 			ChaseMove(fMove);
 		}
 
-		float fRadius = PLAYER_SERCH;
-		if (CircleRange(pos, pPlayer->GetPosition(), 200.0f, fRadius) == false)
+		if (CircleRange(pos, pPlayer->GetPosition(), 200.0f, PLAYER_SERCH) == false)
 		{// プレイヤーが視界から消えたら
-
-			m_state = STATE_PLAYERSEARCH;
-			m_nCntState = 60 * 10;
+			m_state = STATE_NONE;
 		}
 	}
 
@@ -1385,7 +1161,7 @@ void CEnemy::ParentChase(void)
 	bool bLongDistance = true;
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 	// オブジェクト情報
 	CObject *pObj = NULL;
@@ -1498,79 +1274,6 @@ void CEnemy::ParentChase(void)
 }
 
 //==========================================================================
-// 拠点に帰る
-//==========================================================================
-void CEnemy::ReturnBase(void)
-{
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
-
-	// 向き取得
-	D3DXVECTOR3 rot = GetRotation();
-
-	// 目標の向き取得
-	float fRotDest = GetRotDest();
-
-	// 移動量取得
-	float fMove = GetVelocity();
-
-	// 現在と目標の差分
-	float fRotDiff = 0.0f;
-
-	// 距離の判定
-	bool bLen = false;
-
-	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
-
-	// オブジェクト情報
-	CObject *pObj = NULL;
-
-
-	// 目標の角度を求める
-	fRotDest = atan2f((pos.x - m_posOrigin.x), (pos.z - m_posOrigin.z));
-
-	// 目標との差分
-	fRotDiff = fRotDest - rot.y;
-
-	//角度の正規化
-	RotNormalize(fRotDiff);
-
-	//角度の補正をする
-	rot.y += fRotDiff * 0.025f;
-
-	// 角度の正規化
-	RotNormalize(rot.y);
-
-	if (CircleRange(pos, m_posOrigin, 25.0f, CHACE_DISTABCE) == true)
-	{// 一定距離間に親が入ったら
-		bLen = true;	// 長さ判定
-		m_state = STATE_NONE;
-		m_nCntState = 90;
-	}
-
-	// 向いてる方向にダッシュ
-	if (bLen == false)
-	{// 距離が保たれていたら
-
-		// 追い掛け移動処理
-		ChaseMove(fMove * 1.2f);
-	}
-
-	// プレイヤー追従の判定
-	TriggerChasePlayer();
-
-	// 位置設定
-	SetPosition(pos);
-
-	// 向き設定
-	SetRotation(rot);
-
-	// 目標の向き設定
-	SetRotDest(fRotDest);
-}
-
-//==========================================================================
 // 攻撃処理
 //==========================================================================
 void CEnemy::StateAttack(void)
@@ -1597,7 +1300,7 @@ void CEnemy::StateAttack(void)
 	bool bLen = false;
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 	// オブジェクト情報
 	CObject *pObj = NULL;
@@ -1625,7 +1328,7 @@ void CEnemy::StateAttack(void)
 					continue;
 				}
 
-				if (m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DEAD || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_KNOCKBACK)
+				if (m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DEAD)
 				{
 					continue;
 				}
@@ -1649,7 +1352,7 @@ void CEnemy::StateAttack(void)
 			if (m_pChild[nCntEnemy]->m_state != STATE_ATTACK)
 			{// 攻撃状態の時
 
-				if (m_pChild[nCntEnemy]->m_state != STATE_DMG && m_pChild[nCntEnemy]->m_state != STATE_DEAD && m_pChild[nCntEnemy]->m_state != STATE_KNOCKBACK)
+				if (m_pChild[nCntEnemy]->m_state != STATE_DMG && m_pChild[nCntEnemy]->m_state != STATE_DEAD)
 				{
 					m_pChild[nCntEnemy]->m_state = STATE_PLAYERCHASE;
 					m_pChild[nCntEnemy]->m_nCntState = 60;
@@ -1665,8 +1368,7 @@ void CEnemy::StateAttack(void)
 		{// プレイヤーと離れすぎていたら
 
 			// 間隔をあける状態にする
-			m_state = STATE_PLAYERSEARCH;
-			m_nCntState = 60 * 8;
+			m_state = STATE_NONE;
 		}
 		else
 		{// まだ追える時
@@ -1677,7 +1379,7 @@ void CEnemy::StateAttack(void)
 			{// 親がいる場合
 
 				// 親も追い掛け状態にする
-				if (m_pParent->m_state != STATE_DMG && m_pParent->m_state != STATE_DEAD && m_pParent->m_state != STATE_KNOCKBACK)
+				if (m_pParent->m_state != STATE_DMG && m_pParent->m_state != STATE_DEAD)
 				{
 					m_pParent->m_state = STATE_PLAYERCHASE;
 				}
@@ -1690,7 +1392,7 @@ void CEnemy::StateAttack(void)
 						continue;
 					}
 
-					if (m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DEAD || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_KNOCKBACK)
+					if (m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DEAD)
 					{
 						continue;
 					}
@@ -1709,7 +1411,7 @@ void CEnemy::StateAttack(void)
 						continue;
 					}
 
-					if (m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pChild[nCntEnemy]->m_state == STATE_DEAD || m_pChild[nCntEnemy]->m_state == STATE_KNOCKBACK)
+					if (m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pChild[nCntEnemy]->m_state == STATE_DEAD)
 					{
 						continue;
 					}
@@ -1754,7 +1456,7 @@ void CEnemy::TriggerChasePlayer(void)
 {
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -1772,7 +1474,7 @@ void CEnemy::TriggerChasePlayer(void)
 			{// 親がいる場合
 
 				// 親も追い掛け状態にする
-				if (m_pParent->m_state != STATE_DMG && m_pParent->m_state != STATE_DEAD && m_pParent->m_state != STATE_KNOCKBACK)
+				if (m_pParent->m_state != STATE_DMG && m_pParent->m_state != STATE_DEAD)
 				{
 					m_pParent->m_state = STATE_PLAYERCHASE;
 				}
@@ -1785,7 +1487,7 @@ void CEnemy::TriggerChasePlayer(void)
 						continue;
 					}
 
-					if (m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DEAD || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_KNOCKBACK)
+					if (m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pParent->m_pChild[nCntEnemy]->m_state == STATE_DEAD)
 					{
 						continue;
 					}
@@ -1805,7 +1507,7 @@ void CEnemy::TriggerChasePlayer(void)
 						continue;
 					}
 
-					if (m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pChild[nCntEnemy]->m_state == STATE_DEAD || m_pChild[nCntEnemy]->m_state == STATE_KNOCKBACK)
+					if (m_pChild[nCntEnemy]->m_state == STATE_DMG || m_pChild[nCntEnemy]->m_state == STATE_DEAD)
 					{
 						continue;
 					}
@@ -1826,7 +1528,7 @@ void CEnemy::ChangeToAttackState(void)
 	D3DXVECTOR3 pos = GetPosition();
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 	if (pPlayer == NULL)
 	{
@@ -1907,7 +1609,7 @@ void CEnemy::Atack(void)
 		{// 攻撃判定中
 
 			// プレイヤー情報
-			CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+			CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 			if (pPlayer == NULL)
 			{// NULLだったら
@@ -1986,7 +1688,7 @@ void CEnemy::Atack(void)
 					my_particle::Create(TargetPos, my_particle::TYPE_OFFSETTING);
 
 					// プレイヤー情報
-					CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+					CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 					CPlayer **ppPlayer = &pPlayer;
 
 					// プレイヤーをNULL
@@ -2042,6 +1744,39 @@ void CEnemy::Draw(void)
 #endif
 }
 
+
+//==========================================================================
+// マップインデックス番号の設定
+//==========================================================================
+void CEnemy::SetMapIndexOrigin(int nIdx)
+{
+	m_nMapIdxOrigin = nIdx;
+}
+
+//==========================================================================
+// マップインデックス番号の取得
+//==========================================================================
+int CEnemy::GetMapIndexOrigin(void)
+{
+	return m_nMapIdxOrigin;
+}
+
+//==========================================================================
+// マップポイント間の移動量設定
+//==========================================================================
+void CEnemy::SetMapMoveValueOrigin(float fValue)
+{
+	m_fMoveValueOrigin = fValue;
+}
+
+//==========================================================================
+// マップポイント間の移動量設定
+//==========================================================================
+float CEnemy::GetMapMoveValueOrigin(void)
+{
+	return m_fMoveValueOrigin;
+}
+
 //==========================================================================
 // 状態取得
 //==========================================================================
@@ -2056,6 +1791,14 @@ int CEnemy::GetState(void)
 void CEnemy::SetOriginRotation(D3DXVECTOR3 rot)
 {
 	m_rotOrigin = rot;
+}
+
+//==========================================================================
+// スポーン地点取得
+//==========================================================================
+D3DXVECTOR3 CEnemy::GetSpawnPosition(void)
+{
+	return m_posOrigin;
 }
 
 //==========================================================================
@@ -2090,4 +1833,12 @@ CEnemy *CEnemy::GetEnemy(void)
 {
 	// 自分自身のポインタを取得
 	return this;
+}
+
+//==========================================================================
+// 一定の動きポインタ取得
+//==========================================================================
+CEnemyFixedMoveManager *CEnemy::GetFixedManager(void)
+{
+	return m_pFixedMoveManager;
 }

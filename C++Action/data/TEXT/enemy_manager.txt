@@ -9,7 +9,7 @@ SCRIPT			# この行は絶対消さないこと！
 #------------------------------------------------------------------
 # キャラクター数
 #------------------------------------------------------------------
-NUM_CHARACTER = 2
+NUM_CHARACTER = 3
 
 #------------------------------------------------------------------
 # キャラクターファイル名
@@ -28,10 +28,9 @@ PATTERNSET
 	TYPE = 0	# パターンの種類(読み込みはしない)
 	
 	ENEMYSET
-		TYPE = 0					# キャラの種類
+		TYPE = 0		# キャラの種類
 		INDEX = 0
-		PARENT = -1					# 親
-		POS = 0.00 0.00 0.00
+		PARENT = -1		# 親
 	END_ENEMYSET
 	
 END_PATTERNSET
@@ -43,10 +42,111 @@ PATTERNSET
 	TYPE = 1	# パターンの種類(読み込みはしない)
 	
 	ENEMYSET
-		TYPE = 1					# キャラの種類
+		TYPE = 1		# キャラの種類
 		INDEX = 0
-		PARENT = -1					# 親
-		POS = 0.00 0.00 0.00
+	END_ENEMYSET
+	
+END_PATTERNSET
+
+
+#------------------------------------------------------------------
+# 飛行敵4体（横長）
+#------------------------------------------------------------------
+PATTERNSET
+	TYPE = 2	# パターンの種類(読み込みはしない)
+	
+	FIXEDMOVE = 0		# 一定の動きの種類
+	
+	ENEMYSET
+		TYPE = 2		# キャラの種類
+		INDEX = 0
+		STARTKEY = 0	# 初期キー
+		STARTFRAME = 0	# 初期フレーム
+	END_ENEMYSET
+	
+	ENEMYSET
+		TYPE = 2			# キャラの種類
+		INDEX = 1
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 110	# 初期フレーム
+	END_ENEMYSET
+	
+	ENEMYSET
+		TYPE = 2			# キャラの種類
+		INDEX = 2
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 220	# 初期フレーム
+	END_ENEMYSET
+	
+	ENEMYSET
+		TYPE = 2			# キャラの種類
+		INDEX = 3
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 330	# 初期フレーム
+	END_ENEMYSET
+	
+END_PATTERNSET
+
+#------------------------------------------------------------------
+# 飛行敵4体（縦長）
+#------------------------------------------------------------------
+PATTERNSET
+	TYPE = 3	# パターンの種類(読み込みはしない)
+	
+	FIXEDMOVE = 1		# 一定の動きの種類
+	
+	ENEMYSET
+		TYPE = 2		# キャラの種類
+		INDEX = 0
+		STARTKEY = 0	# 初期キー
+		STARTFRAME = 0	# 初期フレーム
+	END_ENEMYSET
+	
+	ENEMYSET
+		TYPE = 2			# キャラの種類
+		INDEX = 1
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 110	# 初期フレーム
+	END_ENEMYSET
+	
+	ENEMYSET
+		TYPE = 2			# キャラの種類
+		INDEX = 2
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 220	# 初期フレーム
+	END_ENEMYSET
+	
+	ENEMYSET
+		TYPE = 2			# キャラの種類
+		INDEX = 3
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 330	# 初期フレーム
+	END_ENEMYSET
+	
+END_PATTERNSET
+
+#------------------------------------------------------------------
+# 飛行敵2体（横往復）
+#------------------------------------------------------------------
+PATTERNSET
+	TYPE = 4	# パターンの種類(読み込みはしない)
+	
+	FIXEDMOVE = 2		# 一定の動きの種類
+	
+	ENEMYSET
+		TYPE = 2		# キャラの種類
+		INDEX = 0
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 0		# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
+	END_ENEMYSET
+	
+	ENEMYSET
+		TYPE = 2			# キャラの種類
+		INDEX = 1
+		STARTKEY = 0			# 初期キー
+		STARTFRAME = 0			# 初期フレーム
+		STARTMOVEVALUE = 80.0	# 初期マップ移動量
 	END_ENEMYSET
 	
 END_PATTERNSET

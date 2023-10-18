@@ -73,7 +73,7 @@ public:
 	void Update(void);
 	static CMotion *Create(void);
 	static CMotion *Create(const std::string pTextFile);
-	void Set(int nType);	// モーションの設定処理
+	void Set(int nType, bool bBlend = true);	// モーションの設定処理
 	int GetType(void);		// 現在のモーションタイプ取得
 	int GetOldType(void);		// 前回のモーションタイプ取得
 	bool IsFinish(void);	// 終了しているかの判定

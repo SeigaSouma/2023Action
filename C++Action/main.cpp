@@ -89,7 +89,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmbLine
 	{// NULL‚¾‚Á‚½‚ç
 
 		// ƒƒ‚ƒŠŠm•Û
-		pManager = DEBUG_NEW CManager;
+		pManager = CManager::Create();
 	}
 
 	if (pManager != NULL)

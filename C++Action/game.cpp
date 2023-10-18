@@ -61,15 +61,15 @@ HRESULT CGame::Init(void)
 	}
 
 	// BGM再生
-	CManager::GetSound()->PlaySound(CSound::LABEL_BGM_GAME);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_GAME);
 
 	//**********************************
 	// プレイヤー
 	//**********************************
-	if (CManager::GetScene()->GetPlayer() != NULL)
+	if (CManager::GetInstance()->GetScene()->GetPlayer() != NULL)
 	{
-		CManager::GetScene()->GetPlayer()->SetPosition(D3DXVECTOR3(0.0f, 0.0f, -1000.0f));
-		CManager::GetScene()->GetPlayer()->SetRotation(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		CManager::GetInstance()->GetScene()->GetPlayer()->SetPosition(D3DXVECTOR3(0.0f, 0.0f, -1000.0f));
+		CManager::GetInstance()->GetScene()->GetPlayer()->SetRotation(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 	}
 
 	//**********************************
@@ -84,7 +84,7 @@ HRESULT CGame::Init(void)
 	// タイマーの生成処理
 	m_pTimer = CTimer::Create(D3DXVECTOR3(200.0f, 50.0f, 0.0f));
 
-	CManager::GetCamera()->Reset(CScene::MODE_GAME);
+	CManager::GetInstance()->GetCamera()->Reset(CScene::MODE_GAME);
 
 	// 成功
 	return S_OK;
@@ -145,21 +145,21 @@ void CGame::Uninit(void)
 //==========================================================================
 void CGame::Update(void)
 {
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"現在のモード：【ゲーム】\n"
 		"切り替え：【 F 】\n\n");
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 #if 1
 	// スコアの更新処理
 	m_pScore->Update();
 
-	if (CManager::GetEdit() == NULL &&
+	if (CManager::GetInstance()->GetEdit() == NULL &&
 		m_pEditControlPoint == NULL &&
 		GetEnemyManager()->GetState() != CEnemyManager::STATE_COMBOANIM)
 	{
@@ -201,7 +201,7 @@ void CGame::Update(void)
 	if (pInputKeyboard->GetTrigger(DIK_F))
 	{
 		// モード設定
-		CManager::GetFade()->SetFade(CScene::MODE_RESULT);
+		CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_RESULT);
 	}
 #endif
 

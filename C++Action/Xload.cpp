@@ -183,7 +183,7 @@ int CXLoad::XLoad(const char *pFileName)
 HRESULT CXLoad::Load(const char *pFileName)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 	int nIdx = m_nNumAll;
 
 	//Xファイルの読み込み
@@ -230,7 +230,7 @@ HRESULT CXLoad::Load(const char *pFileName)
 		{// ファイルが存在する
 
 			// テクスチャの読み込み
-			m_pXFile[nIdx].nIdxTexture[nCntMat] = CManager::GetTexture()->Regist(pMat[nCntMat].pTextureFilename);
+			m_pXFile[nIdx].nIdxTexture[nCntMat] = CManager::GetInstance()->GetTexture()->Regist(pMat[nCntMat].pTextureFilename);
 
 			if (FAILED(hr))
 			{// 失敗していたら

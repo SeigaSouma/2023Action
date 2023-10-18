@@ -36,7 +36,7 @@ CLight::~CLight()
 HRESULT CLight::Init(void)
 {
 	//  デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXVECTOR3 vecDir;	// 設定用方向ベクトル
 

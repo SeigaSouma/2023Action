@@ -495,7 +495,7 @@ void CMotion::Update(void)
 //==========================================================================
 // モーションの設定処理
 //==========================================================================
-void CMotion::Set(int nType)
+void CMotion::Set(int nType, bool bBlend)
 {
 	if (nType == 15)
 	{
@@ -532,8 +532,16 @@ void CMotion::Set(int nType)
 			}
 
 			// 過去の位置・向きを保存
-			aPartsOld[nCntParts].rot = m_ppModel[nCntParts]->GetRotation();
-			aPartsOld[nCntParts].pos = m_ppModel[nCntParts]->GetPosition();
+			if (bBlend == true)
+			{
+				aPartsOld[nCntParts].rot = m_ppModel[nCntParts]->GetRotation();
+				aPartsOld[nCntParts].pos = m_ppModel[nCntParts]->GetPosition();
+			}
+			else
+			{
+				aPartsOld[nCntParts].rot = m_aInfo[m_nType].aKey[0].aParts[nCntParts].rot;
+				aPartsOld[nCntParts].pos = m_aInfo[m_nType].aKey[0].aParts[nCntParts].pos + m_pObjChara->GetOriginPosition();
+			}
 		}
 	}
 	else

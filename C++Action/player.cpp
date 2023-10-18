@@ -41,7 +41,7 @@
 //==========================================================================
 #define CHARAFILE		"data\\TEXT\\motion_set_player.txt"
 #define JUMP			(20.0f * 1.5f)	// ジャンプ力初期値
-#define MAX_LIFE		(2)			// 体力
+#define MAX_LIFE		(100)			// 体力
 #define TARGET_LEN		(400.0f)		// 目標までの距離
 #define WALK_INT		(30)			// 歩行の時間
 #define INVINCIBLE_INT	(2)				// 無敵の間隔
@@ -71,10 +71,13 @@ CPlayer::CPlayer(int nPriority) : CObjectChara(nPriority)
 	m_nCntState = 0;				// 状態遷移カウンター
 	m_nCntWalk = 0;					// 歩行カウンター
 	m_nCntConfusion = 0;			// 混乱カウンター
-	m_nLife = 0;					// 体力
 	m_nTexIdx = 0;					// テクスチャのインデックス番号
 	m_nIdxXFile = 0;				// Xファイルのインデックス番号
 	m_fAtkStickRot = 0.0f;			// 攻撃時のスティック向き
+	m_fBodyRot = 0.0f;				// 攻撃時の身体向き
+	m_bStick = false;				// スティック倒した判定
+	m_StickAngle = ANGLE_RIGHT;		// スティックの向き
+	m_OldStickAngle = ANGLE_RIGHT;	// 前回のスティックの向き
 	m_pMotion = NULL;				// モーションの情報
 	m_pShadow = NULL;				// 影の情報
 	m_pTargetP = NULL;				// 目標の地点
@@ -101,7 +104,7 @@ CPlayer *CPlayer::Create(void)
 	{// NULLだったら
 
 		// メモリの確保
-		switch (CManager::GetMode())
+		switch (CManager::GetInstance()->GetMode())
 		{
 		case CScene::MODE_GAME:
 			pPlayer = DEBUG_NEW CPlayer;
@@ -139,7 +142,6 @@ HRESULT CPlayer::Init(void)
 
 	m_state = STATE_NONE;	// 状態
 	m_nCntState = 0;		// 状態遷移カウンター
-	m_nLife = MAX_LIFE;		// 体力
 
 	// キャラ作成
 	HRESULT hr = SetCharacter(CHARAFILE);
@@ -169,7 +171,7 @@ HRESULT CPlayer::Init(void)
 
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
-	m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
+	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
 
 	return S_OK;
 }
@@ -212,17 +214,17 @@ void CPlayer::Uninit(void)
 //==========================================================================
 void  CPlayer::UninitByMode(void)
 {
-	CScene *pScene = CManager::GetScene();
+	CScene *pScene = CManager::GetInstance()->GetScene();
 	if (pScene != NULL)
 	{
 		// プレイヤー情報
-		CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+		CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 		CPlayer **ppPlayer = &pPlayer;
 
 		// プレイヤーをNULL
 		*ppPlayer = NULL;
 		int n = 0;
-		CManager::GetScene()->UninitPlayer();
+		CManager::GetInstance()->GetScene()->UninitPlayer();
 	}
 }
 
@@ -255,7 +257,7 @@ void CPlayer::Kill(void)
 void CPlayer::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 	if (pInputKeyboard->GetTrigger(DIK_F5) == true)
 	{// F5でリセット
 		SetPosition(D3DXVECTOR3(0.0f, 0.0f, -1000.0f));
@@ -294,133 +296,141 @@ void CPlayer::Update(void)
 	{
 		m_pMotion->Update();
 
-		// モーションの情報取得
-		CMotion::Info aInfo = m_pMotion->GetInfo(m_pMotion->GetType());
-
-		CModel **ppModel = GetObjectChara()->GetModel();
-		D3DXVECTOR3 bodyrot = mylib_const::DEFAULT_VECTOR3;
-		D3DXVECTOR3 playerRot = mylib_const::DEFAULT_VECTOR3;
-
-		// ゲームパッド情報取得
-		CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
-
-		// 移動方向取得
-		CObject::ANGLE MoveAngle = GetMoveAngle();
-
-		if (pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
-			pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f)
+		if (m_pMotion->GetType() == MOTION_ATK || m_pMotion->GetType() == MOTION_ATK2)
 		{
-			switch (MoveAngle)
+#if 1
+			// モーションの情報取得
+			CMotion::Info aInfo = m_pMotion->GetInfo(m_pMotion->GetType());
+
+			CModel **ppModel = GetObjectChara()->GetModel();
+			D3DXVECTOR3 bodyrot = mylib_const::DEFAULT_VECTOR3;
+			D3DXVECTOR3 playerRot = mylib_const::DEFAULT_VECTOR3;
+
+			// ゲームパッド情報取得
+			CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
+
+			// 移動方向取得
+			CObject::ANGLE MoveAngle = GetMoveAngle();
+
+			if (pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
+				pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f)
 			{
-			case CPlayer::ANGLE_UP:
-				bodyrot.x = pInputGamepad->GetStickRotR(0);
+#if 0
+				switch (MoveAngle)
+				{
+				case CPlayer::ANGLE_UP:
+					bodyrot.x = pInputGamepad->GetStickRotR(0);
 
-				if (bodyrot.x > D3DX_PI * 0.15f)
-				{
-					MoveAngle = ANGLE_RIGHT;
-					m_nAngle = 1;	// 向き
-				}
-				else if (bodyrot.x < D3DX_PI * -0.15f)
-				{
-					MoveAngle = ANGLE_LEFT;
-					m_nAngle = -1;	// 向き
-				}
-				if (bodyrot.x > D3DX_PI * 0.85f || bodyrot.x < D3DX_PI * -0.85f)
-				{
-					MoveAngle = ANGLE_DOWN;
+					if (bodyrot.x > D3DX_PI * 0.15f)
+					{
+						MoveAngle = ANGLE_RIGHT;
+						m_nAngle = 1;	// 向き
+					}
+					else if (bodyrot.x < D3DX_PI * -0.15f)
+					{
+						MoveAngle = ANGLE_LEFT;
+						m_nAngle = -1;	// 向き
+					}
+					if (bodyrot.x > D3DX_PI * 0.85f || bodyrot.x < D3DX_PI * -0.85f)
+					{
+						MoveAngle = ANGLE_DOWN;
+						bodyrot.x = 0.0f;
+					}
 					bodyrot.x = 0.0f;
-				}
-				bodyrot.x = 0.0f;
-				break;
+					break;
 
-			case CPlayer::ANGLE_RIGHT:
-				bodyrot.x = -pInputGamepad->GetStickRotR(0);
+				case CPlayer::ANGLE_RIGHT:
+					bodyrot.x = -pInputGamepad->GetStickRotR(0);
 
-				if (bodyrot.x <= D3DX_PI * -0.85f)
-				{
-					MoveAngle = ANGLE_DOWN;
-				}
-				else if (bodyrot.x > D3DX_PI * 0.15f && bodyrot.x < D3DX_PI * 0.85f)
-				{
-					MoveAngle = ANGLE_LEFT;
-					m_nAngle = -1;	// 向き
-				}
-				else if (bodyrot.x <= D3DX_PI * -0.75f)
-				{
-					bodyrot.x = D3DX_PI * -0.75f;
-				}
-				else if (bodyrot.x >= D3DX_PI * -0.15f)
-				{
-					MoveAngle = ANGLE_UP;
-					bodyrot.x = D3DX_PI * -0.15f;
-				}
+					if (bodyrot.x <= D3DX_PI * -0.85f)
+					{
+						MoveAngle = ANGLE_DOWN;
+					}
+					else if (bodyrot.x > D3DX_PI * 0.15f && bodyrot.x < D3DX_PI * 0.85f)
+					{
+						MoveAngle = ANGLE_LEFT;
+						m_nAngle = -1;	// 向き
+					}
+					else if (bodyrot.x <= D3DX_PI * -0.75f)
+					{
+						bodyrot.x = D3DX_PI * -0.75f;
+					}
+					else if (bodyrot.x >= D3DX_PI * -0.15f)
+					{
+						MoveAngle = ANGLE_UP;
+						bodyrot.x = D3DX_PI * -0.15f;
+					}
 
-				bodyrot.x += D3DX_PI;
-				bodyrot.x -= (D3DX_PI * 0.5f);
-				break;
+					bodyrot.x += D3DX_PI;
+					bodyrot.x -= (D3DX_PI * 0.5f);
+					break;
 
-			case CPlayer::ANGLE_DOWN:
+				case CPlayer::ANGLE_DOWN:
 
-				bodyrot.x = pInputGamepad->GetStickRotR(0);
+					bodyrot.x = pInputGamepad->GetStickRotR(0);
 
-				if (bodyrot.x  >= 0.0f && bodyrot.x <= D3DX_PI * 0.85f)
-				{
-					MoveAngle = ANGLE_RIGHT;
-					m_nAngle = 1;	// 向き
-				}
-				else if (bodyrot.x < D3DX_PI * -0.85f)
-				{
-					MoveAngle = ANGLE_LEFT;
-					m_nAngle = -1;	// 向き
-				}
-				if (bodyrot.x < D3DX_PI * 0.15f && bodyrot.x > D3DX_PI * -0.15f)
-				{
-					MoveAngle = ANGLE_UP;
+					if (bodyrot.x >= 0.0f && bodyrot.x <= D3DX_PI * 0.85f)
+					{
+						MoveAngle = ANGLE_RIGHT;
+						m_nAngle = 1;	// 向き
+					}
+					else if (bodyrot.x < D3DX_PI * -0.85f)
+					{
+						MoveAngle = ANGLE_LEFT;
+						m_nAngle = -1;	// 向き
+					}
+					if (bodyrot.x < D3DX_PI * 0.15f && bodyrot.x > D3DX_PI * -0.15f)
+					{
+						MoveAngle = ANGLE_UP;
+						bodyrot.x = 0.0f;
+					}
 					bodyrot.x = 0.0f;
-				}
-				bodyrot.x = 0.0f;
 
-				break;
+					break;
 
-			case CPlayer::ANGLE_LEFT:
-				bodyrot.x = pInputGamepad->GetStickRotR(0);
+				case CPlayer::ANGLE_LEFT:
+					bodyrot.x = pInputGamepad->GetStickRotR(0);
 
-				if (bodyrot.x >= D3DX_PI * 0.85f)
-				{
-					MoveAngle = ANGLE_DOWN;
-					bodyrot.x = D3DX_PI * -0.85f;
-				}
-				else if (bodyrot.x < D3DX_PI * 0.85f && bodyrot.x > 0.0f)
-				{
-					bodyrot.x = D3DX_PI * -0.75f;
-					MoveAngle = ANGLE_RIGHT;
-					m_nAngle = 1;	// 向き
-				}
-				else if (bodyrot.x <= D3DX_PI * -0.75f)
-				{
-					bodyrot.x = D3DX_PI * -0.75f;
-				}
-				else if (bodyrot.x >= D3DX_PI * -0.15f)
-				{
-					MoveAngle = ANGLE_UP;
-					bodyrot.x = D3DX_PI * -0.15f;
-				}
+					if (bodyrot.x >= D3DX_PI * 0.85f)
+					{
+						MoveAngle = ANGLE_DOWN;
+						bodyrot.x = D3DX_PI * -0.85f;
+					}
+					else if (bodyrot.x < D3DX_PI * 0.85f && bodyrot.x > 0.0f)
+					{
+						bodyrot.x = D3DX_PI * -0.75f;
+						MoveAngle = ANGLE_RIGHT;
+						m_nAngle = 1;	// 向き
+					}
+					else if (bodyrot.x <= D3DX_PI * -0.75f)
+					{
+						bodyrot.x = D3DX_PI * -0.75f;
+					}
+					else if (bodyrot.x >= D3DX_PI * -0.15f)
+					{
+						MoveAngle = ANGLE_UP;
+						bodyrot.x = D3DX_PI * -0.15f;
+					}
 
-				bodyrot.x += D3DX_PI;
-				bodyrot.x -= (D3DX_PI * 0.5f);
-				break;
+					bodyrot.x += D3DX_PI;
+					bodyrot.x -= (D3DX_PI * 0.5f);
+					break;
 
-			default:
-				break;
-			}
-			RotNormalize(bodyrot.x);
-
-			ppModel[0]->SetRotation(ppModel[0]->GetRotation() + playerRot);
-			ppModel[1]->SetRotation(ppModel[1]->GetRotation() + bodyrot);
+				default:
+					break;
 		}
+#else
+				bodyrot.x = m_fBodyRot;
+#endif
 
-		// 移動方向設定
-		SetMoveAngle(MoveAngle);
+				RotNormalize(bodyrot.x);
+				ppModel[1]->SetRotation(ppModel[1]->GetRotation() + bodyrot);
+	}
+
+			// 移動方向設定
+			SetMoveAngle(MoveAngle);
+#endif
+}
 	}
 
 	// 頂点情報設定
@@ -450,11 +460,11 @@ void CPlayer::Update(void)
 	// HPゲージの位置更新
 	if (m_pHPGauge != NULL)
 	{
-		m_pHPGauge->UpdatePosition(GetPosition(), m_nLife);
+		m_pHPGauge->UpdatePosition(GetPosition(), GetLife());
 	}
 
 	// デバッグ表示
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"------------------[プレイヤーの操作]------------------\n"
 		"位置：【X：%f, Y：%f, Z：%f】 【W / A / S / D】\n"
 		"向き：【X：%f, Y：%f, Z：%f】 【Z / C】\n"
@@ -467,13 +477,13 @@ void CPlayer::Update(void)
 void CPlayer::Controll(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	// カメラの情報取得
-	CCamera *pCamera = CManager::GetCamera();
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 	// カメラの向き取得
 	D3DXVECTOR3 Camerarot = pCamera->GetRotation();
@@ -560,53 +570,39 @@ void CPlayer::Controll(void)
 			move.y += 17.0f;
 		}
 	}
-	//else
-	//{// 移動可能モーションじゃない場合
+	else
+	{// 移動可能モーションじゃない場合
 
-	//	if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
-	//	{//←キーが押された,左移動
+		if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
+		{//←キーが押された,左移動
 
-	//		if (pInputKeyboard->GetPress(DIK_W) == true || pInputGamepad->GetStickMoveL(0).y > 0)
-	//		{//A+W,左上移動
-	//			fRotDest = D3DX_PI * 0.75f + Camerarot.y;
-	//		}
-	//		else if (pInputKeyboard->GetPress(DIK_S) == true || pInputGamepad->GetStickMoveL(0).y < 0)
-	//		{//A+S,左下移動
-	//			fRotDest = D3DX_PI * 0.25f + Camerarot.y;
-	//		}
-	//		else
-	//		{//A,左移動
-	//			fRotDest = D3DX_PI * 0.5f + Camerarot.y;
-	//		}
-	//	}
-	//	else if (pInputKeyboard->GetPress(DIK_D) == true || pInputGamepad->GetStickMoveL(0).x > 0)
-	//	{//Dキーが押された,右移動
+			// 左向き
+			MoveAngle = ANGLE_LEFT;
+			m_nAngle = -1;	// 向き
+		}
+		else if (pInputKeyboard->GetPress(DIK_D) == true || pInputGamepad->GetStickMoveL(0).x > 0)
+		{//Dキーが押された,右移動
 
-	//		if (pInputKeyboard->GetPress(DIK_W) == true || pInputGamepad->GetStickMoveL(0).y > 0)
-	//		{//D+W,右上移動
-	//			fRotDest = -D3DX_PI * 0.75f + Camerarot.y;
-	//		}
-	//		else if (pInputKeyboard->GetPress(DIK_S) == true || pInputGamepad->GetStickMoveL(0).y < 0)
-	//		{//D+S,右下移動
-	//			fRotDest = -D3DX_PI * 0.25f + Camerarot.y;
-	//		}
-	//		else
-	//		{//D,右移動
-	//			fRotDest = -D3DX_PI * 0.5f + Camerarot.y;
-	//		}
-	//	}
-	//	else if (pInputKeyboard->GetPress(DIK_W) == true || pInputGamepad->GetStickMoveL(0).y > 0)
-	//	{//Wが押された、上移動
-	//		fRotDest = D3DX_PI * 1.0f + Camerarot.y;
-	//	}
-	//	else if (pInputKeyboard->GetPress(DIK_S) == true || pInputGamepad->GetStickMoveL(0).y < 0)
-	//	{//Sが押された、下移動
-	//		fRotDest = D3DX_PI * 0.0f + Camerarot.y;
-	//	}
-	//}
+			// 右向き
+			MoveAngle = ANGLE_RIGHT;
+			m_nAngle = 1;	// 向き
+		}
+		else if (pInputKeyboard->GetPress(DIK_W) == true || pInputGamepad->GetStickMoveL(0).y > 0)
+		{//Wが押された、上移動
+
+			// 上向き
+			MoveAngle = ANGLE_UP;
+		}
+		else if (pInputKeyboard->GetPress(DIK_S) == true || pInputGamepad->GetStickMoveL(0).y < 0)
+		{//Sが押された、下移動
+
+			// 下向き
+			MoveAngle = ANGLE_DOWN;
+		}
+	}
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -706,15 +702,39 @@ void CPlayer::Controll(void)
 	// 当たり判定
 	//**********************************
 	Collision();
+
+	if (pInputGamepad->GetStickPositionRatioR(0).y <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).y >= -0.5f &&
+		pInputGamepad->GetStickPositionRatioR(0).x <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).x >= -0.5f)
+	{
+
+		// スティック倒した判定
+		m_bStick = false;
+	}
 	
-	if (m_bATK == false &&
+	if (/*m_bATK == false &&*/
 		(
 		pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
 		pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f))
 	{// 攻撃
+
 		
-		// 攻撃判定ON
-		m_bATK = true;
+		if (pInputGamepad->GetStickPositionRatioR(0).x >= 0.2f)
+		{
+			m_StickAngle = ANGLE_RIGHT;		// スティックの向き
+		}
+		else if (pInputGamepad->GetStickPositionRatioR(0).x <= -0.2f)
+		{
+			m_StickAngle = ANGLE_LEFT;		// スティックの向き
+		}
+		else if (pInputGamepad->GetStickPositionRatioR(0).y >= 0.2f)
+		{
+			m_StickAngle = ANGLE_UP;		// スティックの向き
+		}
+		else if (pInputGamepad->GetStickPositionRatioR(0).y <= -0.2f)
+		{
+			m_StickAngle = ANGLE_DOWN;		// スティックの向き
+		}
+
 
 		// スティックの向き
 		m_fAtkStickRot = pInputGamepad->GetStickRotR(0);
@@ -728,20 +748,43 @@ void CPlayer::Controll(void)
 		case CPlayer::ANGLE_RIGHT:
 
 
-			if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot >= -D3DX_PI * 0.5f)
-			{
-				m_fAtkStickRot = 0.0f;
+			//if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot >= -D3DX_PI * 0.5f)
+			//{
+			//	m_fAtkStickRot = 0.0f;
+			//}
+			///*else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot < -D3DX_PI * 0.5f)
+			//{
+			//	m_fAtkStickRot = D3DX_PI * 0.75f;
+			//}*/
+			//else if (m_fAtkStickRot >= D3DX_PI * 0.75f)
+			//{
+			//	m_fAtkStickRot = D3DX_PI * 0.75f;
+			//}
+
+			if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot < D3DX_PI * 0.15f)
+			{// 右上
+				m_fAtkStickRot = D3DX_PI * 0.15f;
 			}
-			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot < -D3DX_PI * 0.5f)
-			{
-				m_fAtkStickRot = D3DX_PI * 0.75f;
+			else if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot >= D3DX_PI * 0.85f)
+			{// 右下
+				m_fAtkStickRot = D3DX_PI * 0.85f;
 			}
-			else if (m_fAtkStickRot >= D3DX_PI * 0.75f)
+			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot > -D3DX_PI * 0.15f)
+			{// 左上
+				m_fAtkStickRot = -D3DX_PI * 0.15f;
+			}
+			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot <= -D3DX_PI * 0.85f)
+			{// 左下
+				m_fAtkStickRot = -D3DX_PI * 0.85f;
+			}
+
+			if (m_fAtkStickRot < 0.0f)
 			{
-				m_fAtkStickRot = D3DX_PI * 0.75f;
+				m_fAtkStickRot += D3DX_PI;	// 半周分
 			}
 
 			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
+
 			break;
 
 		case CPlayer::ANGLE_DOWN:
@@ -749,16 +792,34 @@ void CPlayer::Controll(void)
 			break;
 
 		case CPlayer::ANGLE_LEFT:
+
+			if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot < D3DX_PI * 0.15f)
+			{// 右上
+				m_fAtkStickRot = D3DX_PI * 0.15f;
+			}
+			else if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot >= D3DX_PI * 0.85f)
+			{// 右下
+				m_fAtkStickRot = D3DX_PI * 0.85f;
+			}
+			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot > -D3DX_PI * 0.15f)
+			{// 左上
+				m_fAtkStickRot = -D3DX_PI * 0.15f;
+			}
+			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot <= -D3DX_PI * 0.85f)
+			{// 左下
+				m_fAtkStickRot = -D3DX_PI * 0.85f;
+			}
+
 			m_fAtkStickRot *= -1;
 
-			if (m_fAtkStickRot <= 0.0f)
+			/*if (m_fAtkStickRot <= 0.0f)
 			{
 				m_fAtkStickRot = 0.0f;
 			}
 			else if (m_fAtkStickRot >= D3DX_PI * 0.75f)
 			{
 				m_fAtkStickRot = D3DX_PI * 0.75f;
-			}
+			}*/
 			m_fAtkStickRot += D3DX_PI * 0.5f;	// 半周分
 			break;
 
@@ -767,17 +828,58 @@ void CPlayer::Controll(void)
 		}
 		RotNormalize(m_fAtkStickRot);
 
-		// 連続アタックの種類
-		m_atkRush = (ATKRUSH)(((int)m_atkRush + 1) % (int)ATKRUSH_MAX);
+		// 攻撃判定ON
+		if (m_StickAngle != m_OldStickAngle)
+		{
+			switch (MoveAngle)
+			{
+			case CPlayer::ANGLE_UP:
+				m_fBodyRot = 0.0f;	// 攻撃時の身体向き
+				break;
+
+			case CPlayer::ANGLE_RIGHT:
+				m_fBodyRot = m_fAtkStickRot;	// 攻撃時の身体向き
+				break;
+
+			case CPlayer::ANGLE_DOWN:
+				m_fBodyRot = 0.0f;	// 攻撃時の身体向き
+				break;
+
+			case CPlayer::ANGLE_LEFT:
+				m_fBodyRot = m_fAtkStickRot;	// 攻撃時の身体向き
+				m_fBodyRot += D3DX_PI;
+				break;
+
+			default:
+				break;
+			}
+
+
+			m_bATK = true;
+			//	m_pMotion->ToggleFinish(true);
+		}
+
+		// スティック倒した判定
+		m_bStick = true;
+
+		m_OldStickAngle = m_StickAngle;	// 前回のスティックの向き
+	}
+	else
+	{
+		//m_atkRush = ATKRUSH_LEFT;
+		m_OldStickAngle = ANGLE_MAX;
+
+		// スティック倒した判定
+		m_bStick = false;
 	}
 
-	if ((nMotionType == MOTION_ATK ||
-		nMotionType == MOTION_ATK2) &&
-		pInputGamepad->GetStickPositionRatioR(0).y <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).y >= -0.5f &&
-		pInputGamepad->GetStickPositionRatioR(0).x <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).x >= -0.5f)
-	{// 攻撃中にスティック倒してないとき
-		m_pMotion->ToggleFinish(true);
-	}
+	//if ((nMotionType == MOTION_ATK ||
+	//	nMotionType == MOTION_ATK2) &&
+	//	pInputGamepad->GetStickPositionRatioR(0).y <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).y >= -0.5f &&
+	//	pInputGamepad->GetStickPositionRatioR(0).x <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).x >= -0.5f)
+	//{// 攻撃中にスティック倒してないとき
+	//	m_pMotion->ToggleFinish(true);
+	//}
 }
 
 //==========================================================================
@@ -816,8 +918,11 @@ void CPlayer::MotionSet(void)
 
 			m_bATK = false;		// 攻撃判定OFF
 
+			// 連続アタックの種類
+			m_atkRush = (ATKRUSH)(((int)m_atkRush + 1) % (int)ATKRUSH_MAX);
+
 			int nType = MOTION_ATK + m_atkRush;
-			m_pMotion->Set(nType);
+			m_pMotion->Set(nType, false);
 		}
 		else
 		{
@@ -844,7 +949,7 @@ void CPlayer::Atack(void)
 	D3DXVECTOR3 rot = GetRotation();
 
 	// カメラの情報取得
-	CCamera *pCamera = CManager::GetCamera();
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 	// カメラの向き取得
 	D3DXVECTOR3 Camerarot = pCamera->GetRotation();
@@ -921,7 +1026,7 @@ void CPlayer::Atack(void)
 				//);
 
 				// 振動
-				//CManager::GetCamera()->SetShake(20, 10.0f, 0.0f);
+				//CManager::GetInstance()->GetCamera()->SetShake(20, 10.0f, 0.0f);
 
 				// 斬撃生成
 				CSlash::Create
@@ -930,7 +1035,7 @@ void CPlayer::Atack(void)
 					D3DXVECTOR3(m_fAtkStickRot, 0.0f, 0.0f),		// 向き
 					D3DXVECTOR3(0.0f, D3DX_PI + rot.y, 0.0f),		// 向き
 					D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f),	// 色
-					150.0f,								// 幅
+					200.0f,								// 幅
 					50.0f,								// 中心からの間隔
 					10,									// 寿命
 					20.0f,								// 幅の移動量
@@ -940,7 +1045,7 @@ void CPlayer::Atack(void)
 				);
 
 				// 歩行音再生
-				CManager::GetSound()->PlaySound(CSound::LABEL_SE_IMPACT01);
+				CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_IMPACT01);
 				break;
 			}
 		}
@@ -1027,7 +1132,7 @@ void CPlayer::Atack(void)
 		}
 	}
 
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"モーションカウンター：%d\n", m_pMotion->GetAllCount());
 }
 
@@ -1052,7 +1157,7 @@ void CPlayer::Collision(void)
 	// 高さ取得
 	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG)
 	{
-		fHeight = CManager::GetScene()->GetElevation()->GetHeight(pos, bLand);
+		fHeight = CManager::GetInstance()->GetScene()->GetElevation()->GetHeight(pos, bLand);
 	}
 	else
 	{
@@ -1101,13 +1206,22 @@ void CPlayer::Collision(void)
 //==========================================================================
 bool CPlayer::Hit(const int nValue)
 {
+	// 体力取得
+	int nLife = GetLife();
+
 	if (m_state != STATE_DEAD && m_state != STATE_DMG && m_state != STATE_KNOCKBACK && m_state != STATE_INVINCIBLE)
 	{// ダメージ受付状態の時
 
 		// 体力減らす
-		m_nLife -= nValue;
+		nLife -= nValue;
 
-		if (m_nLife <= 0)
+		// 補正
+		ValueNormalize(nLife, MAX_LIFE, 0);
+
+		// 体力設定
+		SetLife(nLife);
+
+		if (nLife <= 0)
 		{// 体力がなくなったら
 
 			// 死状態
@@ -1122,9 +1236,6 @@ bool CPlayer::Hit(const int nValue)
 			// 死んだ
 			return true;
 		}
-
-		// 補正
-		ValueNormalize(m_nLife, MAX_LIFE, 0);
 
 		// 過去の状態保存
 		m_Oldstate = m_state;
@@ -1160,13 +1271,13 @@ bool CPlayer::Hit(const int nValue)
 			false										// 加算合成するか
 		);
 
-		CManager::SetEnableHitStop(12);
+		CManager::GetInstance()->SetEnableHitStop(12);
 
 		// 振動
-		CManager::GetCamera()->SetShake(12, 25.0f, 0.0f);
+		CManager::GetInstance()->GetCamera()->SetShake(12, 25.0f, 0.0f);
 
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_PLAYERDMG);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_PLAYERDMG);
 	}
 
 	// 死んでない
@@ -1318,7 +1429,7 @@ void CPlayer::KnockBack(void)
 	bool bLen = false;
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 
 	// 状態遷移カウンター減算

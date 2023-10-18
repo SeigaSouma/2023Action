@@ -34,6 +34,7 @@ CSlash::CSlash(int nPriority) : CImpactWave(nPriority)
 	m_nTexIdx = 0;										// テクスチャのインデックス番号
 	m_colOrigin = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// 元の色
 	m_fSizeDest = 0.0f;		// 目標のサイズ
+	collisionRotation = mylib_const::DEFAULT_VECTOR3;	// 当たり判定の向き
 }
 
 //==========================================================================
@@ -81,7 +82,7 @@ CSlash *CSlash::Create(D3DXVECTOR3 pos, D3DXVECTOR3 Parentrot, D3DXVECTOR3 rot, 
 			pObjMeshCylinder->SetMoveAngle(angle);			// 向き
 
 			// テクスチャの割り当て
-			pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(GetFileName(nTexType));
+			pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(GetFileName(nTexType));
 
 			// テクスチャの割り当て
 			pObjMeshCylinder->BindTexture(pObjMeshCylinder->m_nTexIdx);
@@ -104,7 +105,7 @@ HRESULT CSlash::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 種類設定
 	SetType(TYPE_MESHDONUTS);
@@ -115,6 +116,34 @@ HRESULT CSlash::Init(void)
 	{// 失敗していたら
 		return E_FAIL;
 	}
+
+	// 計算用マトリックス宣言
+	D3DXMATRIX mtxRot, mtxTrans, mtxRotOrigin, mtxCollision;
+	D3DXVECTOR3 rotOrigin = GetRotation();
+	D3DXVECTOR3 rot = GetOriginRotation();
+	D3DXVECTOR3 pos = GetPosition();
+
+	// ワールドマトリックスの初期化
+	D3DXMatrixIdentity(&mtxCollision);
+	D3DXMatrixIdentity(&mtxRotOrigin);
+
+	// 元の向きを反映する
+	D3DXMatrixRotationYawPitchRoll(&mtxRotOrigin, rotOrigin.y, rotOrigin.x, rotOrigin.z);
+	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxRotOrigin);
+
+	// 向きを反映する
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
+	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxRot);
+
+	// 位置を反映する
+	D3DXMatrixTranslation(&mtxTrans, pos.x, pos.y, pos.z);
+	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxTrans);
+
+	// ワールド行列から回転成分を計算
+	collisionRotation.x = atan2f(mtxCollision._32, mtxCollision._33);
+	collisionRotation.y = atan2f(-mtxCollision._31, sqrtf(mtxCollision._32 * mtxCollision._32 + mtxCollision._33 * mtxCollision._33));
+	collisionRotation.z = atan2f(mtxCollision._21, mtxCollision._11);
+	RotNormalize(collisionRotation);
 
 	return S_OK;
 }
@@ -161,6 +190,7 @@ void  CSlash::Collision(void)
 	// 外側の幅
 	float fOutWidth = GetOutWidth();
 
+	// 弾情報取得
 	CBullet **ppBullet = CGame::GetBulletManager()->GetBullet();
 	int nNumAll = CGame::GetBulletManager()->GetNumAll();
 
@@ -218,7 +248,7 @@ void  CSlash::Collision(void)
 			}
 			break;
 
-			default:
+			default:	// 左右
 
 				float fSlashRot = GetOriginRotation().x;
 				if (GetMoveAngle() == ANGLE_LEFT)
@@ -232,7 +262,7 @@ void  CSlash::Collision(void)
 				}
 				BulletMove.x *= 2.5f;
 
-				SlashMove = D3DXVECTOR3(BulletMove.x, sinf(D3DX_PI + fSlashRot) * 2.0f, 0.0f);
+				SlashMove = D3DXVECTOR3(cosf(fSlashRot) * BulletMove.x, sinf(D3DX_PI + fSlashRot) * 5.0f, 0.0f);
 				ppBullet[nCntBullet]->SetMove(SlashMove);
 				break;
 			}
@@ -242,10 +272,10 @@ void  CSlash::Collision(void)
 			ppBullet[nCntBullet]->SetMoveAngle(GetMoveAngle());
 
 			// ヒットストップ
-			CManager::SetEnableHitStop(6);
+			CManager::GetInstance()->SetEnableHitStop(6);
 
 			// 振動
-			CManager::GetCamera()->SetShake(12, 25.0f, 0.0f);
+			CManager::GetInstance()->GetCamera()->SetShake(12, 25.0f, 0.0f);
 		}
 	}
 }
@@ -255,116 +285,45 @@ void  CSlash::Collision(void)
 //==========================================================================
 bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 {
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
-
 	// 外側の幅
 	float fOutWidth = GetOutWidth();
 
-#if 0
+	D3DXVECTOR3 rectCenter = GetPosition();							// 矩形の中心座標
+	D3DXVECTOR3 rectSize = D3DXVECTOR3(fOutWidth, 40.0f, fOutWidth);	// 矩形のサイズ
+	D3DXMATRIX rectWorldMatrix = GetWorldMtx();						// 回転した矩形のワールド変換行列
+	D3DXVECTOR3 sphereCenter = TargetPos;							// 球の中心座標
+	float sphereRadius = fTargetRadius;								// 球の半径
 
-	if (SphereRange(pos, TargetPos, fOutWidth, fTargetRadius) == false)
-	{// 大きい球の判定
-		return false;
-	}
+	// 矩形の幅を一時代入
+	float halfWidth = rectSize.x;
+	float halfHeight = rectSize.y;
+	float halfDepth = rectSize.z;
 
-	// 向き取得
-	D3DXVECTOR3 rot = GetRotation();
-	float RotX = GetOriginRotation().x;
+	// 球の中心を矩形に移動
+	D3DXMATRIX rotationMatrix;
+	D3DXMatrixRotationYawPitchRoll(&rotationMatrix, collisionRotation.y, collisionRotation.x, collisionRotation.z);
+	D3DXVECTOR3 transformedSphereCenter = sphereCenter - rectCenter;
+	D3DXVec3TransformCoord(&transformedSphereCenter, &transformedSphereCenter, &rotationMatrix);
 
-	if (GetMoveAngle() == ANGLE_LEFT)
-	{
-		RotX += D3DX_PI;
-	}
+	// 球の中心と矩形の内部の最も近い点を求める
+	float closestX = max(-halfWidth, min(transformedSphereCenter.x, halfWidth));
+	float closestY = max(-halfHeight, min(transformedSphereCenter.y, halfHeight));
+	float closestZ = max(-halfDepth, min(transformedSphereCenter.z, halfDepth));
 
-	float fLength = sqrtf(fOutWidth * fOutWidth + fOutWidth * fOutWidth);	// 対角線の長さ
-	float fAngle = atan2f(fOutWidth, fOutWidth);									// 対角線の向き
+	// 上の最も近い点と球との距離計算
+	float distanceSquared =
+		(closestX - transformedSphereCenter.x) * (closestX - transformedSphereCenter.x) +
+		(closestY - transformedSphereCenter.y) * (closestY - transformedSphereCenter.y) +
+		(closestZ - transformedSphereCenter.z) * (closestZ - transformedSphereCenter.z);
 
-	float fPosY = sinf(GetOriginRotation().x) * fOutWidth;
-
-	// 判定する四角の4頂点
-	bool bLine1 = false, bLine2 = false, bLine3 = false, bLine4 = false;
-	
-	D3DXVECTOR3 LeftUp = D3DXVECTOR3(
-		pos.x + cosf(RotX) * sinf(rot.y - fAngle) * fLength,
-		pos.y + fPosY,
-		pos.z + cosf(RotX) * cosf(rot.y - fAngle) * fLength);
-
-	D3DXVECTOR3 RightUp = D3DXVECTOR3(
-		pos.x + cosf(RotX) * sinf(rot.y + fAngle) * fLength,
-		pos.y + fPosY,
-		pos.z + cosf(RotX) * cosf(rot.y + fAngle) * fLength);
-
-	D3DXVECTOR3 LeftDown = D3DXVECTOR3(
-		pos.x + cosf(RotX) * sinf(rot.y - D3DX_PI + fAngle) * fLength,
-		pos.y - fPosY,
-		pos.z + cosf(RotX) * cosf(rot.y - D3DX_PI + fAngle) * fLength);
-
-	D3DXVECTOR3 RightDown = D3DXVECTOR3(
-		pos.x + cosf(RotX) * sinf(rot.y + D3DX_PI - fAngle) * fLength,
-		pos.y - fPosY,
-		pos.z + cosf(RotX) * cosf(rot.y + D3DX_PI - fAngle) * fLength);
-
-	if (CollisionCircleSquare2D(TargetPos, D3DXVECTOR3(pos.x, TargetPos.y, pos.z), D3DXVECTOR3(RotX, rot.y, rot.z), fTargetRadius, D3DXVECTOR2(fOutWidth, fOutWidth)))
+	// 球の判定
+	if (distanceSquared <= (sphereRadius * sphereRadius))
 	{
 		return true;
 	}
 
-
-#else
-
-	// 向き取得
-	D3DXVECTOR3 rot = GetRotation();
-
-	{
-
-		D3DXVECTOR3 rectCenter = pos; // 回転した矩形の中心座標
-		D3DXVECTOR3 rectRotation = D3DXVECTOR3(D3DX_PI - GetOriginRotation().x, rot.y, rot.z);
-		D3DXVECTOR3 rectSize(fOutWidth, 1.0f, fOutWidth); // 回転した矩形の幅、高さ、奥行き
-		D3DXMATRIX rectWorldMatrix = GetWorldMtx(); // 回転した矩形のワールド変換行列
-		D3DXVECTOR3 sphereCenter = TargetPos; // 球の中心座標
-		float sphereRadius = fTargetRadius; // 球の半径
-
-		// 回転した矩形の半幅を計算
-		float halfWidth = rectSize.x;
-		float halfHeight = rectSize.y;
-		float halfDepth = rectSize.z;
-
-		// 球の中心を回転した座標系に変換
-		D3DXMATRIX rotationMatrix;
-		D3DXMatrixRotationYawPitchRoll(&rotationMatrix, rectRotation.y, rectRotation.x, rectRotation.z);
-		D3DXVECTOR3 transformedSphereCenter = sphereCenter - rectCenter;
-		D3DXVec3TransformCoord(&transformedSphereCenter, &transformedSphereCenter, &rotationMatrix);
-
-		// 移動する球の新しい位置を計算
-		D3DXVECTOR3 newSphereCenter = sphereCenter;
-
-		// 球の中心と矩形の内部の最も近い点を求める
-		float closestX = max(-halfWidth, min(transformedSphereCenter.x, halfWidth));
-		float closestY = max(-halfHeight, min(transformedSphereCenter.y, halfHeight));
-		float closestZ = max(-halfDepth, min(transformedSphereCenter.z, halfDepth));
-
-		// 最も近い点と球の中心との距離を計算
-		float distanceSquared = 
-			(closestX - transformedSphereCenter.x) * (closestX - transformedSphereCenter.x) +
-			(closestY - transformedSphereCenter.y) * (closestY - transformedSphereCenter.y) +
-			(closestZ - transformedSphereCenter.z) * (closestZ - transformedSphereCenter.z);
-
-		float sphereRadiusWithMargin = sphereRadius;  // 球の半径に追加のマージンを考慮する場合、適切な値に変更
-
-		// 球が新しい位置で矩形と交差している場合、当たり判定
-		if (distanceSquared <= (sphereRadiusWithMargin * sphereRadiusWithMargin)) {
-			return true;
-		}
-
-		return false;
-	}
-
-#endif
-
-	
-
 	return false;
+
 }
 
 //==========================================================================

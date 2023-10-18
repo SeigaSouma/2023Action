@@ -36,6 +36,7 @@ private:
 	int m_nTexIdx;	// テクスチャのインデックス番号
 	D3DXCOLOR m_colOrigin;	// 元の色
 	float m_fSizeDest;		// 目標のサイズ
+	D3DXVECTOR3 collisionRotation;	// 当たり判定の向き
 };
 
 

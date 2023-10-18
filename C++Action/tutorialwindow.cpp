@@ -101,7 +101,7 @@ HRESULT CTutorialWindow::Init(void)
 	// テクスチャの割り当て
 	if (m_nTexIdx[m_NowStep] == 0)
 	{// まだ読み込んでなかったら
-		m_nTexIdx[m_NowStep] = CManager::GetTexture()->Regist(m_apTextureFile[m_NowStep]);
+		m_nTexIdx[m_NowStep] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_NowStep]);
 	}
 
 	// テクスチャの割り当て
@@ -113,7 +113,7 @@ HRESULT CTutorialWindow::Init(void)
 
 
 	// サウンド再生
-	CManager::GetSound()->PlaySound(CSound::LABEL_SE_TUTORIALWINDOW);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_TUTORIALWINDOW);
 
 	return S_OK;
 }
@@ -153,10 +153,10 @@ void CTutorialWindow::Update(void)
 	m_nCntWait = -1;
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_A, 0) == true)
 	{// 決定が押されていたら

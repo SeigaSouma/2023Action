@@ -150,7 +150,7 @@ CObject3DMesh *CObject3DMesh::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fWi
 			// テクスチャの割り当て
 			if (pFileName != NULL)
 			{// NULLじゃなかったら
-				pObject3D->m_nTexIdx = CManager::GetTexture()->Regist(pFileName);
+				pObject3D->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(pFileName);
 			}
 
 			// 位置・向き
@@ -176,7 +176,7 @@ HRESULT CObject3DMesh::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	m_nNumIndex = (m_nHeight * ((m_nWidth + 1) * 2)) + (2 * (m_nHeight - 1));	// インデックス数
 	m_nNumVertex = (m_nHeight + 1) * (m_nWidth + 1);							// 頂点数
@@ -224,7 +224,7 @@ HRESULT CObject3DMesh::Init(TYPE type)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	m_nNumIndex = (m_nHeight * ((m_nWidth + 1) * 2)) + (2 * (m_nHeight - 1));	// インデックス数
 	m_nNumVertex = (m_nHeight + 1) * (m_nWidth + 1);							// 頂点数
@@ -327,8 +327,8 @@ HRESULT CObject3DMesh::Init(TYPE type)
 				m_pVtxNor[nNowVtx] = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 				m_pVtxTex[nNowVtx] = -D3DXVECTOR2
 				(
-					((float)nCntWidth / (1.0f / (float)(m_nWidth + 1))) * (1.0f / (float)(m_nWidth + 1)),
-					((float)nCntHeight / (1.0f / (float)(m_nHeight + 1))) * (1.0f / (float)(m_nHeight + 1))
+					nCntWidth * (1.0f / (float)(m_nWidth / 4)),
+					nCntHeight * (1.0f / (float)(m_nHeight / 4))
 				);
 				break;
 			}
@@ -341,6 +341,9 @@ HRESULT CObject3DMesh::Init(TYPE type)
 	// 頂点バッファをアンロックする
 	m_pVtxBuff->Unlock();
 
+	// ワールドマトリックスの計算処理
+	CalWorldMtx();
+
 	return S_OK;
 }
 
@@ -352,7 +355,7 @@ HRESULT CObject3DMesh::CreateVertex(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 頂点バッファの生成
 	if (m_pVtxBuff != NULL)
@@ -476,7 +479,7 @@ HRESULT CObject3DMesh::CreateIndex(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// インデックスバッファの生成
 	hr = pDevice->CreateIndexBuffer(sizeof(WORD) * m_nNumIndex,
@@ -598,13 +601,13 @@ void CObject3DMesh::UPVtxField(D3DXVECTOR3 pos)
 	}
 
 	// デバッグ表示
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"\n"
 		"頂点上げ下げ：[5, 6]\n"
 		"幅拡縮：[7, 8] 【%f, %f】\n", m_fWidthLen, m_fHeightLen);
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 頂点情報の設定
 	for (int nCntHeight = 0; nCntHeight < m_nHeight + 1; nCntHeight++)
@@ -658,10 +661,11 @@ void CObject3DMesh::UPVtxField(D3DXVECTOR3 pos)
 	ValueNormalize(m_fHeightLen, 99999999.0f, 10.0f);
 }
 
+
 //==========================================================================
-// 描画処理
+// ワールドマトリックスの計算処理
 //==========================================================================
-void CObject3DMesh::Draw(void)
+void CObject3DMesh::CalWorldMtx(void)
 {
 	D3DXMATRIX m_mtxWorld = GetWorldMtx();			// マトリックス取得
 	D3DXVECTOR3 m_rot = GetRotation();				// 向き取得
@@ -669,7 +673,7 @@ void CObject3DMesh::Draw(void)
 	D3DXVECTOR3 m_pos = GetPosition();				// 位置取得
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 計算用マトリックス宣言
 	D3DXMATRIX mtxRot, mtxTrans, mtxRotOrigin;
@@ -680,10 +684,10 @@ void CObject3DMesh::Draw(void)
 
 	// 元の向きを反映する
 	D3DXMatrixRotationYawPitchRoll(&mtxRotOrigin, m_rotOrigin.y, m_rotOrigin.x, m_rotOrigin.z);
+	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRotOrigin);
 
 	// 向きを反映する
 	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRotOrigin);
 	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
 
 	// 位置を反映する
@@ -692,6 +696,19 @@ void CObject3DMesh::Draw(void)
 
 	// ワールドマトリックスの設定
 	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
+	SetWorldMtx(m_mtxWorld);
+}
+
+//==========================================================================
+// 描画処理
+//==========================================================================
+void CObject3DMesh::Draw(void)
+{
+	// デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
+
+	// ワールドマトリックスの計算処理
+	CalWorldMtx();
 
 	// 頂点バッファをデータストリームに設定
 	pDevice->SetStreamSource(0, m_pVtxBuff, 0, sizeof(VERTEX_3D));
@@ -703,7 +720,7 @@ void CObject3DMesh::Draw(void)
 	pDevice->SetFVF(FVF_VERTEX_3D);
 
 	// テクスチャの設定
-	pDevice->SetTexture(0, CManager::GetTexture()->GetAdress(m_nTexIdx));
+	pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(m_nTexIdx));
 
 	// ポリゴンの描画
 	pDevice->DrawIndexedPrimitive(
@@ -714,7 +731,6 @@ void CObject3DMesh::Draw(void)
 		0,
 		m_nNumIndex - 2);
 
-	SetWorldMtx(m_mtxWorld);
 }
 
 //==========================================================================

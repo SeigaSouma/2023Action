@@ -150,7 +150,7 @@ HRESULT CTexture::LoadTex(const char *pFileName)
 	int nIdx = m_nNumAll;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevive = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevive = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// テクスチャの読み込み
 	hr = D3DXCreateTextureFromFile(pDevive,

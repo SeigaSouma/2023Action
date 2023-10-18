@@ -98,7 +98,7 @@ HRESULT CMultiNumber::Init(void)
 	m_ppMultiNumber = DEBUG_NEW (CNumber*[m_nNumNumber]);
 
 	// ¶¬ˆ—
-	int nTex = CManager::GetTexture()->Regist(TEXTURE);
+	int nTex = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 	for (int nCntNum = 0; nCntNum < m_nNumNumber; nCntNum++)
 	{
 		// ¶¬ˆ—

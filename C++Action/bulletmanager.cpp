@@ -95,7 +95,7 @@ int CBulletManager::Regist(CBullet *pBullet)
 		// ’eî•ñŠ„‚è“–‚Ä
 		m_apBullet[nCntBullet] = pBullet;
 
-		nIdx = m_nNumAll;
+		nIdx = nCntBullet;
 
 		// ‘”‰ÁZ
 		m_nNumAll++;

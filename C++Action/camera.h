@@ -25,6 +25,13 @@ private:
 		CAMERASTATE_SHAKE,		// 振動
 	};
 
+	enum CHASETYPE
+	{
+		CHASETYPE_NORMAL = 0,	// 通常
+		CHASETYPE_MAP,			// マップに追従
+		CHASETYPE_MAX
+	};
+
 public:
 
 	CCamera();
@@ -65,6 +72,11 @@ private:
 	void Shake(void);
 	void UpdateState(void);
 
+	// 追従関数
+	void ChaseNormal(void);	// 通常の追従
+	void ChaseMap(void);	// マップに沿った追従
+
+
 	void ResetGame(void);	// リセット
 	void ResetTitle(void);	// リセット
 	void ResetResult(void);	// リセット
@@ -101,6 +113,7 @@ private:
 	float m_fDistanceCorrection;	// 距離の慣性補正係数
 	float m_fDistanceDecrementValue;// 距離の減少係数
 	STATE m_state;					// 状態
+	CHASETYPE m_ChaseType;			// 追従の種類
 };
 
 #endif

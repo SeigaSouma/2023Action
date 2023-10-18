@@ -122,10 +122,10 @@ HRESULT CElevation::Init(const char *pText)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// テクスチャの割り当て
-	m_nTexIdx = CManager::GetTexture()->Regist(TEXTURE);
+	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 
 	// テクスチャの割り当て
 	BindTexture(m_nTexIdx);
@@ -207,7 +207,7 @@ void CElevation::Release(void)
 void CElevation::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// コンボ演出中は抜ける
 	if (CGame::GetEnemyManager()->GetState() == CEnemyManager::STATE_COMBOANIM)
@@ -261,9 +261,9 @@ void CElevation::UpdateState(void)
 void CElevation::Draw(void)
 {
 	//  デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
-	if (CManager::IsWireframe() == true)
+	if (CManager::GetInstance()->IsWireframe() == true)
 	{
 		pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);	// ワイヤーフレームモード
 	}
@@ -518,7 +518,7 @@ void CElevation::UPVtxField(D3DXVECTOR3 pos)
 	D3DXVECTOR3 *pVtxPos = GetVtxPos();
 
 	// デバッグ表示
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"------------------[ 起伏エディット情報 ]------------------\n"
 		"ブラシのサイズ：[1, 2] 【%f】\n"
 		"ブラシの強さ：  [3, 4] 【%f】\n"
@@ -529,7 +529,7 @@ void CElevation::UPVtxField(D3DXVECTOR3 pos)
 		"起伏情報保存：  [F9]\n\n", m_fBrushRange, m_fBrushStrength, m_fWidthLen, m_fHeightLen);
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	if (pInputKeyboard->GetTrigger(DIK_F9) == true)
 	{// セーブ
@@ -637,7 +637,7 @@ void CElevation::UPVtxField(D3DXVECTOR3 pos)
 		m_pTargetP->SetWidthLen(m_fBrushRange);
 
 		// カメラの情報取得
-		CCamera *pCamera = CManager::GetCamera();
+		CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 		// カメラの向き取得
 		D3DXVECTOR3 Camerarot = pCamera->GetRotation();

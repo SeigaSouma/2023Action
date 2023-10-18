@@ -18,6 +18,7 @@
 class CHP_Gauge;
 class CShadow;
 class CEffect3D;
+class CEnemyFixedMoveManager;
 
 //==========================================================================
 // クラス定義
@@ -31,6 +32,7 @@ public:
 	{
 		TYPE_POWER = 0,	// パワー
 		TYPE_CROUWD,
+		TYPE_FLY,
 		TYPE_MAX
 	}TYPE;
 
@@ -40,11 +42,8 @@ public:
 		STATE_NONE = 0,		// なにもない
 		STATE_SPAWN,		// スポーン
 		STATE_DMG,			// ダメージ
-		STATE_KNOCKBACK,	// ノックバック
 		STATE_DEAD,			// 死
 		STATE_FADEOUT,		// フェードアウト
-		STATE_RETURNBASE,	// 拠点に戻る
-		STATE_PLAYERSEARCH,	// プレイヤー探す
 		STATE_PLAYERCHASE,	// プレイヤー追い掛け
 		STATE_PARENTCHASE,	// 親追い掛け
 		STATE_ATTACK,		// 攻撃
@@ -68,12 +67,19 @@ public:
 	int GetCharaType(void) override;	// 種類取得
 	virtual bool Hit(const int nValue);
 
+
+	void SetMapIndexOrigin(int nIdx);			// 元のマップインデックス番号の設定
+	int GetMapIndexOrigin(void);				// 元のマップインデックス番号の取得
+	void SetMapMoveValueOrigin(float fValue);	// 元のマップポイント間の移動量設定
+	float GetMapMoveValueOrigin(void);			// 元のマップポイント間の移動量設定
+
+	D3DXVECTOR3 GetSpawnPosition(void);	// スポーン地点取得
 	HRESULT RoadText(const char *pFileName);
 	virtual void Kill(void);
 	void SetParent(CEnemy *pParent);		// 親のポインタ設定
 	void SetOriginRotation(D3DXVECTOR3 rot);	// 元の向き
 	CEnemy *GetEnemy(void);
-
+	CEnemyFixedMoveManager *GetFixedManager(void);	// 一定の動きポインタ取得
 protected:
 
 	enum COLORTYPE
@@ -85,6 +91,14 @@ protected:
 		COLORTYPE_SWIFTFOOT,	// 脚はやい
 		COLORTYPE_TUTORIAL,		// チュートリアル
 		COLORTYPE_MAX
+	};
+
+	enum ACTTYPE
+	{
+		ACTTYPE_FIXED = 0,	// 一定の動き
+		ACTTYPE_CHASE,		// 追い掛け
+		ACTTYPE_TURRET,	// タレット
+		ACTTYPE_MAX
 	};
 
 	// モーションの判定
@@ -112,15 +126,14 @@ protected:
 	virtual void ChaseMove(float fMove);	// 追い掛け移動
 
 	// 状態更新系
+	virtual void StateNone(void);			// 何もない状態
+	virtual void FixedMove(void);			// 一定の動き
 	virtual void Spawn(void);				// スポーン
 	virtual void Damage(void);				// ダメージ
 	virtual void Dead(void);				// 死亡
 	virtual void FadeOut(void);				// フェードアウト
-	virtual void KnockBack(void);			// ノックバック
-	virtual void PlayerSearch(void);		// プレイヤー探索
 	virtual void PlayerChase(void);			// プレイヤー追従
 	virtual void ParentChase(void);			// 親追従
-	virtual void ReturnBase(void);			// 拠点に帰る
 	virtual void StateAttack(void);			// 攻撃処理
 	virtual void TriggerChasePlayer(void);	// プレイヤー追従ONにするトリガー
 	virtual void ChangeToAttackState(void);	// 攻撃状態移行処理
@@ -137,9 +150,11 @@ protected:
 	CHP_Gauge *m_pHPGauge;					// HPゲージの情報
 	CMotion *m_pMotion;						// モーションの情報
 	COLORTYPE m_colorType;					// 色ごとの種類
+	ACTTYPE m_ActType;						// 行動の種類
 	CResultManager::ADDTYPE m_AddType;		// スコアの加算種類
 	CEnemy *m_pParent;		// 親のポインタ
 	D3DXCOLOR m_mMatcol;	// マテリアルの色
+	CEnemyFixedMoveManager *m_pFixedMoveManager;	// 一定の動きマネージャ
 private:
 
 	typedef enum
@@ -164,6 +179,8 @@ private:
 	TYPE m_type;			// 種類
 	SFormationInfo m_sFormationInfo;	// 隊列の情報
 	D3DXVECTOR3 m_rotOrigin;	// 最初の向き
+	int m_nMapIdxOrigin;		// 元のマップインデックス
+	float m_fMoveValueOrigin;	// 元の移動量
 	int m_nTexIdx;			// テクスチャのインデックス番号
 	int m_nNumChild;		// 子の数
 	int m_nIdxManager;		// マネージャのインデックス番号

@@ -124,7 +124,7 @@ HRESULT CObjectBillboard::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 頂点バッファの生成
 	if (m_pVtxBuff != NULL)
@@ -188,7 +188,7 @@ void CObjectBillboard::Update(void)
 void CObjectBillboard::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 計算用マトリックス宣言
 	D3DXMATRIX mtxRot, mtxTrans;
@@ -240,7 +240,7 @@ void CObjectBillboard::Draw(void)
 	pDevice->SetFVF(FVF_VERTEX_3D);
 
 	// テクスチャの設定
-	pDevice->SetTexture(0, CManager::GetTexture()->GetAdress(m_nTexIdx));
+	pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(m_nTexIdx));
 
 	// ビルボードの描画
 	pDevice->DrawPrimitive(D3DPT_TRIANGLESTRIP, 0, 2);

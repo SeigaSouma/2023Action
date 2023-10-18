@@ -42,6 +42,7 @@ class CPause;
 class CPowerGauge;
 class CResultManager;
 class CRankingManager;
+class CEnemyFixedMoveManager;
 
 //==========================================================================
 // クラス定義
@@ -58,55 +59,58 @@ public:
 	void Update(void);
 	void Draw(void);
 
-	static CRenderer *GetRenderer(void);
-	static CInputKeyboard *GetInputKeyboard(void);
-	static CInputGamepad *GetInputGamepad(void);
-	static CInputMouse *GetInputMouse(void);
-	static CSound *GetSound(void);
-	static CDebugProc *GetDebugProc(void);
-	static CBG *GetBg(void);
-	static CLight *GetLight(void);
-	static CCamera *GetCamera(void);
-	static CMap *GetMap(void);
-	static CTexture *GetTexture(void);
-	static CEdit *GetEdit(void);
-	static CFade *GetFade(void);
-	static CInstantFade *GetInstantFade(void);	// 遷移なしフェード取得
-	static CPause *GetPause(void);
-	static CResultManager *GetResultManager(void);	// リザルトマネージャ取得
-	static CRankingManager *GetRankingManager(void);	// ランキングマネージャのオブジェクト
-	static CScene *GetScene(void);		// シーン取得
+	static CManager *Create(void);		// 生成処理
+	static CManager *GetInstance(void);	// インスタンス取得
 
-	static void SetMode(CScene::MODE mode);						// 次のモード設定
-	static CScene::MODE GetMode(void);							// 現在のモード取得
-	static void SetEnableHitStop(int nCntHitStop);				// ヒットストップの設定
-	static bool IsWireframe(void) { return m_bWireframe; }		// ワイヤーフレーム
-	static CScene::MODE GetOldMode(void) { return m_OldMode; }	// 前回のモード取得
+	CRenderer *GetRenderer(void);
+	CInputKeyboard *GetInputKeyboard(void);
+	CInputGamepad *GetInputGamepad(void);
+	CInputMouse *GetInputMouse(void);
+	CSound *GetSound(void);
+	CDebugProc *GetDebugProc(void);
+	CLight *GetLight(void);
+	CCamera *GetCamera(void);
+	CTexture *GetTexture(void);
+	CEdit *GetEdit(void);
+	CFade *GetFade(void);
+	CInstantFade *GetInstantFade(void);	// 遷移なしフェード取得
+	CPause *GetPause(void);
+	CResultManager *GetResultManager(void);	// リザルトマネージャ取得
+	CRankingManager *GetRankingManager(void);	// ランキングマネージャのオブジェクト
+	CScene *GetScene(void);		// シーン取得
+	CEnemyFixedMoveManager *GetFixedManager(void);	// 一定の行動マネージャ取得
+
+	void SetMode(CScene::MODE mode);						// 次のモード設定
+	CScene::MODE GetMode(void);							// 現在のモード取得
+	void SetEnableHitStop(int nCntHitStop);				// ヒットストップの設定
+	bool IsWireframe(void) { return m_bWireframe; }		// ワイヤーフレーム
+	CScene::MODE GetOldMode(void) { return m_OldMode; }	// 前回のモード取得
 private:
 
-	static CRenderer *m_pRenderer;				// レンダラーのオブジェクト
-	static CInputKeyboard *m_pInputKeyboard;	// キーボードのオブジェクト
-	static CInputGamepad *m_pInputGamepad;		// ゲームパッドのオブジェクト
-	static CInputMouse *m_pInputMouse;			// マウスのオブジェクト
-	static CSound *m_pSound;					// サウンドのオブジェクト
-	static CDebugProc *m_pDebugProc;			// デバッグ表示のオブジェクト
-	static CBG *m_pBg;							// 背景のオブジェクト
-	static CLight *m_pLight;					// ライトのオブジェクト
-	static CCamera *m_pCamera;					// カメラのオブジェクト
-	static CMap *m_pMap;						// マップのオブジェクト
-	static CTexture *m_pTexture;				// テクスチャのオブジェクト
-	static CEdit *m_pEdit;						// エディットのオブジェクト
-	static CScene *m_pScene;					// シーンのオブジェクト
-	static CFade *m_pFade;						// フェードのオブジェクト
-	static CInstantFade *m_pInstantFade;		// 遷移なしフェードのオブジェクト
-	static CPause *m_pPause;					// ポーズのオブジェクト
-	static CResultManager *m_pResultManager;	// リザルトマネージャのオブジェクト
-	static CRankingManager *m_pRankingManager;	// ランキングマネージャのオブジェクト
+	CRenderer *m_pRenderer;				// レンダラーのオブジェクト
+	CInputKeyboard *m_pInputKeyboard;	// キーボードのオブジェクト
+	CInputGamepad *m_pInputGamepad;		// ゲームパッドのオブジェクト
+	CInputMouse *m_pInputMouse;			// マウスのオブジェクト
+	CSound *m_pSound;					// サウンドのオブジェクト
+	CDebugProc *m_pDebugProc;			// デバッグ表示のオブジェクト
+	CLight *m_pLight;					// ライトのオブジェクト
+	CCamera *m_pCamera;					// カメラのオブジェクト
+	CTexture *m_pTexture;				// テクスチャのオブジェクト
+	CEdit *m_pEdit;						// エディットのオブジェクト
+	CScene *m_pScene;					// シーンのオブジェクト
+	CFade *m_pFade;						// フェードのオブジェクト
+	CInstantFade *m_pInstantFade;		// 遷移なしフェードのオブジェクト
+	CPause *m_pPause;					// ポーズのオブジェクト
+	CResultManager *m_pResultManager;	// リザルトマネージャのオブジェクト
+	CRankingManager *m_pRankingManager;	// ランキングマネージャのオブジェクト
+	CEnemyFixedMoveManager *m_pFixedMoveManager;	// 一定の行動マネージャのオブジェクト
 
-	static bool m_bWireframe;					// ワイヤーフレーム
-	static bool m_bHitStop;						// ヒットストップの判定
-	static int m_nCntHitStop;					// ヒットストップのカウンター
-	static CScene::MODE m_OldMode;				// 前回のモード
+	bool m_bWireframe;					// ワイヤーフレーム
+	bool m_bHitStop;						// ヒットストップの判定
+	int m_nCntHitStop;					// ヒットストップのカウンター
+	CScene::MODE m_OldMode;				// 前回のモード
+
+	static CManager *m_pManager;	// マネージャのオブジェクト
 };
 
 

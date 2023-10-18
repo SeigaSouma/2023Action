@@ -65,9 +65,12 @@ public:
 private:
 	void UpdatePos(void);		// 移動
 	void UpdateTypePlayer(void);	// プレイヤー弾の更新
+	void CollisionPlayer(void);		// プレイヤーとの判定
+	void CollisionEnemy(void);		// 敵との判定
+	
+	void StateNone(void);		// 何もない状態
+	void StateDamage(void);		// ダメージ状態処理
 
-	void StateNone(void);
-	void StateDamage(void);	// ダメージ状態処理
 
 	TYPE m_type;							// 弾の種類
 	STATE m_state;				// 状態
@@ -83,7 +86,9 @@ private:
 
 	//using STATE_FUNC = void(CBullet::*)();
 	typedef void(CBullet::*STATE_FUNC)(void);
+	typedef void(CBullet::*COLLISION_FUNC)(void);
 	static STATE_FUNC m_FuncList[];
+	static COLLISION_FUNC m_CollisionFuncList[];	// 当たり判定のリスト
 };
 
 

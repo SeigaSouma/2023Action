@@ -79,13 +79,13 @@ CMeshWall *CMeshWall::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fWidthLen, 
 			{// NULLだったら
 
 				// テクスチャの割り当て
-				pObjMeshField->m_nTexIdx = CManager::GetTexture()->Regist(m_apFilename[pObjMeshField->m_type]);
+				pObjMeshField->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(m_apFilename[pObjMeshField->m_type]);
 			}
 			else
 			{// ファイル名が入っていたら
 
 				// テクスチャの割り当て
-				pObjMeshField->m_nTexIdx = CManager::GetTexture()->Regist(aFileName);
+				pObjMeshField->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(aFileName);
 			}
 
 			// テクスチャの割り当て
@@ -109,7 +109,7 @@ HRESULT CMeshWall::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 種類設定
 	SetType(TYPE_MESHWALL);
@@ -149,9 +149,9 @@ void CMeshWall::Update(void)
 void CMeshWall::Draw(void)
 {
 	//  デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
-	if (CManager::IsWireframe() == true)
+	if (CManager::GetInstance()->IsWireframe() == true)
 	{
 		pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);	// ワイヤーフレームモード
 	}

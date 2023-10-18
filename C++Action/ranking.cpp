@@ -77,15 +77,15 @@ void CRanking::Uninit(void)
 //==========================================================================
 void CRanking::Update(void)
 {
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"現在のモード：【ランキング】\n"
 		"切り替え：【 F 】\n\n");
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	// 切り替えのカウンター加算
 	m_nCntSwitch++;
@@ -93,7 +93,7 @@ void CRanking::Update(void)
 	if (m_nCntSwitch >= 60 * 20)
 	{
 		// モード設定
-		CManager::GetFade()->SetFade(CScene::MODE_TITLE);
+		CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_TITLE);
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_A, 0) == true)
@@ -101,7 +101,7 @@ void CRanking::Update(void)
 		if (m_bAllArrival == true)
 		{
 			// モード設定
-			CManager::GetFade()->SetFade(CScene::MODE_TITLE);
+			CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_TITLE);
 		}
 		else
 		{

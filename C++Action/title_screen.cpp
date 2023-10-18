@@ -97,7 +97,7 @@ HRESULT CTitleScreen::Init(void)
 		m_pObj2D[nCntSelect]->SetType(TYPE_TITLESELECT);
 
 		// テクスチャの割り当て
-		m_nTexIdx[nCntSelect] = CManager::GetTexture()->Regist(m_apTextureFile[nCntSelect]);
+		m_nTexIdx[nCntSelect] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[nCntSelect]);
 
 		// テクスチャの割り当て
 		m_pObj2D[nCntSelect]->BindTexture(m_nTexIdx[nCntSelect]);
@@ -109,7 +109,7 @@ HRESULT CTitleScreen::Init(void)
 		case VTX_LOGO:
 
 			// サイズ取得
-			size = CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]);
+			size = CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]);
 			m_pObj2D[nCntSelect]->SetSize(size * 0.5f);	// サイズ
 			m_pObj2D[nCntSelect]->SetPosition(LOGO_POSITION);	// 位置
 			break;
@@ -117,7 +117,7 @@ HRESULT CTitleScreen::Init(void)
 		case VTX_SELECTSTART:
 
 			// サイズ取得
-			size = CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]);
+			size = CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntSelect]);
 			m_pObj2D[nCntSelect]->SetSize(D3DXVECTOR2(size.x * 0.4f, size.y * 0.4f));	// サイズ
 			m_pObj2D[nCntSelect]->SetPosition(D3DXVECTOR3(640.0f, 550.0f, 0.0f));	// 位置
 			break;
@@ -228,7 +228,7 @@ void CTitleScreen::UpdateSelect(int nCntSelect)
 void CTitleScreen::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// アルファテストを有効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);

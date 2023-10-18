@@ -78,7 +78,7 @@ CExplosion *CExplosion::Create(void)
 			pExplosion->Init();
 
 			// 爆発音
-			CManager::GetSound()->PlaySound(CSound::LABEL_SE_EXPLOSION);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_EXPLOSION);
 		}
 
 		return pExplosion;
@@ -118,7 +118,7 @@ CExplosion *CExplosion::Create(const D3DXVECTOR3 pos)
 			pExplosion->Init();
 
 			// 爆発音
-			CManager::GetSound()->PlaySound(CSound::LABEL_SE_EXPLOSION);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_EXPLOSION);
 		}
 
 		return pExplosion;
@@ -141,7 +141,7 @@ HRESULT CExplosion::Init(void)
 	SetType(TYPE_EXPLOSION);
 
 	// テクスチャの割り当て
-	m_nTexIdx = CManager::GetTexture()->Regist(TEXTURE);
+	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 
 	// テクスチャの割り当て
 	BindTexture(m_nTexIdx);
@@ -215,7 +215,7 @@ void CExplosion::Update(void)
 void CExplosion::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// ライティングを無効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);

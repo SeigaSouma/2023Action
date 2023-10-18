@@ -154,7 +154,7 @@ HRESULT CHP_Gauge::Init(void)
 
 
 		// テクスチャの割り当て
-		m_nTexIdx[nCntGauge] = CManager::GetTexture()->Regist(m_apTextureFile[nCntGauge]);
+		m_nTexIdx[nCntGauge] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[nCntGauge]);
 
 		// テクスチャの割り当て
 		m_HPGauge[nCntGauge].pObjBillboard->BindTexture(m_nTexIdx[nCntGauge]);
@@ -325,7 +325,7 @@ void CHP_Gauge::ChangeColor(int nCntGauge)
 void CHP_Gauge::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	for (int nCntGauge = 0; nCntGauge < VTXTYPE_MAX; nCntGauge++)
 	{

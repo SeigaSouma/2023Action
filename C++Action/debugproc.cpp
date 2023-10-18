@@ -53,7 +53,7 @@ CDebugProc::~CDebugProc()
 HRESULT CDebugProc::Init(HINSTANCE hInstance, HWND hWnd)
 {
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	HRESULT hr;
 
@@ -104,7 +104,7 @@ void CDebugProc::Uninit(void)
 void CDebugProc::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 #if _DEBUG
 	if(pInputKeyboard->GetTrigger(DIK_F1) == true)
@@ -235,7 +235,7 @@ void CDebugProc::Print(const char *fmt, ...)
 void CDebugProc::SetText(void)
 {
 	// デバッグの情報取得
-	CDebugProc *pDebug = CManager::GetDebugProc();
+	CDebugProc *pDebug = CManager::GetInstance()->GetDebugProc();
 
 	pDebug->Print("FPS：%d\n", GetFPS());
 	pDebug->Print("オブジェクトの総数：%d\n", CObject::GetNumAll());
@@ -243,11 +243,11 @@ void CDebugProc::SetText(void)
 		CObject::GetNumPriorityAll(0), CObject::GetNumPriorityAll(1), CObject::GetNumPriorityAll(2), CObject::GetNumPriorityAll(3),
 		CObject::GetNumPriorityAll(4), CObject::GetNumPriorityAll(5), CObject::GetNumPriorityAll(6), CObject::GetNumPriorityAll(7));
 
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"\n"
 		"読み込んだテクスチャの総数【%d】\n", CTexture::GetNumAll());
 
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"読み込んだXファイルの総数【%d】\n"
 		"配置したXファイルオブジェの総数【%d】\n", CXLoad::GetNumAll(), CObjectX::GetNumAll());
 

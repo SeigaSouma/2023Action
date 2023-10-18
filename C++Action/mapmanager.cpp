@@ -336,29 +336,183 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 	}
 
 	bool bLeftArrival = false, bRightArrival = false;
-	if (fRatio >= 1.0f && nIdx < GetControlPointNum() - 1)
+	while (1)
 	{
-		// マップの位置加算
-		nIdx++;
-		if (nP1 < GetControlPointNum() - 1)
+		bLeftArrival = false, bRightArrival = false;
+		if (fRatio >= 1.0f && nIdx < GetControlPointNum() - 1)
 		{
-			fMoveValue = fMoveValue - fPosLength;
-			fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
-			bRightArrival = true;
+			// マップの位置加算
+			nIdx++;
+			if (nP1 < GetControlPointNum() - 1)
+			{
+				fMoveValue = fMoveValue - fPosLength;
+				fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
+				bRightArrival = true;
+			}
+		}
+		else if (fRatio < 0.0f)
+		{
+			// マップの位置減算
+			nIdx--;
+
+			if (nIdx < -1)
+			{
+				nIdx = -1;
+			}
+			fMoveValue = GetPosLength(TargetPoint0, TargetPoint1);
+			fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
+			bLeftArrival = true;
+		}
+
+		if (fRatio >= 0.0f && fRatio <= 1.0f)
+		{
+			break;
+		}
+		else
+		{
+			nP0 = nIdx;
+			nP1 = nIdx + 1;
+			nP2 = nIdx + 2;
+			nP3 = nIdx + 3;
+
+			// 目標地点
+			TargetPoint0 = GetControlPoint(nP0);
+			TargetPoint1 = GetControlPoint(nP1);
+			TargetPoint2 = GetControlPoint(nP2);
+			TargetPoint3 = GetControlPoint(nP3);
 		}
 	}
-	else if (fRatio < 0.0f)
-	{
-		// マップの位置減算
-		nIdx--;
 
-		if (nIdx < -1)
+	if (bLeftArrival == true || bRightArrival == true)
+	{// 左右どっちか到着
+
+		// 補正の4点更新
+		nP0 = nIdx;
+		nP1 = nIdx + 1;
+		nP2 = nIdx + 2;
+		nP3 = nIdx + 3;
+
+		// 4点の位置も更新
+		TargetPoint0 = GetControlPoint(nP0);
+		TargetPoint1 = GetControlPoint(nP1);
+		TargetPoint2 = GetControlPoint(nP2);
+		TargetPoint3 = GetControlPoint(nP3);
+
+		if (bLeftArrival == true)
 		{
-			nIdx = -1;
+			// 移動の値を終端
+			int nIdx1 = nP1, nIdx2 = nP2;
+			fMoveValue = GetPosLength(GetControlPoint(nIdx1), GetControlPoint(nIdx2));
+			if (nIdx <= -1)
+			{
+				nIdx1 = nP0 + 1, nIdx2 = nP1 + 1;
+				TargetPoint0 = GetControlPoint(0);
+				TargetPoint1 = GetControlPoint(0);
+				TargetPoint2 = GetControlPoint(1);
+				TargetPoint3 = GetControlPoint(2);
+				fMoveValue = GetPosLength(GetControlPoint(nIdx1), GetControlPoint(nIdx2));
+			}
 		}
-		fMoveValue = GetPosLength(TargetPoint0, TargetPoint1);
-		fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
-		bLeftArrival = true;
+	}
+
+	if (nIdx <= -1 && fRatio < 1.0f && fRatio > 0.0f)
+	{
+		fRatio = 1.0f;
+		int nIdx1 = nP0 + 1, nIdx2 = nP1 + 1;
+		fMoveValue = fPosLength;
+	}
+	else if (nIdx >= GetControlPointNum() - 1)
+	{
+		fRatio = 0.0f;
+		fMoveValue = 0.0f;
+	}
+
+	// 曲線の位置
+	pos = CatmullRomSplineInterp(TargetPoint0, TargetPoint1, TargetPoint2, TargetPoint3, fRatio);
+	pos.y = PosY;
+
+	return pos;
+}
+
+//==========================================================================
+// 現在地更新
+//==========================================================================
+D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMoveValue, float PosY, CObject::ANGLE MoveAngle, float fMove)
+{
+	D3DXVECTOR3 pos;
+	D3DXVECTOR3 sakiPos;
+
+	// 移動用の向き
+	int nAngle = 1;
+
+	// 移動した量加算
+	if (MoveAngle == CObject::ANGLE_LEFT)
+	{// 左は逆移動
+		nAngle = -1;
+	}
+
+	// 移動
+	fMoveValue += fMove * nAngle;
+
+	// 曲線作る為の4点
+	int nP0, nP1, nP2, nP3;
+	nP0 = nIdx;
+	nP1 = nIdx + 1;
+	nP2 = nIdx + 2;
+	nP3 = nIdx + 3;
+
+	// 目標地点
+	D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
+	D3DXVECTOR3 TargetPoint1 = GetControlPoint(nP1);
+	D3DXVECTOR3 TargetPoint2 = GetControlPoint(nP2);
+	D3DXVECTOR3 TargetPoint3 = GetControlPoint(nP3);
+
+	// 2点間の距離取得
+	float fPosLength = GetPosLength(TargetPoint1, TargetPoint2);
+
+	// 位置の割合
+	if (fPosLength != 0.0f)
+	{
+		fRatio = fMoveValue / fPosLength;
+	}
+	else if (nIdx >= GetControlPointNum() - 1/* && move.x < 0*/)
+	{// 最後
+		fRatio = 1.0f;
+	}
+
+	bool bLeftArrival = false, bRightArrival = false;
+	while (1)
+	{
+		bLeftArrival = false, bRightArrival = false;
+		if (fRatio >= 1.0f && nIdx < GetControlPointNum() - 1)
+		{
+			// マップの位置加算
+			nIdx++;
+			if (nP1 < GetControlPointNum() - 1)
+			{
+				fMoveValue = fMoveValue - fPosLength;
+				fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
+				bRightArrival = true;
+			}
+		}
+		else if (fRatio < 0.0f)
+		{
+			// マップの位置減算
+			nIdx--;
+
+			if (nIdx < -1)
+			{
+				nIdx = -1;
+			}
+			fMoveValue = GetPosLength(TargetPoint0, TargetPoint1);
+			fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
+			bLeftArrival = true;
+		}
+
+		if (fRatio >= 0.0f && fRatio <= 1.0f)
+		{
+			break;
+		}
 	}
 
 	if (bLeftArrival == true || bRightArrival == true)
@@ -441,6 +595,80 @@ CObject::ANGLE CMapManager::GetTargetAngle(int myIdx, int TargetIdx, float myMov
 	}
 
 	return angle;
+}
+
+//==========================================================================
+// 目標が自分のどっちにいるかの判定
+//==========================================================================
+CObject::ANGLE CMapManager::GetTargetAngle(CObject *pMyObj, CObject *pTargetObj)
+{
+	CObject::ANGLE angle = CObject::ANGLE_UP;
+	if (pMyObj == NULL || pTargetObj == NULL)
+	{// NULLだったら
+		return angle;
+	}
+
+	int nMyIdx = pMyObj->GetMapIndex();
+	int nTargetIdx = pTargetObj->GetMapIndex();
+	float fMyMoveValue = pMyObj->GetMapMoveValue();
+	float fTargetMoveValue = pTargetObj->GetMapMoveValue();
+
+	if (nMyIdx > nTargetIdx)
+	{// 自分より左にいる
+		angle = CObject::ANGLE_LEFT;
+	}
+	else if (nMyIdx < nTargetIdx)
+	{// 自分より右にいる
+		angle = CObject::ANGLE_RIGHT;
+	}
+	else if (nMyIdx == nTargetIdx)
+	{// 自分と同じ
+
+		if (fMyMoveValue > fTargetMoveValue)
+		{// 自分より左にいる
+			angle = CObject::ANGLE_LEFT;
+		}
+		else
+		{// 自分より右にいる
+			angle = CObject::ANGLE_RIGHT;
+		}
+	}
+
+	return angle;
+}
+
+//==========================================================================
+// これまでのマップ移動量取得
+//==========================================================================
+float CMapManager::GetThusFarMoveValue(int nIdx)
+{
+
+	int nCalIdx = nIdx;
+	float fMoveValue = 0.0f;
+
+	// 曲線作る為の4点
+	int nP0, nP1;
+
+	while (1)
+	{
+		nP0 = nCalIdx;
+		nP1 = nCalIdx + 1;
+
+		if (nP1 > nIdx)
+		{// 最終点超えたら終了
+			break;
+		}
+
+		// 目標地点
+		D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
+		D3DXVECTOR3 TargetPoint1 = GetControlPoint(nP1);
+
+		// 長さ加算
+		fMoveValue += GetPosLength(TargetPoint0, TargetPoint1);
+		nCalIdx++;
+	}
+
+	return fMoveValue;
 }
 
 //==========================================================================

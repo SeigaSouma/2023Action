@@ -207,7 +207,7 @@ void CTimer::Add(int nValue)
 		m_nNum = 0;
 
 		// ƒ‚[ƒhİ’è
-		CManager::GetFade()->SetFade(CScene::MODE_RESULT);
+		CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_RESULT);
 	}
 
 	// ’l‚Ìİ’èˆ—

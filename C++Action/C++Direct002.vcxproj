@@ -169,8 +169,10 @@
     <ClCompile Include="edit_controlpoint.cpp" />
     <ClCompile Include="elevation.cpp" />
     <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="enemyfixedmove_manager.cpp" />
     <ClCompile Include="enemymanager.cpp" />
     <ClCompile Include="enemy_crowd.cpp" />
+    <ClCompile Include="enemy_fly.cpp" />
     <ClCompile Include="enemy_power.cpp" />
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="fade.cpp" />
@@ -250,8 +252,10 @@
     <ClInclude Include="edit_controlpoint.h" />
     <ClInclude Include="elevation.h" />
     <ClInclude Include="enemy.h" />
+    <ClInclude Include="enemyfixedmove_manager.h" />
     <ClInclude Include="enemymanager.h" />
     <ClInclude Include="enemy_crowd.h" />
+    <ClInclude Include="enemy_fly.h" />
     <ClInclude Include="enemy_power.h" />
     <ClInclude Include="explosion.h" />
     <ClInclude Include="fade.h" />

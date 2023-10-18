@@ -136,7 +136,7 @@ void CEnemyPower::Update(void)
 		float fRotDest = GetRotDest();
 
 		// プレイヤー情報
-		CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+		CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 		if (pPlayer == NULL)
 		{// NULLだったら
@@ -184,7 +184,7 @@ void CEnemyPower::ChangeToAttackState(void)
 	D3DXVECTOR3 pos = GetPosition();
 
 	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetScene()->GetPlayer();
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 	if (pPlayer == NULL)
 	{
@@ -366,7 +366,7 @@ void CEnemyPower::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		CBallast::Create(weponpos, DEFAULTMOVE_BALLAST, 5);
 
 		// 振動
-		CManager::GetCamera()->SetShake(20, 5.0f, 0.0f);
+		CManager::GetInstance()->GetCamera()->SetShake(20, 5.0f, 0.0f);
 		break;
 	}
 }

@@ -69,7 +69,7 @@ CMeshDome *CMeshDome::Create(void)
 			pObjMeshCylinder->SetHeightLen(POS_MESHDOME_Y);
 
 			// テクスチャの割り当て
-			pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(TEXTURE);
+			pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 
 			// テクスチャの割り当て
 			pObjMeshCylinder->BindTexture(pObjMeshCylinder->m_nTexIdx);
@@ -119,13 +119,13 @@ CMeshDome *CMeshDome::Create(const float fMove, const char *aFileName, const int
 			{// NULLだったら
 
 				// テクスチャの割り当て
-				pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(TEXTURE);
+				pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 			}
 			else
 			{// ファイル名が入っていたら
 
 				// テクスチャの割り当て
-				pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(aFileName);
+				pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(aFileName);
 			}
 
 			// テクスチャの割り当て
@@ -149,7 +149,7 @@ HRESULT CMeshDome::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 種類設定
 	SetType(TYPE_MESHDOME);
@@ -201,7 +201,7 @@ void CMeshDome::Update(void)
 void CMeshDome::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// ライティングを無効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);

@@ -200,10 +200,10 @@ int GetDigit(int nNum)
 //==================================================================================
 // äÑçáéÊìæ
 //==================================================================================
-float GetRatio(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2)
+float GetRatio(D3DXVECTOR3 Mypos, D3DXVECTOR3 Targetpos)
 {
-	return sqrtf((pos1.x - pos2.x) * (pos1.x - pos2.x)
-			+ (pos1.z - pos2.z) * (pos1.z - pos2.z));
+	return sqrtf((Mypos.x - Targetpos.x) * (Mypos.x - Targetpos.x)
+			+ (Mypos.z - Targetpos.z) * (Mypos.z - Targetpos.z));
 }
 
 //==================================================================================

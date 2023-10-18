@@ -18,6 +18,7 @@
 #include "impactwave.h"
 #include "camera.h"
 #include "sound.h"
+#include "enemyfixedmove_manager.h"
 
 //==========================================================================
 // マクロ定義
@@ -147,11 +148,11 @@ void CEnemyManager::Update(void)
 
 	if (m_nNumAll <= 0)
 	{
-		SetEnemy(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 1);
+		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 4);
 	}
 
 	// テキストの描画
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"---------------- 敵情報 ----------------\n"
 		"【残り人数】[%d]\n", m_nNumAll);
 }
@@ -159,15 +160,23 @@ void CEnemyManager::Update(void)
 //==========================================================================
 // 敵配置
 //==========================================================================
-void CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nType)
+void CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern)
 {
+	int nNumSpawn = m_aPattern[nPattern].nNumEnemy;	// スポーンする数
 	int nCntNULL = 0;
-	int aParent[mylib_const::MAX_PATTEN_ENEMY] = {};
+	int nCntStart = 0;
+	Pattern NowPattern = m_aPattern[nPattern];
 
-	for (int nCntNULL = 0; nCntNULL < mylib_const::MAX_OBJ; nCntNULL++)
+	for (int nCntEnemy = 0; nCntEnemy < nNumSpawn; nCntEnemy++)
 	{
-		if (m_pEnemy[nCntNULL] == NULL)
-		{// NULLだったら
+		for (nCntNULL = nCntStart; nCntNULL < mylib_const::MAX_OBJ; nCntNULL++, nCntStart++)
+		{
+			if (m_pEnemy[nCntNULL] != NULL)
+			{// 情報が入ってたら
+				continue;
+			}
+
+			int nType = NowPattern.EnemyData[nCntEnemy].nType;
 
 			// 敵の生成
 			m_pEnemy[nCntNULL] = CEnemy::Create(
@@ -187,25 +196,19 @@ void CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nType)
 			// 向き設定
 			m_pEnemy[nCntNULL]->SetRotation(rot);
 			m_pEnemy[nCntNULL]->SetRotDest(rot.y);
+			m_pEnemy[nCntNULL]->SetMapMoveValueOrigin(NowPattern.EnemyData[nCntEnemy].fStartMoveValue);
 
-			// 親モデルの設定
-			//if (m_aPattern[nPattern].EnemyData[nCntEnemy].nParent >= 0)
-			//{
-			//	m_pEnemy[nCntNULL]->SetParent(m_pEnemy[aParent[m_aPattern[nPattern].EnemyData[nCntEnemy].nParent]]);
-			//}
-			//else
-			//{// 親が自分の場合
-
-			//	// NULL設定
-			//	m_pEnemy[nCntNULL]->SetParent(NULL);
-			//}
-
-			// 親番号保存
-			//aParent[nCntEnemy] = nCntNULL;
+			// 敵の一定の動きマネージャポインタ取得
+			CEnemyFixedMoveManager *pFixed = m_pEnemy[nCntNULL]->GetFixedManager();
+			if (pFixed == NULL)
+			{// 失敗していたら
+				return;
+			}
+			pFixed->Set(NowPattern.nFixedType);
+			pFixed->StartSet(NowPattern.EnemyData[nCntEnemy].nStartKey, NowPattern.EnemyData[nCntEnemy].nStartFrame);
 
 			// 総数加算
 			m_nNumAll++;
-
 			break;
 		}
 	}
@@ -301,6 +304,13 @@ HRESULT CEnemyManager::ReadText(const std::string pTextFile)
 
 				fscanf(pFile, "%s", &aComment[0]);	//確認する
 
+				if (strcmp(aComment, "FIXEDMOVE") == 0)
+				{// FIXEDMOVEが来たら一定の動きの種類読み込み
+
+					fscanf(pFile, "%s", &aComment[0]);	// =の分
+					fscanf(pFile, "%d", &m_aPattern[nCntPatten].nFixedType);	// 一定の動きの種類
+				}
+
 				if (strcmp(aComment, "ENEMYSET") == 0)
 				{// ENEMYSETで敵情報の読み込み開始
 
@@ -316,27 +326,25 @@ HRESULT CEnemyManager::ReadText(const std::string pTextFile)
 							fscanf(pFile, "%d", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].nType);	// キャラファイル番号
 						}
 
-						if (strcmp(aComment, "PARENT") == 0)
-						{// PARENTが来たら親の番号読み込み
+						if (strcmp(aComment, "STARTKEY") == 0)
+						{// STARTKEYが来たら初期キー読み込み
 
 							fscanf(pFile, "%s", &aComment[0]);	// =の分
-							fscanf(pFile, "%d", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].nParent);	// 親の番号
+							fscanf(pFile, "%d", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].nStartKey);	// 初期キー
 						}
 
-						if (strcmp(aComment, "WAITTIME") == 0)
-						{// WAITTIMEが来たら待機時間読み込み
+						if (strcmp(aComment, "STARTFRAME") == 0)
+						{// STARTFRAMEが来たら初期フレーム読み込み
 
 							fscanf(pFile, "%s", &aComment[0]);	// =の分
-							fscanf(pFile, "%d", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].nWaitTime);	// 待機時間
+							fscanf(pFile, "%d", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].nStartFrame);	// 初期フレーム
 						}
 
-						if (strcmp(aComment, "POS") == 0)
-						{// POSが来たら位置読み込み
+						if (strcmp(aComment, "STARTMOVEVALUE") == 0)
+						{// STARTMOVEVALUEが来たら初期マップ移動量読み込み
 
-							fscanf(pFile, "%s", &aComment[0]);		// =の分
-							fscanf(pFile, "%f", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].pos.x);	// X座標
-							fscanf(pFile, "%f", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].pos.y);	// Y座標
-							fscanf(pFile, "%f", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].pos.z);	// Z座標
+							fscanf(pFile, "%s", &aComment[0]);	// =の分
+							fscanf(pFile, "%f", &m_aPattern[nCntPatten].EnemyData[nCntEnemy].fStartMoveValue);	// 初期マップ移動量
 						}
 
 					}// END_ENEMYSETのかっこ
@@ -362,4 +370,12 @@ HRESULT CEnemyManager::ReadText(const std::string pTextFile)
 	fclose(pFile);
 
 	return S_OK;
+}
+
+//==========================================================================
+// 敵取得
+//==========================================================================
+CEnemy **CEnemyManager::GetEnemy(void)
+{
+	return &m_pEnemy[0];
 }

@@ -25,16 +25,30 @@ protected:
 	// 構造体定義
 	struct EnemyData
 	{
-		int nType;				// キャラクター種類
-		int nParent;			// 親のインデックス
-		int nWaitTime;			// 待機時間
-		D3DXVECTOR3 pos;		// 位置
+		int nType;	// キャラクター種類
+		int nStartFrame;	// 初期フレーム
+		int nStartKey;		// 初期キー
+		float fStartMoveValue;	// 初期マップ移動量
 	};
 
 	struct Pattern
 	{
 		int nNumEnemy;	// 敵の数
+		int nFixedType;	// 一定の動きの種類
 		EnemyData EnemyData[mylib_const::MAX_PATTEN_ENEMY];
+	};
+
+	struct sFixedInfo
+	{
+		int nFrame;			// フレーム数
+		D3DXVECTOR3 move;	// 移動量
+	};
+
+	// 一定行動
+	struct sFixedMove
+	{
+		sFixedInfo info[mylib_const::MAX_FIXEDMOVE_INFO];	// 行動情報
+		int nNumKey;		// キーの数
 	};
 
 public:
@@ -56,12 +70,12 @@ public:
 
 	static CEnemyManager *Create(const std::string pTextFile);
 	HRESULT ReadText(const std::string pTextFile);	// 外部ファイル読み込み処理
-	void SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nType);	// 敵配置
+	void SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern);	// 敵配置
 	static int GetPatternNum(void);
 	static void Release(int nIdx);		// 破棄
 	STATE GetState(void) { return m_state; }	// 状態取得
 	int GetNumAll(void);	// 敵の総数取得
-
+	CEnemy **GetEnemy(void);	// 敵取得
 protected:
 
 

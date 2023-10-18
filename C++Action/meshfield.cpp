@@ -72,7 +72,7 @@ CMeshField *CMeshField::Create(void)
 			pObjMeshField->SetHeightLen(100.0f);
 
 			// テクスチャの割り当て
-			pObjMeshField->m_nTexIdx = CManager::GetTexture()->Regist(m_apFilename[pObjMeshField->m_type]);
+			pObjMeshField->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(m_apFilename[pObjMeshField->m_type]);
 
 			// テクスチャの割り当て
 			pObjMeshField->BindTexture(pObjMeshField->m_nTexIdx);
@@ -117,13 +117,13 @@ CMeshField *CMeshField::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, float fWidthLen
 			{// NULLだったら
 
 				// テクスチャの割り当て
-				pObjMeshField->m_nTexIdx = CManager::GetTexture()->Regist(m_apFilename[pObjMeshField->m_type]);
+				pObjMeshField->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(m_apFilename[pObjMeshField->m_type]);
 			}
 			else
 			{// ファイル名が入っていたら
 
 				// テクスチャの割り当て
-				pObjMeshField->m_nTexIdx = CManager::GetTexture()->Regist(aFileName);
+				pObjMeshField->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(aFileName);
 			}
 
 			// テクスチャの割り当て
@@ -147,7 +147,7 @@ HRESULT CMeshField::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 種類設定
 	SetType(TYPE_MESHFIELD);
@@ -188,7 +188,7 @@ void CMeshField::Update(void)
 void CMeshField::Draw(void)
 {
 	//  デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	//pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);	// 埋めるモード
 

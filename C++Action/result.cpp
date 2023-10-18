@@ -50,7 +50,7 @@ HRESULT CResult::Init(void)
 	}
 
 	// BGM再生
-	CManager::GetSound()->PlaySound(CSound::LABEL_BGM_RESULT);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_RESULT);
 
 	// リザルト画面
 	m_pResultScreen = CResultScreen::Create();
@@ -75,22 +75,22 @@ void CResult::Uninit(void)
 //==========================================================================
 void CResult::Update(void)
 {
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"現在のモード：【リザルト】\n"
 		"切り替え：【 F 】\n\n");
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	static int n = 0;
 	n = (n + 1) % 5;
 	if (n == 0)
 	{
 		// モード設定
-		//CManager::GetFade()->SetFade(CScene::MODE_TITLE);
+		//CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_TITLE);
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_A, 0) == true)
@@ -98,10 +98,10 @@ void CResult::Update(void)
 		if (m_bAllArrival == true)
 		{
 			// モード設定
-			CManager::GetFade()->SetFade(CScene::MODE_RANKING);
+			CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_RANKING);
 		}
 
-		if (CManager::GetFade()->GetState() == CFade::STATE_NONE)
+		if (CManager::GetInstance()->GetFade()->GetState() == CFade::STATE_NONE)
 		{
 			// 全ての到着処理
 			m_pResultScreen->SetAllArrival();

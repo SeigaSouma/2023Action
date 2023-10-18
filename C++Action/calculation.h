@@ -46,7 +46,7 @@ float Lerp(float start, float end, float time);								// üŒ`•â³
 template<class T> void CuadricCurveComp(T& Value, const int nRange, T RangeOrigin, T Max, int& nAlphaCnt);	// “ñŸ‹Èü•â³
 int Random(int nMinNum, int nMaxNum);										// ƒ‰ƒ“ƒ_ƒ€¶¬
 int GetDigit(int nNum);														// Œ…”æ“¾
-float GetRatio(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);							// Š„‡æ“¾
+float GetRatio(D3DXVECTOR3 Mypos, D3DXVECTOR3 Targetpos);					// Š„‡æ“¾
 float GetPosLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);						// ’·‚³æ“¾
 bool CircleRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1‚Æ2‚Ì“–‚½‚è”»’è(‰~)
 bool SphereRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1‚Æ2‚Ì“–‚½‚è”»’è(‹…)

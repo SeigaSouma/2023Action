@@ -315,7 +315,7 @@ void CObjectChara::SetObject(int nNewParts)
 void CObjectChara::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス宣言
 
@@ -351,7 +351,7 @@ void CObjectChara::Draw(void)
 void CObjectChara::Draw(D3DXCOLOR col)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス宣言
 

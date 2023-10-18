@@ -98,7 +98,7 @@ void CEditControlPoint::Uninit(void)
 void CEditControlPoint::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 操作
 	Control(m_pos);
@@ -114,11 +114,11 @@ void CEditControlPoint::Update(void)
 	{// ENTERで配置
 
 		// マップマネージャの取得
-		if (CManager::GetScene()->GetMapManager() == NULL)
+		if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
 		{
 			return;
 		}
-		CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+		CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 		pMapManager->CreatePos(m_pos);
 	}
 
@@ -131,16 +131,16 @@ void CEditControlPoint::Update(void)
 	{// セーブ
 
 		// マップマネージャの取得
-		if (CManager::GetScene()->GetMapManager() == NULL)
+		if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
 		{
 			return;
 		}
-		CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+		CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 		pMapManager->Save("data\\BIN\\maptarget.bin");
 	}
 
 	// デバッグ情報
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"------------------[ エディット情報 ]------------------\n"
 		"<配置>         [ENTER]\n"
 		"<ファイル保存> [F9] 【data/TEXT/edit_info.txt】\n"
@@ -158,13 +158,13 @@ void CEditControlPoint::Update(void)
 void CEditControlPoint::Control(D3DXVECTOR3 &pos)
 {
 	// カメラの情報取得
-	CCamera *pCamera = CManager::GetCamera();
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 	// カメラの向き取得
 	D3DXVECTOR3 Camerarot = pCamera->GetRotation();
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	if (pInputKeyboard->GetPress(DIK_LEFT) == true)
 	{// ←キーが押された,左移動
@@ -296,7 +296,7 @@ void CEditControlPoint::Control(D3DXVECTOR3 &pos)
 	bool bLand = false;
 
 	// 高さ取得
-	float fHeight = CManager::GetScene()->GetElevation()->GetHeight(pos, bLand);
+	float fHeight = CManager::GetInstance()->GetScene()->GetElevation()->GetHeight(pos, bLand);
 
 	if (bLand == true)
 	{
@@ -312,15 +312,15 @@ void CEditControlPoint::Grab(void)
 {
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
-	if (CManager::GetScene()->GetMapManager() == NULL)
+	if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
 	{// NULLで抜ける
 		return;
 	}
 
 	// マップマネージャ取得
-	CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 
 	for (int i = 0; i < pMapManager->GetNumAll(); i++)
 	{
@@ -343,15 +343,15 @@ void CEditControlPoint::Grab(void)
 void CEditControlPoint::Delete(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
-	if (CManager::GetScene()->GetMapManager() == NULL)
+	if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
 	{// NULLで抜ける
 		return;
 	}
 
 	// マップマネージャ取得
-	CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 
 	for (int i = 0; i < pMapManager->GetNumAll(); i++)
 	{

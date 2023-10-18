@@ -17,6 +17,7 @@
 #include "mapmanager.h"
 #include "game.h"
 #include "bulletmanager.h"
+#include "player.h"
 
 //==========================================================================
 // マクロ定義
@@ -37,22 +38,30 @@
 //==========================================================================
 const char *CBullet::m_apTextureFile[TYPE_MAX] =	// テクスチャのファイル
 {
-	"data\\TEXTURE\\glass.jpg",
-	"data\\TEXTURE\\leaf.jpg",
+	"data\\TEXTURE\\sunder_01.png",
+	"data\\TEXTURE\\sunder_01.png",
 };
 int CBullet::m_nNumAll = 0;		// 弾の総数
 
+//==========================================================================
 // 関数ポインタ
+//==========================================================================
 CBullet::STATE_FUNC CBullet::m_FuncList[] =
 {
 	&CBullet::StateNone,
 	&CBullet::StateDamage,
 };
 
+CBullet::COLLISION_FUNC CBullet::m_CollisionFuncList[] =	// 当たり判定のリスト
+{
+	&CBullet::CollisionEnemy,	// 敵との判定
+	&CBullet::CollisionPlayer,	// プレイヤーとの判定
+};
+
 //==========================================================================
 // コンストラクタ
 //==========================================================================
-CBullet::CBullet(int nPriority) : CMeshSphere(nPriority), m_nLifeMax(40)
+CBullet::CBullet(int nPriority) : CMeshSphere(nPriority), m_nLifeMax(1)
 {
 	// 値のクリア
 	m_type = TYPE_PLAYER;
@@ -134,11 +143,11 @@ HRESULT CBullet::Init(void)
 	HRESULT hr;
 
 	// 各種変数の初期化
-	m_nLifeMax = 180;
+	m_nLifeMax = 60 * 8;
 	m_nLife = m_nLifeMax;	// 寿命
 
 	// テクスチャの割り当て
-	m_nTexIdx = CManager::GetTexture()->Regist(m_apTextureFile[m_type]);
+	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_type]);
 
 	// テクスチャの割り当て
 	BindTexture(m_nTexIdx);
@@ -168,7 +177,7 @@ void CBullet::Uninit(void)
 	CMeshSphere::Uninit();
 
 	// 削除
-	if (CManager::GetMode() == CScene::MODE_GAME && CGame::GetBulletManager() != NULL)
+	if (CManager::GetInstance()->GetMode() == CScene::MODE_GAME && CGame::GetBulletManager() != NULL)
 	{// 弾マネージャの削除
 		CGame::GetBulletManager()->Delete(m_nIdxBulletManager);
 	}
@@ -188,20 +197,28 @@ void CBullet::Update(void)
 	// 状態別処理
 	(this->*(m_FuncList[m_state]))();
 
+	// 当たり判定処理
+	(this->*(m_CollisionFuncList[m_type]))();
+
+	if (IsDeath() == true)
+	{// 死亡フラグが立っていたら
+		return;
+	}
+
 	// 寿命減算
-	//m_nLife--;
+	m_nLife--;
 
-	//if (m_nLife <= 0)
-	//{// 寿命が尽きたら
+	if (m_nLife <= 0)
+	{// 寿命が尽きたら
 
-	//	// 爆発の生成
-	//	CExplosion::Create(GetPosition());
-	//	my_particle::Create(GetPosition(), my_particle::TYPE_OFFSETTING);
+		// 爆発の生成
+		CExplosion::Create(GetPosition());
+		my_particle::Create(GetPosition(), my_particle::TYPE_OFFSETTING);
 
-	//	// 弾の削除
-	//	Uninit();
-	//	return;
-	//}
+		// 弾の削除
+		Uninit();
+		return;
+	}
 
 	// 頂点情報設定
 	SetVtx();
@@ -222,7 +239,7 @@ void CBullet::UpdatePos(void)
 	D3DXVECTOR3 rot = GetRotation();
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -240,6 +257,10 @@ void CBullet::UpdatePos(void)
 	// 位置の割合取得
 	float fPointRatio = GetMapPointRatio();
 
+	// 回転
+	rot.y += D3DX_PI * 0.025f;
+	rot.x += D3DX_PI * (Random(5, 25) * 0.001f);
+
 	// 位置更新
 	if (m_state == STATE_NONE)
 	{
@@ -252,17 +273,9 @@ void CBullet::UpdatePos(void)
 		case CObject::ANGLE_RIGHT:
 		case CObject::ANGLE_LEFT:
 		{
-			int nAngle = 1;
-			// 移動した量加算
-			if (MoveAngle == ANGLE_LEFT)
-			{// 左は逆移動
-				nAngle = -1;
-			}
-
-			fMoveValue += move.x * nAngle;
+			// 移動
 			pos.y += move.y;
-
-			pos = pMapManager->UpdateNowPosition(nIdxMapPoint, fPointRatio, fMoveValue, pos.y);
+			pos = pMapManager->UpdateNowPosition(nIdxMapPoint, fPointRatio, fMoveValue, pos.y, MoveAngle, move.x);
 		}
 			break;
 
@@ -338,6 +351,88 @@ void CBullet::StateDamage(void)
 }
 
 //==========================================================================
+// プレイヤーとの判定
+//==========================================================================
+void CBullet::CollisionPlayer(void)
+{
+	// プレイヤー情報取得
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	if (pPlayer == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	// プレイヤーの情報取得
+	D3DXVECTOR3 PlayerPosition = pPlayer->GetPosition();
+	D3DXVECTOR3 PlayerRotation = pPlayer->GetRotation();
+	float fPlayerRadius = pPlayer->GetRadius();
+
+	// 情報取得
+	D3DXVECTOR3 pos = GetPosition();
+	float fRadius = GetRadius();
+
+	if (SphereRange(pos, PlayerPosition, fRadius, fPlayerRadius))
+	{// 当たっていたら
+
+		//// ヒット処理
+		//pPlayer->Hit(1);
+
+		//// 終了処理
+		//Uninit();
+	}
+
+}
+
+//==========================================================================
+// 敵との判定
+//==========================================================================
+void CBullet::CollisionEnemy(void)
+{
+	// 敵マネージャ取得
+	CEnemyManager *pEnemyManager = CManager::GetInstance()->GetScene()->GetEnemyManager();
+	if (pEnemyManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	// 敵情報取得
+	CEnemy **ppEnemy = pEnemyManager->GetEnemy();
+	int nNumEnemy = pEnemyManager->GetNumAll();
+
+	// 情報取得
+	D3DXVECTOR3 pos = GetPosition();
+	float fRadius = GetRadius();
+	bool bHit = false;
+
+	for (int nCntEnemy = 0; nCntEnemy < nNumEnemy; nCntEnemy++)
+	{
+		if (ppEnemy[nCntEnemy] == NULL)
+		{// NULLだったら
+			continue;
+		}
+
+		// 敵の情報取得
+		D3DXVECTOR3 EnemyPosition = ppEnemy[nCntEnemy]->GetPosition();
+		float fEnemyRadius = ppEnemy[nCntEnemy]->GetRadius();
+
+		if (SphereRange(pos, EnemyPosition, fRadius, fEnemyRadius))
+		{// 当たっていたら
+
+			// ヒット処理
+			/*ppEnemy[nCntEnemy]->Hit(1);
+			bHit = true;*/
+		}
+	}
+
+	if (bHit == true)
+	{// 当たってたら
+		Uninit();
+		return;
+	}
+
+}
+
+//==========================================================================
 // プレイヤー弾の更新
 //==========================================================================
 void CBullet::UpdateTypePlayer(void)
@@ -351,15 +446,25 @@ void CBullet::UpdateTypePlayer(void)
 void CBullet::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// アルファテストを有効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);
 
+	// αブレンディングを加算合成に設定
+	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+
 	// ビルボードの描画
 	CMeshSphere::Draw();
+
+	// αブレンディングを元に戻す
+	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
 	// アルファテストを無効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
@@ -409,7 +514,7 @@ void CBullet::SetType(TYPE type)
 	m_type = type;
 
 	// テクスチャの割り当て
-	m_nTexIdx = CManager::GetTexture()->Regist(m_apTextureFile[m_type]);
+	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_type]);
 
 	// テクスチャの割り当て
 	BindTexture(m_nTexIdx);

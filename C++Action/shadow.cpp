@@ -137,7 +137,7 @@ HRESULT CShadow::Init(void)
 	}
 
 	// テクスチャの割り当て
-	m_nTexIdx = CManager::GetTexture()->Regist("data\\TEXTURE\\shadow000.jpg");
+	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist("data\\TEXTURE\\shadow000.jpg");
 
 	// テクスチャの割り当て
 	BindTexture(m_nTexIdx);
@@ -188,7 +188,7 @@ void CShadow::Update(void)
 void CShadow::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 減算合成の設定
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);

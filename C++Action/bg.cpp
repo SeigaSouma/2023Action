@@ -116,7 +116,7 @@ HRESULT CBG::Init(void)
 		m_aBg[nCntBg].Info = m_aBgInfo[nCntBg];	// 情報渡す
 
 		// テクスチャの割り当て
-		m_nTexIdx[nCntBg] = CManager::GetTexture()->Regist(m_apTextureFile[nCntBg]);
+		m_nTexIdx[nCntBg] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[nCntBg]);
 
 		// テクスチャの割り当て
 		m_aBg[nCntBg].pObject2D->BindTexture(m_nTexIdx[nCntBg]);

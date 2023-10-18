@@ -41,7 +41,7 @@ HRESULT CTitle::Init(void)
 {
 
 	// BGM再生
-	CManager::GetSound()->PlaySound(CSound::LABEL_BGM_TITLE);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_TITLE);
 
 	// 初期化処理
 	if (FAILED(CScene::Init()))
@@ -70,15 +70,15 @@ void CTitle::Uninit(void)
 //==========================================================================
 void CTitle::Update(void)
 {
-	CManager::GetDebugProc()->Print(
+	CManager::GetInstance()->GetDebugProc()->Print(
 		"現在のモード：【タイトル】\n"
 		"切り替え：【 F 】\n\n");
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	// 切り替えのカウンター加算
 	m_nCntSwitch++;
@@ -86,14 +86,14 @@ void CTitle::Update(void)
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_A, 0) == true)
 	{
 		// モード設定
-		CManager::GetFade()->SetFade(CScene::MODE_GAME);
+		CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_GAME);
 	}
 
 	if (m_nCntSwitch >= 60 * 40)
 	{// 自動遷移
 
 		// モード設定
-		CManager::GetFade()->SetFade(CScene::MODE_RANKING);
+		CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_RANKING);
 	}
 }
 

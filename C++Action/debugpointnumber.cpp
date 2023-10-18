@@ -80,13 +80,13 @@ CDebugPointNumber *CDebugPointNumber::Create(int nIdx)
 //==========================================================================
 HRESULT CDebugPointNumber::Init(void)
 {
-	//if (CManager::GetScene()->GetMapManager() == NULL)
+	//if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
 	//{// NULLで抜ける
 	//	return E_FAIL;
 	//}
 
 	//// マップマネージャ取得
-	//CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+	//CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 
 	// 数字生成
 	m_pMultiNumber = CMultiNumber::Create(
@@ -124,7 +124,7 @@ void CDebugPointNumber::Uninit(void)
 void CDebugPointNumber::Update(void)
 {
 	// マップマネージャ取得
-	CMapManager *pMapManager = CManager::GetScene()->GetMapManager();
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLで抜ける
 		return;

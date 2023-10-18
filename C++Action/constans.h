@@ -29,9 +29,11 @@ namespace mylib_const
 	const int MAX_BASE_ENEMY = 32;		// 敵の拠点最大数
 	const int MAX_ENEMY = 256;			// 敵の最大数
 	const int ENEMY_PRIORITY = 4;		// 敵の優先順位
+	const int MAX_FIXEDMOVE = 32;		// 一定の動き最大数
+	const int MAX_FIXEDMOVE_INFO = 16;	// 一定の動き情報最大数
 	const int MAX_BULLET = 256;			// 弾の最大数
-	const float GRAVITY = 0.7f;		// 重力
-	const int MAX_VTX = 6561;			// 頂点の最大数
+	const float GRAVITY = 0.7f;			// 重力
+	const int MAX_VTX = 51200;			// 頂点の最大数
 	const float KILL_Y = -800.0f;		// 消滅する座標
 	const int MAX_DIGIT = 8;			// 数字の最大桁数
 	const D3DXCOLOR DEFAULT_COLOR = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// フィールドの色

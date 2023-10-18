@@ -60,7 +60,7 @@ CMeshSphere *CMeshSphere::Create(D3DXVECTOR3 pos, float fSize, const char *pFile
 		{// メモリの確保が出来ていたら
 
 			// テクスチャの割り当て
-			pObjMeshField->m_nTexIdx = CManager::GetTexture()->Regist(pFileName);
+			pObjMeshField->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(pFileName);
 
 			// テクスチャの割り当て
 			pObjMeshField->BindTexture(pObjMeshField->m_nTexIdx);
@@ -157,7 +157,7 @@ void CMeshSphere::Uninit(void)
 void CMeshSphere::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 向き取得
 	D3DXVECTOR3 rot = GetRotation();
@@ -181,6 +181,9 @@ void CMeshSphere::Update(void)
 	// 長さ設定
 	SetWidthLen(fWidthLen);
 	SetHeightLen(fHeightLen);
+
+	// 頂点座標更新
+	SetVtx();
 }
 
 //==========================================================================
@@ -189,7 +192,7 @@ void CMeshSphere::Update(void)
 void CMeshSphere::Draw(void)
 {
 	//  デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// ライティングを無効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);

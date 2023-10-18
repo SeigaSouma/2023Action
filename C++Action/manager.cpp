@@ -25,6 +25,7 @@
 #include "edit.h"
 #include "resultmanager.h"
 #include "rankingmanager.h"
+#include "enemyfixedmove_manager.h"
 
 //==========================================================================
 // マクロ定義
@@ -33,36 +34,34 @@
 //==========================================================================
 // 静的メンバ変数宣言
 //==========================================================================
-CRenderer *CManager::m_pRenderer = NULL;				// レンダラーのオブジェクト
-CInputKeyboard *CManager::m_pInputKeyboard = NULL;		// キーボードのオブジェクト
-CInputGamepad *CManager::m_pInputGamepad = NULL;		// ゲームパッドのオブジェクト
-CSound *CManager::m_pSound = NULL;						// サウンドのオブジェクト
-CInputMouse *CManager::m_pInputMouse = NULL;			// マウスのオブジェクト
-CDebugProc *CManager::m_pDebugProc = NULL;				// デバッグ表示のオブジェクト
-CBG *CManager::m_pBg = NULL;							// 背景のオブジェクト
-CLight *CManager::m_pLight = NULL;						// ライトのオブジェクト
-CCamera *CManager::m_pCamera = NULL;					// カメラのオブジェクト
-CMap *CManager::m_pMap = NULL;							// マップのオブジェクト
-CTexture *CManager::m_pTexture = NULL;					// テクスチャのオブジェクト
-CEdit *CManager::m_pEdit = NULL;						// エディットのオブジェクト
-CScene *CManager::m_pScene = NULL;						// シーンのオブジェクト
-CFade *CManager::m_pFade = NULL;						// フェードのオブジェクト
-CInstantFade *CManager::m_pInstantFade = NULL;			// 遷移なしフェードのオブジェクト
-CPause *CManager::m_pPause = NULL;						// ポーズのオブジェクト
-CResultManager *CManager::m_pResultManager = NULL;		// リザルトマネージャのオブジェクト
-CRankingManager *CManager::m_pRankingManager = NULL;	// ランキングマネージャのオブジェクト
-
-bool CManager::m_bWireframe = false;					// ワイヤーフレーム
-bool CManager::m_bHitStop = false;						// ヒットストップの判定
-int CManager::m_nCntHitStop = 0;						// ヒットストップのカウンター
-CScene::MODE CManager::m_OldMode = CScene::MODE_NONE;	// 前回のモード
+CManager *CManager::m_pManager = NULL;					// マネージャのオブジェクト
 
 //==========================================================================
 // コンストラクタ
 //==========================================================================
 CManager::CManager()
 {
-
+	m_pRenderer = NULL;				// レンダラーのオブジェクト
+	m_pInputKeyboard = NULL;		// キーボードのオブジェクト
+	m_pInputGamepad = NULL;			// ゲームパッドのオブジェクト
+	m_pSound = NULL;				// サウンドのオブジェクト
+	m_pInputMouse = NULL;			// マウスのオブジェクト
+	m_pDebugProc = NULL;			// デバッグ表示のオブジェクト
+	m_pLight = NULL;				// ライトのオブジェクト
+	m_pCamera = NULL;				// カメラのオブジェクト
+	m_pTexture = NULL;				// テクスチャのオブジェクト
+	m_pEdit = NULL;					// エディットのオブジェクト
+	m_pScene = NULL;				// シーンのオブジェクト
+	m_pFade = NULL;					// フェードのオブジェクト
+	m_pInstantFade = NULL;			// 遷移なしフェードのオブジェクト
+	m_pPause = NULL;				// ポーズのオブジェクト
+	m_pResultManager = NULL;		// リザルトマネージャのオブジェクト
+	m_pRankingManager = NULL;		// ランキングマネージャのオブジェクト
+	m_pFixedMoveManager = NULL;		// 一定の行動マネージャのオブジェクト
+	m_bWireframe = false;			// ワイヤーフレーム
+	m_bHitStop = false;				// ヒットストップの判定
+	m_nCntHitStop = 0;				// ヒットストップのカウンター
+	m_OldMode = CScene::MODE_NONE;	// 前回のモード
 }
 
 //==========================================================================
@@ -71,6 +70,34 @@ CManager::CManager()
 CManager::~CManager()
 {
 
+}
+
+//==========================================================================
+// 生成処理
+//==========================================================================
+CManager *CManager::Create(void)
+{
+	if (m_pManager == NULL)
+	{// まだ生成していなかったら
+
+		// マネージャのインスタンス生成
+		m_pManager = DEBUG_NEW CManager;
+	}
+	else
+	{
+		// インスタンス取得
+		m_pManager->GetInstance();
+	}
+
+	return m_pManager;
+}
+
+//==========================================================================
+// インスタンス取得
+//==========================================================================
+CManager *CManager::GetInstance(void)
+{
+	return m_pManager;
 }
 
 //==========================================================================
@@ -307,52 +334,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	}
 
 	//**********************************
-	// マップ
-	//**********************************
-
-
-	//**********************************
-	// オブジェクト生成
-	//**********************************
-	CObject2D *pObject2D = NULL;
-
-
-#if 0
-	// ブロックの生成処理
-	pObject2D = CBlock::Create(D3DXVECTOR3(640.0f, 550.0f, 0.0f), D3DXVECTOR2(50.0f, 50.0f), 2, 1);
-	pObject2D = CBlock::Create(D3DXVECTOR3(340.0f, 550.0f, 0.0f), D3DXVECTOR2(50.0f, 50.0f), 2, 1);
-	pObject2D = CBlock::Create(D3DXVECTOR3(100.0f, 650.0f, 0.0f), D3DXVECTOR2(120.0f, 120.0f));
-
-	pObject2D = CBlock::Create(D3DXVECTOR3(640.0f, 400.0f, 0.0f), D3DXVECTOR2(30.0f, 30.0f));
-	pObject2D = CBlock::Create(D3DXVECTOR3(450.0f, 150.0f, 0.0f), D3DXVECTOR2(30.0f, 30.0f), 1, 8);
-	pObject2D = CBlock::Create(D3DXVECTOR3(810.0f, 150.0f, 0.0f), D3DXVECTOR2(30.0f, 30), 1, 8);
-	pObject2D = CBlock::Create(D3DXVECTOR3(480.0f, 150.0f, 0.0f), D3DXVECTOR2(30.0f, 30.0f), 11, 1);
-
-
-	for (int nCnt = 0; nCnt < 30; nCnt++)
-	{
-		CBlock::Create(D3DXVECTOR3(nCnt * 50.0f, 700.0f, 0.0f), D3DXVECTOR2(50.0f, 50.0f));
-	}
-
-	// 下から順番
-	for (int nCnt = 0; nCnt < 8; nCnt++)
-	{
-		CBlock::Create(D3DXVECTOR3(1000.0f, 550.0f - nCnt * 50.0f, 0.0f), D3DXVECTOR2(50.0f, 50.0f));
-	}
-
-	// 上から順番
-	for (int nCnt = 0; nCnt < 8; nCnt++)
-	{
-		CBlock::Create(D3DXVECTOR3(1200.0f, 200.0f + nCnt * 50.0f, 0.0f), D3DXVECTOR2(50.0f, 50.0f));
-	}
-
-	// ブロックの生成処理
-	pObject2D = CItem::Create(CItem::TYPE_ITEM, D3DXVECTOR3(640.0f, 500.0f, 0.0f));
-	pObject2D = CItem::Create(CItem::TYPE_ITEM, D3DXVECTOR3(340.0f, 500.0f, 0.0f));
-	pObject2D = CItem::Create(CItem::TYPE_ITEM, D3DXVECTOR3(800.0f, 600.0f, 0.0f));
-#endif
-
-	//**********************************
 	// 遷移なしフェード
 	//**********************************
 	m_pInstantFade = CInstantFade::Create();
@@ -401,6 +382,17 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	{// 失敗していたら
 		return E_FAIL;
 	}
+
+	//**********************************
+	// 一定の行動マネージャ
+	//**********************************
+	m_pFixedMoveManager = CEnemyFixedMoveManager::Create();
+	if (m_pFixedMoveManager == NULL)
+	{// 失敗していたら
+		return E_FAIL;
+	}
+	m_pFixedMoveManager->ReadText("data\\TEXT\\enemy_act_fixed.txt");
+
 
 	return S_OK;
 }
@@ -590,20 +582,6 @@ void CManager::Uninit(void)
 		m_pDebugProc = NULL;
 	}
 
-	// 背景の破棄
-	if (m_pBg != NULL)
-	{// メモリの確保が出来ていたら
-
-		m_pBg = NULL;
-	}
-
-	// マップの破棄
-	if (m_pMap != NULL)
-	{// メモリの確保が出来ていたら
-
-		m_pMap = NULL;
-	}
-
 	// エディットの破棄
 	if (m_pEdit != NULL)
 	{// メモリの確保が出来ていたら
@@ -681,6 +659,15 @@ void CManager::Uninit(void)
 		m_pRankingManager = NULL;
 	}
 
+	if (m_pFixedMoveManager != NULL)
+	{// メモリの確保がされていたら
+
+		// 終了処理
+		m_pFixedMoveManager->Uninit();
+		delete m_pFixedMoveManager;
+		m_pFixedMoveManager = NULL;
+	}
+
 }
 
 //==========================================================================
@@ -689,7 +676,7 @@ void CManager::Uninit(void)
 void CManager::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = GetInputKeyboard();
 
 
 	// フェードの更新処理
@@ -707,13 +694,13 @@ void CManager::Update(void)
 	// マウスの更新処理
 	m_pInputMouse->Update();
 
-	if ((pInputKeyboard->GetTrigger(DIK_P) == true || m_pInputGamepad->GetTrigger(CInputGamepad::BUTTON_START, 0) == true) && 
+	if ((pInputKeyboard->GetTrigger(DIK_P) == true || m_pInputGamepad->GetTrigger(CInputGamepad::BUTTON_START, 0) == true) &&
 		m_pFade->GetState() == CFade::STATE_NONE &&
 		GetMode() == CScene::MODE_GAME)
 	{// フェード中じゃないとき
-		
-	// サウンド再生
-	CManager::GetSound()->PlaySound(CSound::LABEL_SE_TUTORIALWINDOW);
+
+		// サウンド再生
+		GetSound()->PlaySound(CSound::LABEL_SE_TUTORIALWINDOW);
 		m_pPause->SetPause();
 	}
 
@@ -870,14 +857,6 @@ CDebugProc *CManager::GetDebugProc(void)
 }
 
 //==========================================================================
-// 背景の取得
-//==========================================================================
-CBG *CManager::GetBg(void)
-{
-	return m_pBg;
-}
-
-//==========================================================================
 // ライトの取得
 //==========================================================================
 CLight *CManager::GetLight(void)
@@ -947,6 +926,14 @@ CResultManager *CManager::GetResultManager(void)
 CRankingManager *CManager::GetRankingManager(void)
 {
 	return m_pRankingManager;
+}
+
+//==========================================================================
+// 一定の行動マネージャ取得
+//==========================================================================
+CEnemyFixedMoveManager *CManager::GetFixedManager(void)
+{
+	return m_pFixedMoveManager;
 }
 
 //==========================================================================

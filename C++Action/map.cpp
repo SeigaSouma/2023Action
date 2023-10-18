@@ -344,7 +344,7 @@ HRESULT map::ReadTexture(void)
 
 	//ファイルを開く
 	pFile = fopen("data\\TEXT\\edit_info.txt", "r");
-	/*switch (CManager::GetMode())
+	/*switch (CManager::GetInstance()->GetMode())
 	{
 	case CScene::MODE_TITLE:
 		pFile = fopen("data\\TEXT\\edit_info.txt", "r");
@@ -405,7 +405,7 @@ HRESULT map::ReadTexture(void)
 				TextureFile.push_back(&aComment[0]);
 
 				// テクスチャの割り当て
-				CManager::GetTexture()->Regist(&TextureFile[nCntTexture][0]);
+				CManager::GetInstance()->GetTexture()->Regist(&TextureFile[nCntTexture][0]);
 
 				nCntTexture++;	// テクスチャ数加算
 			}
@@ -442,7 +442,7 @@ HRESULT map::ReadXFile(void)
 
 	//ファイルを開く
 	pFile = fopen("data\\TEXT\\edit_info.txt", "r");
-	/*switch (CManager::GetMode())
+	/*switch (CManager::GetInstance()->GetMode())
 	{
 	case CScene::MODE_TITLE:
 		pFile = fopen("data\\TEXT\\edit_info.txt", "r");
@@ -546,7 +546,7 @@ HRESULT map::ReadText(void)
 	FILE *pFile = NULL;
 
 	//ファイルを開く
-	switch (CManager::GetMode())
+	switch (CManager::GetInstance()->GetMode())
 	{
 	case CScene::MODE_TITLE:
 		pFile = fopen("data\\TEXT\\edit_info.txt", "r");

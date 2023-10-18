@@ -1,12 +1,12 @@
 //=============================================================================
 // 
-//  群体敵ヘッダー [enemy_crowd.h]
+//  飛行敵ヘッダー [enemy_fly.h]
 //  Author : 相馬靜雅
 // 
 //=============================================================================
 
-#ifndef _ENEMYCROWD_H_
-#define _ENEMYCROWD_H_	// 二重インクルード防止
+#ifndef _ENEMYFLY_H_
+#define _ENEMYFLY_H_	// 二重インクルード防止
 
 #include "main.h"
 #include "enemy.h"
@@ -16,13 +16,13 @@
 //==========================================================================
 // クラス定義
 //==========================================================================
-// 群体敵クラス定義
-class CEnemyCrowd : public CEnemy
+// 飛行敵クラス定義
+class CEnemyFly : public CEnemy
 {
 public:
 
-	CEnemyCrowd(int nPriority = mylib_const::ENEMY_PRIORITY);
-	~CEnemyCrowd();
+	CEnemyFly(int nPriority = mylib_const::ENEMY_PRIORITY);
+	~CEnemyFly();
 
 	// オーバーライドされた関数
 	HRESULT Init(void) override;
@@ -31,20 +31,10 @@ public:
 	void Draw(void) override;
 	void Kill(void) override;
 
-	CEnemyCrowd *GetEnemy(void);
+	CEnemyFly *GetEnemy(void);
 protected:
 
 private:
-	virtual void ProcessLanding(void) override;	// 着地時処理
-	virtual void AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo) override;	// 攻撃時処理
-	virtual void ChaseMove(float fMove);	// 追い掛け移動
-	void ChangeToAttackState(void);			// 攻撃状態移行処理
-	void StateAttack(void) override;		// 攻撃処理
-	void MotionSet(void) override;		// モーションの設定
-
-	// 状態更新系
-	void Spawn(void) override;		// スポーン
-
 	typedef enum
 	{
 		MOTION_DEF = 0,	// ニュートラルモーション
@@ -54,6 +44,16 @@ private:
 		MOTION_FADEOUT,		// 帰還モーション
 		MOTION_MAX
 	}MOTION;
+
+	void ProcessLanding(void) override;	// 着地時処理
+	void AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo) override;	// 攻撃時処理
+	void ChaseMove(float fMove);	// 追い掛け移動
+	void ChangeToAttackState(void);			// 攻撃状態移行処理
+	void StateAttack(void) override;		// 攻撃処理
+	void MotionSet(void) override;		// モーションの設定
+
+	// 状態更新系
+	void Spawn(void) override;		// スポーン
 };
 
 

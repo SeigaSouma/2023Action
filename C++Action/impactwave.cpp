@@ -103,7 +103,7 @@ CImpactWave *CImpactWave::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXCOLOR col
 			pObjMeshCylinder->m_bAddBlend = bAddBlend;	// 加算合成の判定
 
 			// テクスチャの割り当て
-			pObjMeshCylinder->m_nTexIdx = CManager::GetTexture()->Regist(m_apFilename[nTexType]);
+			pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(m_apFilename[nTexType]);
 
 			// テクスチャの割り当て
 			pObjMeshCylinder->BindTexture(pObjMeshCylinder->m_nTexIdx);
@@ -126,7 +126,7 @@ HRESULT CImpactWave::Init(void)
 	HRESULT hr;
 
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// 種類設定
 	SetType(TYPE_MESHDONUTS);
@@ -192,7 +192,7 @@ void CImpactWave::Update(void)
 void CImpactWave::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 
 	// 背面のカリングなし

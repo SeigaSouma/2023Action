@@ -49,7 +49,7 @@ HRESULT CTutorial::Init(void)
 	}
 
 	// BGM再生
-	CManager::GetSound()->PlaySound(CSound::LABEL_BGM_GAME);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_GAME);
 
 	// 成功
 	return S_OK;
@@ -69,18 +69,18 @@ void CTutorial::Uninit(void)
 //==========================================================================
 void CTutorial::Update(void)
 {
-	CManager::GetDebugProc()->Print("現在のモード：【チュートリアル】\n\n");
+	CManager::GetInstance()->GetDebugProc()->Print("現在のモード：【チュートリアル】\n\n");
 
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_A, 0) == true)
 	{
 		// モード設定
-		CManager::GetFade()->SetFade(CScene::MODE_GAME);
+		CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_GAME);
 	}
 }
 

@@ -157,7 +157,7 @@ HRESULT CEffect2D::Init(void)
 	for (int nCntTex = 0; nCntTex < sizeof(m_apTextureFile) / sizeof(*m_apTextureFile); nCntTex++)
 	{
 		// テクスチャの割り当て
-		m_nTexIdx[nCntTex] = CManager::GetTexture()->Regist(m_apTextureFile[nCntTex]);
+		m_nTexIdx[nCntTex] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[nCntTex]);
 
 		// テクスチャの割り当て
 		BindTexture(m_nTexIdx[nCntTex]);
@@ -229,7 +229,7 @@ HRESULT CEffect2D::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3D
 	// テクスチャデータの配列分繰り返す
 	
 		// テクスチャの割り当て
-		m_nTexIdx[m_nType] = CManager::GetTexture()->Regist(m_apTextureFile[m_nType]);
+		m_nTexIdx[m_nType] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_nType]);
 
 		// テクスチャの割り当て
 		BindTexture(m_nTexIdx[m_nType]);
@@ -382,7 +382,7 @@ void CEffect2D::AddSize(void)
 void CEffect2D::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// αブレンディングを加算合成に設定
 	if (m_bAddAlpha == true)

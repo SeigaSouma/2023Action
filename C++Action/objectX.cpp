@@ -229,7 +229,7 @@ CObjectX *CObjectX::Create(int nIdxXFile, D3DXVECTOR3 pos, D3DXVECTOR3 rot, bool
 HRESULT CObjectX::Init(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// Xファイルのデータ取得
 	CXLoad *pXLoad = CScene::GetXLoad();
@@ -255,7 +255,7 @@ HRESULT CObjectX::Init(void)
 HRESULT CObjectX::Init(const char *pFileName)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	// Xファイルのデータ取得
 	CXLoad *pXLoad = CScene::GetXLoad();
@@ -362,7 +362,7 @@ void CObjectX::Update(void)
 void CObjectX::Draw(void)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXMATRIX mtxRot, mtxTrans, mtxScale;	// 計算用マトリックス宣言
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
@@ -402,7 +402,7 @@ void CObjectX::Draw(void)
 		pDevice->SetMaterial(&pMat[nCntMat].MatD3D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, CManager::GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
+		pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
 
 		if (m_scale != D3DXVECTOR3(1.0f, 1.0f, 1.0f))
 		{// 少しでも違う場合
@@ -433,7 +433,7 @@ void CObjectX::Draw(void)
 void CObjectX::Draw(D3DXCOLOR col)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXMATRIX mtxRot, mtxTrans, mtxScale;	// 計算用マトリックス宣言
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
@@ -480,7 +480,7 @@ void CObjectX::Draw(D3DXCOLOR col)
 		pDevice->SetMaterial(&matNow.MatD3D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, CManager::GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
+		pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
 
 		if (m_scale != D3DXVECTOR3(1.0f, 1.0f, 1.0f))
 		{// 少しでも違う場合
@@ -511,7 +511,7 @@ void CObjectX::Draw(D3DXCOLOR col)
 void CObjectX::Draw(float fAlpha)
 {
 	// デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXMATRIX mtxRot, mtxTrans, mtxScale;	// 計算用マトリックス宣言
 	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
@@ -563,7 +563,7 @@ void CObjectX::Draw(float fAlpha)
 		pDevice->SetMaterial(&matNow.MatD3D);
 
 		// テクスチャの設定
-		pDevice->SetTexture(0, CManager::GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
+		pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
 
 		if (m_scale != D3DXVECTOR3(1.0f, 1.0f, 1.0f))
 		{// 少しでも違う場合

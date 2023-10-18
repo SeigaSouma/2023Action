@@ -106,10 +106,10 @@ void CTutorialStep::Uninit(void)
 void CTutorialStep::Update(void)
 {
 	// キーボード情報取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// ゲームパッド情報取得
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	switch (m_step)
 	{
@@ -131,7 +131,7 @@ void CTutorialStep::Update(void)
 			(pInputKeyboard->GetTrigger(DIK_BACKSPACE) || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_START, 0) == true))
 		{
 			// モード設定
-			CManager::GetFade()->SetFade(CScene::MODE_GAME);
+			CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_GAME);
 		}
 		break;
 	}
@@ -144,7 +144,7 @@ void CTutorialStep::Update(void)
 		m_bSetOK = true;
 
 		// サウンド再生
-		CManager::GetSound()->PlaySound(CSound::LABEL_SE_STEPCLEAR);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_STEPCLEAR);
 	}
 
 }

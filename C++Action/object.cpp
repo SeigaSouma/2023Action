@@ -144,7 +144,7 @@ void CObject::UpdateAll(void)
 {
 #if _DEBUG
 	// エディットの情報取得
-	CEdit *pEdit = CManager::GetEdit();
+	CEdit *pEdit = CManager::GetInstance()->GetEdit();
 #endif
 
 	for (int nCntPriority = 0; nCntPriority < mylib_const::PRIORITY_NUM; nCntPriority++)

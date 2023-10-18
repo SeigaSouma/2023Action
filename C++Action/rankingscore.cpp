@@ -108,7 +108,7 @@ HRESULT CRankingScore::Init(void)
 		m_pObj2D[nCntVtx] = CObject2D::Create(7);
 
 		// テクスチャの割り当て
-		m_nTexIdx[nCntVtx] = CManager::GetTexture()->Regist(m_apTextureFile[nCntVtx]);
+		m_nTexIdx[nCntVtx] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[nCntVtx]);
 
 		// テクスチャの割り当て
 		m_pObj2D[nCntVtx]->GetObject2D()->BindTexture(m_nTexIdx[nCntVtx]);
@@ -117,12 +117,12 @@ HRESULT CRankingScore::Init(void)
 		switch (nCntVtx)
 		{
 		case VTX_LOGO:
-			m_pObj2D[nCntVtx]->GetObject2D()->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntVtx]) * 0.3f);	// サイズ
+			m_pObj2D[nCntVtx]->GetObject2D()->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntVtx]) * 0.3f);	// サイズ
 			m_pObj2D[nCntVtx]->GetObject2D()->SetPosition(D3DXVECTOR3(280.0f, 60.0f, 0.0f));	// 位置
 			break;
 
 		case VTX_NUM:
-			m_pObj2D[nCntVtx]->GetObject2D()->SetSize(CManager::GetTexture()->GetImageSize(m_nTexIdx[nCntVtx]) * 0.5f);	// サイズ
+			m_pObj2D[nCntVtx]->GetObject2D()->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(m_nTexIdx[nCntVtx]) * 0.5f);	// サイズ
 			m_pObj2D[nCntVtx]->GetObject2D()->SetPosition(D3DXVECTOR3(m_pObj2D[nCntVtx]->GetSize().x, 360.0f, 0.0f));	// 位置
 			break;
 
@@ -152,7 +152,7 @@ HRESULT CRankingScore::Init(void)
 			m_pScore[nCntRanking][nCntScore]->GetObject2D()->SetType(CObject::TYPE_SCORE);
 
 			// テクスチャの割り当て
-			m_nTexIdxNumber = CManager::GetTexture()->Regist(NUMBERTEXTURE);
+			m_nTexIdxNumber = CManager::GetInstance()->GetTexture()->Regist(NUMBERTEXTURE);
 
 			// テクスチャの割り当て
 			m_pScore[nCntRanking][nCntScore]->GetObject2D()->BindTexture(m_nTexIdxNumber);
@@ -162,10 +162,10 @@ HRESULT CRankingScore::Init(void)
 	// ランキング読み込み
 	Load();
 
-	if (CManager::GetOldMode() == CScene::MODE_RESULT)
+	if (CManager::GetInstance()->GetOldMode() == CScene::MODE_RESULT)
 	{
 		// 今回のスコア取得
-		m_nNowScore = CManager::GetRankingManager()->GetNowScore();
+		m_nNowScore = CManager::GetInstance()->GetRankingManager()->GetNowScore();
 
 		// ソート処理
 		Sort();
@@ -254,7 +254,7 @@ void CRankingScore::Moving(int nCntRanking)
 		if (pos.x == INIT_POSX)
 		{
 			// サウンド再生
-			CManager::GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
 		}
 
 		// 色取得
@@ -341,7 +341,7 @@ void CRankingScore::SetAllArrival(void)
 			if (pos.x == INIT_POSX)
 			{
 				// サウンド再生
-				CManager::GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
+				CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_NUMBERMOVE);
 			}
 
 			// 色取得
