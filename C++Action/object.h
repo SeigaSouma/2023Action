@@ -119,6 +119,8 @@ public:
 	float GetMapMoveValue(void);			// マップポイント間の移動量設定
 	void SetMoveAngle(ANGLE angle);			// 移動方向設定
 	ANGLE GetMoveAngle(void);				// 移動方向取得
+	void SetOldMoveAngle(ANGLE angle);		// 過去の移動方向設定
+	ANGLE GetOldMoveAngle(void);			// 過去の移動方向取得
 
 	int SetEffectParent(CEffect3D *pEffect3D);	// エフェクト設定
 	CEffect3D *GetEffectParent(int nIdx);	// 親設定したエフェクト取得
@@ -157,6 +159,7 @@ private:
 	static int m_nNumPriorityAll[mylib_const::PRIORITY_NUM];
 	TYPE m_type;			// 種類
 	ANGLE m_angle;			// 向き
+	ANGLE m_angleOld;		// 過去の向き
 	static CObject *m_pTop[mylib_const::PRIORITY_NUM];	// 先頭のオブジェクトへのポインタ
 	static CObject *m_pCur[mylib_const::PRIORITY_NUM];	// 最後尾のオブジェクトへのポインタ
 	CObject *m_pPrev;	// 前のオブジェクトへのポインタ

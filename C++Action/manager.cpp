@@ -62,6 +62,9 @@ CManager::CManager()
 	m_bHitStop = false;				// ヒットストップの判定
 	m_nCntHitStop = 0;				// ヒットストップのカウンター
 	m_OldMode = CScene::MODE_NONE;	// 前回のモード
+	m_CurrentTime = 0;				// 現在時間
+	m_OldTime = 0;					// 過去の時間
+	m_fDeltaTime = 0.0f;			// 経過時間
 }
 
 //==========================================================================
@@ -678,6 +681,13 @@ void CManager::Update(void)
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = GetInputKeyboard();
 
+	// 過去の時間保存
+	m_OldTime = m_CurrentTime;
+
+	// 現在時間取得
+	m_CurrentTime = timeGetTime();
+
+	m_fDeltaTime = (float)(m_CurrentTime - m_OldTime) / 1000;
 
 	// フェードの更新処理
 	m_pFade->Update();
@@ -774,7 +784,7 @@ void CManager::Update(void)
 	// デバッグ表示の更新処理
 	m_pDebugProc->Update();
 
-	if (m_pScene != NULL)
+	if (m_pEdit == NULL && m_pScene != NULL)
 	{// メモリの確保が出来ていたら
 		m_pScene->Update();
 	}
@@ -797,6 +807,14 @@ void CManager::Draw(void)
 	m_pRenderer->Draw();
 
 	pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);	// 埋めるモード
+}
+
+//==========================================================================
+// 経過時間取得
+//==========================================================================
+float CManager::DeltaTime(void)
+{
+	return m_fDeltaTime;
 }
 
 //==========================================================================

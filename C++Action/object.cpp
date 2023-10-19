@@ -39,6 +39,7 @@ CObject::CObject(int nPriority)
 	m_nPriority = nPriority;	// 優先順位
 	m_type = TYPE_NONE;			// 種類
 	m_angle = ANGLE_UP;			// 移動方向
+	m_angleOld = ANGLE_UP;		// 過去の向き
 	m_bDeath = false;			// 死亡フラグ
 	memset(&m_pEffect[0], NULL, sizeof(m_pEffect));	// エフェクトのポインタ
 	m_nNumEffectParent = 0;		// エフェクトの親設定した数
@@ -609,6 +610,22 @@ void CObject::SetMoveAngle(ANGLE angle)
 CObject::ANGLE CObject::GetMoveAngle(void)
 {
 	return m_angle;
+}
+
+//==========================================================================
+// 過去の移動方向設定
+//==========================================================================
+void CObject::SetOldMoveAngle(ANGLE angle)
+{
+	m_angleOld = angle;		// 過去の向き
+}
+
+//==========================================================================
+// 過去の移動方向取得
+//==========================================================================
+CObject::ANGLE CObject::GetOldMoveAngle(void)
+{
+	return m_angleOld;
 }
 
 //==========================================================================

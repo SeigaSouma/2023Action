@@ -45,6 +45,7 @@
 #define ROTHOSEI	(0.01f)	// 向きの補正係数
 #define POSV_HOSEI	(0.12f)
 #define POSR_HOSEI	(0.08f)
+#define CHASEDISTANCE_DEST	(150.0f)
 
 //==========================================================================
 // コンストラクタ
@@ -80,6 +81,9 @@ CCamera::CCamera()
 	m_fDiffHeight = 0.0f;						// 高さの差分
 	m_fDiffHeightSave = 0.0f;					// 高さの差分保存用
 	m_fDiffHeightDest = 0.0f;					// 目標の高さの差分
+	m_fChaseLerpStart = 0.0f;					// 追従補正の初期値
+	m_fChaseDistance = 0.0f;					// 追従の間隔
+	m_fDestChaseDistance = 0.0f;				// 目標の追従の間隔
 	m_bFollow = false;							// 追従するかどうか
 	m_state = CAMERASTATE_NONE;					// 状態
 	m_nCntState = 0;							// 状態カウンター
@@ -124,6 +128,9 @@ HRESULT CCamera::Init(void)
 	m_fDiffHeight = 0.0f;									// 高さの差分
 	m_fDiffHeightSave = 0.0f;								// 高さの差分保存用
 	m_fDiffHeightDest = 0.0f;								// 目標の高さの差分
+	m_fChaseLerpStart = 0.0f;								// 追従補正の初期値
+	m_fChaseDistance = 0.0f;								// 追従の間隔
+	m_fDestChaseDistance = 0.0f;							// 目標の追従の間隔
 	m_bFollow = true;										// 追従するかどうか
 	m_state = CAMERASTATE_NONE;								// 状態
 	m_nCntState = 0;							// 状態カウンター
@@ -807,12 +814,36 @@ void CCamera::SetCameraRGame(void)
 			nAngle = -1;
 		}
 
+		static float time = 0.0f;
+		if (pPlayer->GetMoveAngle() == CObject::ANGLE_RIGHT && pPlayer->GetOldMoveAngle() != CObject::ANGLE_RIGHT)
+		{// 目標が右
+			time = 0.0f;
+			m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
+			m_fDestChaseDistance = CHASEDISTANCE_DEST;
+		}
+		else if (pPlayer->GetMoveAngle() == CObject::ANGLE_LEFT && pPlayer->GetOldMoveAngle() != CObject::ANGLE_LEFT)
+		{// 目標が右
+			time = 0.0f;
+			m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
+			m_fDestChaseDistance = -CHASEDISTANCE_DEST;
+		}
+		else if (
+			(pPlayer->GetMoveAngle() == CObject::ANGLE_UP && pPlayer->GetOldMoveAngle() != CObject::ANGLE_UP) ||
+			(pPlayer->GetMoveAngle() == CObject::ANGLE_DOWN && pPlayer->GetOldMoveAngle() != CObject::ANGLE_DOWN))
+		{// 目標が右
+			time = 0.0f;
+			m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
+			m_fDestChaseDistance = 0.0f;
+		}
+		time += CManager::GetInstance()->DeltaTime() * 0.5f;
+#if 0
+		m_fChaseDistance = Lerp(m_fChaseLerpStart, m_fDestChaseDistance, time);
+#else
+		m_fChaseDistance += (m_fDestChaseDistance - m_fChaseDistance) * 0.02f;
+#endif
 		// 少し先の地点取得
-		float fMoveValue = fMapMoveValue + 150.0f * nAngle;
+		float fMoveValue = fMapMoveValue + m_fChaseDistance;
 		D3DXVECTOR3 DestPoint = pMapManager->GetTargetPosition(nMapIdx, fMoveValue);
-
-
-
 
 
 
@@ -1162,6 +1193,15 @@ void CCamera::SetChaseType(CHASETYPE type)
 {
 	m_ChaseType = type;
 }
+
+//==================================================================================
+// 追従の種類取得
+//==================================================================================
+CCamera::CHASETYPE CCamera::GetChaseType(void)
+{
+	return m_ChaseType;
+}
+
 
 //==================================================================================
 // カメラの振動処理

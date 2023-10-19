@@ -51,6 +51,7 @@ public:
 	void SetLenDest(float fLength, int nCntTime = 120, float DecrementValue = 2.0f, float fCorrection = 0.1f);	// 目標の長さ設定
 	void SetTargetPos(const D3DXVECTOR3 pos);	// 目標の位置設定
 	void SetChaseType(CHASETYPE type);	// 追従の種類設定
+	CHASETYPE GetChaseType(void);		// 追従の種類取得
 	void Reset(CScene::MODE mode);	// リセット
 private:
 
@@ -109,6 +110,9 @@ private:
 	float m_fDiffHeight;			// 高さの差分
 	float m_fDiffHeightSave;		// 高さの差分保存用
 	float m_fDiffHeightDest;		// 目標の高さの差分
+	float m_fChaseLerpStart;		// 追従補正の初期値
+	float m_fChaseDistance;			// 追従の間隔
+	float m_fDestChaseDistance;		// 目標の追従の間隔
 	bool m_bFollow;					// 追従するかどうか
 	int m_nCntState;				// 状態カウンター
 	int m_nCntDistance;				// 距離カウンター

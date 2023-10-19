@@ -29,8 +29,10 @@ public:
 	// 構造体定義
 	struct sChaseChangeInfo
 	{
+		int nMapIdx;		// マップインデックス
+		float fMapMoveValue;	// マップの移動量
+
 		int nByTypeIdx;					// 種類別インデックス番号
-		D3DXVECTOR3 pos;				// 位置
 		CCamera::CHASETYPE chaseType;	// 追従の種類
 	};
 
@@ -41,7 +43,7 @@ public:
 	void Uninit(void);
 	void Update(void);
 
-	void CreatePos(CCamera::CHASETYPE type, D3DXVECTOR3 pos);	// 位置作成
+	void CreatePos(CCamera::CHASETYPE type, int nIdx, float fMoveValue);	// 位置作成
 	void DeletePos(int nIdx);			// 位置削除
 	HRESULT ReadText(const std::string pFileName);	// 外部ファイル読み込み処理
 	void Save(const std::string pFileName);			// 外部ファイル書き出し処理
@@ -49,7 +51,7 @@ public:
 	static CCameraChaseChanger *Create(const std::string pFileName);
 	int GetAxisNum(void);			// 軸数取得
 	D3DXVECTOR3 GetAxis(int nIdx);	// 軸取得
-	void SetAxis(D3DXVECTOR3 pos, int nIdx);	// 軸設定
+	void SetAxis(int nIdx, int nMapIdx, float fMapMoveValue);	// 軸設定
 	sChaseChangeInfo GetChaseChangeInfo(int nIdx);	// 変更の情報取得
 	static int GetNumAll(void) { return m_nNumAll; }	// 総数取得
 private:

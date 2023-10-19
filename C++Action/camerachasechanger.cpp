@@ -11,6 +11,8 @@
 #include "3D_effect.h"
 #include "debugpointnumber.h"
 #include "objectX.h"
+#include "mapmanager.h"
+#include "manager.h"
 
 //==========================================================================
 // マクロ定義
@@ -97,14 +99,15 @@ HRESULT CCameraChaseChanger::Init(void)
 //==========================================================================
 // 位置作成
 //==========================================================================
-void CCameraChaseChanger::CreatePos(CCamera::CHASETYPE type, D3DXVECTOR3 pos)
+void CCameraChaseChanger::CreatePos(CCamera::CHASETYPE type, int nIdx, float fMoveValue)
 {
 	sChaseChangeInfo InitInfo;
 	memset(&InitInfo, NULL, sizeof(InitInfo));
 
 	// 位置生成
 	m_ChaseChangeInfo.push_back(InitInfo);
-	m_ChaseChangeInfo[m_nNumAll].pos = pos;
+	m_ChaseChangeInfo[m_nNumAll].nMapIdx = nIdx;
+	m_ChaseChangeInfo[m_nNumAll].fMapMoveValue = fMoveValue;
 	m_ChaseChangeInfo[m_nNumAll].chaseType = type;
 
 	// 総数加算
@@ -166,6 +169,14 @@ void CCameraChaseChanger::Uninit(void)
 void CCameraChaseChanger::Update(void)
 {
 #if _DEBUG
+
+	// マップマネージャの取得
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
 	for (int i = 0; i < m_nNumAll; i++)
 	{
 		if (m_apObjX[i] == NULL)
@@ -174,8 +185,11 @@ void CCameraChaseChanger::Update(void)
 			m_apObjX[i]->SetType(CObject::TYPE_BALLAST);
 		}
 
-		m_apObjX[i]->SetPosition(m_ChaseChangeInfo[i].pos);
-		m_pMultiNumber[i]->SetPosition(D3DXVECTOR3(m_ChaseChangeInfo[i].pos.x, m_ChaseChangeInfo[i].pos.y + 50.0f, m_ChaseChangeInfo[i].pos.z));
+		// マップ情報から位置取得
+		D3DXVECTOR3 pos = pMapManager->GetTargetPosition(m_ChaseChangeInfo[i].nMapIdx, m_ChaseChangeInfo[i].fMapMoveValue);
+
+		m_apObjX[i]->SetPosition(pos);
+		m_pMultiNumber[i]->SetPosition(D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z));
 	}
 #endif
 }
@@ -280,14 +294,6 @@ int CCameraChaseChanger::GetAxisNum(void)
 }
 
 //==========================================================================
-// 軸設定
-//==========================================================================
-void CCameraChaseChanger::SetAxis(D3DXVECTOR3 pos, int nIdx)
-{
-	m_ChaseChangeInfo[nIdx].pos = pos;
-}
-
-//==========================================================================
 // 軸取得
 //==========================================================================
 D3DXVECTOR3 CCameraChaseChanger::GetAxis(int nIdx)
@@ -297,13 +303,44 @@ D3DXVECTOR3 CCameraChaseChanger::GetAxis(int nIdx)
 		nIdx = 0;
 	}
 
+	// マップマネージャの取得
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return mylib_const::DEFAULT_VECTOR3;
+	}
+
+	D3DXVECTOR3 pos = mylib_const::DEFAULT_VECTOR3;
+
 	if (nIdx >= (int)m_ChaseChangeInfo.size())
 	{// 要素数を超えていたら
 
 		int nMaxIdx = (int)m_ChaseChangeInfo.size() - 1;
-		return m_ChaseChangeInfo[nMaxIdx].pos;
+
+		// マップ情報から位置取得
+		pos = pMapManager->GetTargetPosition(m_ChaseChangeInfo[nMaxIdx].nMapIdx, m_ChaseChangeInfo[nMaxIdx].fMapMoveValue);
+		return pos;
 	}
-	return m_ChaseChangeInfo[nIdx].pos;
+
+	// マップ情報から位置取得
+	pos = pMapManager->GetTargetPosition(m_ChaseChangeInfo[nIdx].nMapIdx, m_ChaseChangeInfo[nIdx].fMapMoveValue);
+
+	return pos;
+}
+
+//==========================================================================
+// 軸設定
+//==========================================================================
+void CCameraChaseChanger::SetAxis(int nIdx, int nMapIdx, float fMapMoveValue)
+{
+	if (nIdx < 0)
+	{
+		return;
+	}
+
+	// 情報渡す
+	m_ChaseChangeInfo[nIdx].nMapIdx = nMapIdx;
+	m_ChaseChangeInfo[nIdx].fMapMoveValue = fMapMoveValue;
 }
 
 //==========================================================================

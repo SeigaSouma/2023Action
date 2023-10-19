@@ -238,6 +238,7 @@ void CDebugProc::SetText(void)
 	CDebugProc *pDebug = CManager::GetInstance()->GetDebugProc();
 
 	pDebug->Print("FPS：%d\n", GetFPS());
+	pDebug->Print("デルタタイム：%f\n", CManager::GetInstance()->DeltaTime());
 	pDebug->Print("オブジェクトの総数：%d\n", CObject::GetNumAll());
 	pDebug->Print("オブジェクトの総数：1[%d], 2[%d], 3[%d], 4[%d], 5[%d], 6[%d], 7[%d], 8[%d]\n", CObject::GetNumAll(),
 		CObject::GetNumPriorityAll(0), CObject::GetNumPriorityAll(1), CObject::GetNumPriorityAll(2), CObject::GetNumPriorityAll(3),

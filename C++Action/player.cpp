@@ -511,6 +511,7 @@ void CPlayer::Controll(void)
 
 	// 移動方向取得
 	CObject::ANGLE MoveAngle = GetMoveAngle();
+	SetOldMoveAngle(MoveAngle);
 
 	if (m_pMotion->IsGetMove(nMotionType) == 1)
 	{// 移動可能モーションの時
@@ -1221,28 +1222,65 @@ void CPlayer::CollisionChaseChanger(void)
 
 	// 情報取得
 	CCameraChaseChanger::sChaseChangeInfo ChaseChangerInfo;
+	//CCamera::CHASETYPE CameraChaseType;
 
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
+	int nMapIdx = GetMapIndex();
+	int nChangeNumAll = pCameraChaseChanger->GetNumAll();
 
-	for (int i = 0; i < pCameraChaseChanger->GetNumAll(); i++)
+	for (int i = 0; i < nChangeNumAll; i++)
 	{
 		// 情報取得
 		ChaseChangerInfo = pCameraChaseChanger->GetChaseChangeInfo(i);
 
-		// 円の判定
-		if (CircleRange(pos, ChaseChangerInfo.pos, GetRadius(), 50.0f))
-		{
-			// 追従の種類設定
-			pCamera->SetChaseType(ChaseChangerInfo.chaseType);
+		if (nMapIdx > ChaseChangerInfo.nMapIdx && i != nChangeNumAll - 1)
+		{// 自分のマップインデックスより小さい場合 && 終端じゃない
+			continue;
+		}
+		else if (i == nChangeNumAll - 1)
+		{// 最後
+			pCamera->SetChaseType(CCamera::CHASETYPE_MAP);
+		}
 
-			if (ChaseChangerInfo.chaseType == CCamera::CHASETYPE_NORMAL)
-			{
-				D3DXVECTOR3 AxisPos = CManager::GetInstance()->GetScene()->GetCameraAxis()->GetAxis(ChaseChangerInfo.nByTypeIdx);
-				pCamera->SetTargetPos(AxisPos);
-			}
+		// 種類別処理
+		switch (ChaseChangerInfo.chaseType)
+		{
+		case CCamera::CHASETYPE_NORMAL:
+			pCamera->SetChaseType(CCamera::CHASETYPE_MAP);
+			break;
+
+		case CCamera::CHASETYPE_MAP:
+			pCamera->SetChaseType(CCamera::CHASETYPE_NORMAL);
 			break;
 		}
+
+		break;
+
+		//// 円の判定
+		//if (CircleRange(pos, ChaseChangerInfo.pos, GetRadius(), 50.0f))
+		//{
+		//	// カメラの追従種類取得
+		//	CameraChaseType = pCamera->GetChaseType();
+		//	pCamera->SetChaseType(ChaseChangerInfo.chaseType);
+
+		//	// 追従の種類設定
+		//	if (ChaseChangerInfo.chaseType == CCamera::CHASETYPE_NORMAL)
+		//	{
+		//		if (GetMoveAngle() == CObject::ANGLE_LEFT && CameraChaseType == CCamera::CHASETYPE_NORMAL)
+		//		{// 軸回転だったら && 左向き
+		//			pCamera->SetChaseType(CCamera::CHASETYPE_MAP);
+		//		}
+		//		else if(GetMoveAngle() == CObject::ANGLE_LEFT && CameraChaseType != CCamera::CHASETYPE_NORMAL)
+		//		{
+		//			int n = 0;
+		//		}
+
+		//		//D3DXVECTOR3 AxisPos = CManager::GetInstance()->GetScene()->GetCameraAxis()->GetAxis(ChaseChangerInfo.nByTypeIdx);
+		//		//pCamera->SetTargetPos(AxisPos);
+		//	}
+		//	break;
+		//}
 	}
 
 }

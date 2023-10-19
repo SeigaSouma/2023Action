@@ -138,7 +138,7 @@ void CEditCameraChaseChanger::Update(void)
 		{
 			return;
 		}
-		pCmaeraChanger->CreatePos(m_ChaseType, m_pos);
+		pCmaeraChanger->CreatePos(m_ChaseType, m_nIdxMapPoint, m_fMoveValue);
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_DELETE) == true)
@@ -276,7 +276,7 @@ void CEditCameraChaseChanger::Grab(void)
 			Control(TargetPoint);
 
 			// ˆÊ’uÝ’è
-			pCmaeraChanger->SetAxis(TargetPoint, i);
+			pCmaeraChanger->SetAxis(i, m_nIdxMapPoint, m_fMoveValue);
 		}
 	}
 }
