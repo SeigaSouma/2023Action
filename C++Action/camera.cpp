@@ -932,6 +932,7 @@ void CCamera::ChaseMap(void)
 
 	// マップ情報取得
 	int nMapIdx = pPlayer->GetMapIndex();
+	float fMapRatio = pPlayer->GetMapPointRatio();
 
 	// 曲線作る為の4点
 	int nP0 = nMapIdx;
@@ -943,6 +944,10 @@ void CCamera::ChaseMap(void)
 	D3DXVECTOR3 TargetPoint1 = pMapManager->GetControlPoint(nP1);
 	D3DXVECTOR3 TargetPoint2 = pMapManager->GetControlPoint(nP2);
 
+	// 少し先の地点取得
+	float fRatio = fMapRatio + 0.05f;
+	D3DXVECTOR3 DestPoint = pMapManager->GetTargetPosition(nMapIdx, fRatio);
+
 	// ベクトル
 	D3DXVECTOR3 vec = mylib_const::DEFAULT_VECTOR3;
 	D3DXVECTOR3 newvec = mylib_const::DEFAULT_VECTOR3;
@@ -951,7 +956,7 @@ void CCamera::ChaseMap(void)
 	float fPosLength = GetPosLength(TargetPoint1, TargetPoint2);
 
 	// ベクトル
-	vec = TargetPoint2 - TargetPoint1;
+	vec = DestPoint - TargetPoint1;
 	D3DXVec3Normalize(&vec, &vec);
 
 	// 90度傾ける

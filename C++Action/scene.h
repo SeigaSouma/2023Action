@@ -18,6 +18,7 @@ class CXLoad;
 class CEnemyManager;
 class CMapManager;
 class CPlayer;
+class CCameraAxis;
 
 //==========================================================================
 // クラス定義
@@ -52,6 +53,7 @@ public:
 	static CElevation *GetElevation(void);	// オブジェクト3Dの取得
 	static CEnemyManager *GetEnemyManager(void);
 	static CMapManager *GetMapManager(void);	// マップマネージャ取得
+	static CCameraAxis *GetCameraAxis(void);	// カメラの軸取得
 	CPlayer *GetPlayer(void);
 	void UninitPlayer();// プレイヤーの情報取得
 	MODE GetMode(void);		// 現在のモード取得
@@ -63,6 +65,7 @@ private:
 	static CElevation *m_pObject3DMesh;			// オブジェクト3Dメッシュのオブジェクト
 	static CEnemyManager *m_pEnemyManager;		// 敵マネージャのオブジェクト
 	static CMapManager *m_pMapManager;			// マップマネージャのオブジェクト
+	static CCameraAxis *m_pCameraAxis;	// カメラの軸のオブジェクト
 };
 
 

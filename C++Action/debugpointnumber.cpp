@@ -133,10 +133,10 @@ void CDebugPointNumber::Update(void)
 	// 値の設定処理
 	m_pMultiNumber->SetValue(m_nIdxParent);
 
-	// 位置更新
-	D3DXVECTOR3 pos = pMapManager->GetControlPoint(m_nIdxParent + 1);
-	pos.y += 50.0f;
-	m_pMultiNumber->SetPosition(pos);
+	//// 位置更新
+	//D3DXVECTOR3 pos = pMapManager->GetControlPoint(m_nIdxParent + 1);
+	//pos.y += 50.0f;
+	m_pMultiNumber->SetPosition(GetPosition());
 
 	//D3DXCOLOR col = m_pMultiNumber->GetColor();
 

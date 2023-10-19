@@ -31,6 +31,7 @@ namespace mylib_const
 	const int ENEMY_PRIORITY = 4;		// “G‚Ì—Dæ‡ˆÊ
 	const int MAX_FIXEDMOVE = 32;		// ˆê’è‚Ì“®‚«Å‘å”
 	const int MAX_FIXEDMOVE_INFO = 16;	// ˆê’è‚Ì“®‚«î•ñÅ‘å”
+	const int MAX_CAMERAAXIS = 62;		// ƒJƒƒ‰²‚ÌÅ‘å”
 	const int MAX_BULLET = 256;			// ’e‚ÌÅ‘å”
 	const float GRAVITY = 0.7f;			// d—Í
 	const int MAX_VTX = 51200;			// ’¸“_‚ÌÅ‘å”

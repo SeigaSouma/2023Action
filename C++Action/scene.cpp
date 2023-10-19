@@ -14,6 +14,7 @@
 #include "enemymanager.h"
 #include "mapmanager.h"
 #include "player.h"
+#include "cameraaxis.h"
 
 // 遷移先
 #include "game.h"
@@ -28,7 +29,8 @@
 CXLoad *CScene::m_pXLoad = NULL;				// Xファイルのオブジェクト
 CElevation *CScene::m_pObject3DMesh = NULL;		// オブジェクト3Dメッシュのオブジェクト
 CEnemyManager *CScene::m_pEnemyManager = NULL;	// 敵マネージャのオブジェクト
-CMapManager *CScene::m_pMapManager = NULL;			// マップマネージャのオブジェクト
+CMapManager *CScene::m_pMapManager = NULL;		// マップマネージャのオブジェクト
+CCameraAxis *CScene::m_pCameraAxis = NULL;		// カメラの軸のオブジェクト
 
 //==========================================================================
 // コンストラクタ
@@ -131,6 +133,15 @@ HRESULT CScene::Init(void)
 	}
 
 	//**********************************
+	// カメラの軸
+	//**********************************
+	m_pCameraAxis = CCameraAxis::Create("data\\BIN\\cameraaxis.bin");
+	if (m_pCameraAxis == NULL)
+	{// NULLだったら
+		return E_FAIL;
+	}
+	
+	//**********************************
 	// 敵マネージャ
 	//**********************************
 	m_pEnemyManager = CEnemyManager::Create("data\\TEXT\\enemy_manager.txt");
@@ -192,6 +203,14 @@ void CScene::Uninit(void)
 		m_pMapManager = NULL;
 	}
 
+	// カメラの軸
+	if (m_pCameraAxis != NULL)
+	{
+		m_pCameraAxis->Uninit();
+		delete m_pCameraAxis;
+		m_pCameraAxis = NULL;
+	}
+
 	// 敵マネージャ
 	if (m_pEnemyManager != NULL)
 	{
@@ -215,7 +234,11 @@ void CScene::Uninit(void)
 //==========================================================================
 void CScene::Update(void)
 {
+	// マップマネージャの更新処理
 	m_pMapManager->Update();
+
+	// カメラの軸の更新処理
+	m_pCameraAxis->Update();
 }
 
 //==========================================================================
@@ -264,6 +287,14 @@ CEnemyManager *CScene::GetEnemyManager(void)
 CMapManager *CScene::GetMapManager(void)
 {
 	return m_pMapManager;
+}
+
+//==========================================================================
+// カメラの軸取得
+//==========================================================================
+CCameraAxis *CScene::GetCameraAxis(void)
+{
+	return m_pCameraAxis;
 }
 
 //==========================================================================

@@ -15,6 +15,7 @@
 //==========================================================================
 // 前方宣言
 //==========================================================================
+class CDebugPointNumber;
 
 //==========================================================================
 // クラス定義
@@ -40,6 +41,7 @@ public:
 	D3DXVECTOR3 GetControlPoint(void);		// 制御点取得
 	D3DXVECTOR3 GetControlPoint(int nIdx);	// 制御点取得
 	void SetControlPoint(D3DXVECTOR3 pos, int nIdx);	// 制御点設定
+	D3DXVECTOR3 GetTargetPosition(int nIdx, float fRatio);	// 目標の位置取得
 	D3DXVECTOR3 UpdateNowPosition(int& nIdx, float& fRatio, float& fMoveValue, float PosY);
 	D3DXVECTOR3 UpdateNowPosition(int& nIdx, float& fRatio, float& fMoveValue, float PosY, CObject::ANGLE MoveAngle, float fMove);	// 現在地更新
 	CObject::ANGLE GetTargetAngle(int myIdx, int TargetIdx, float myMoveValue, float TargetMoveValue);	// 目標が自分のどっちにいるかの判定
@@ -57,6 +59,7 @@ private:
 	CMapManager *m_pPrev;		// 前のオブジェクトへのポインタ
 	CMapManager *m_pNext;		// 次のオブジェクトへのポインタ
 	static int m_nNumAll;		// 総数
+	CDebugPointNumber *m_pMultiNumber[mylib_const::MAX_CAMERAAXIS];
 };
 
 

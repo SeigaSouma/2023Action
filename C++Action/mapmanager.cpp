@@ -31,6 +31,7 @@ CMapManager::CMapManager()
 	m_pPrev = NULL;		// 前のオブジェクトへのポインタ
 	m_pNext = NULL;		// 次のオブジェクトへのポインタ
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 位置
+	memset(&m_pMultiNumber[0], NULL, sizeof(m_pMultiNumber));
 }
 
 //==========================================================================
@@ -131,7 +132,7 @@ void CMapManager::CreatePos(D3DXVECTOR3 pos)
 
 
 	// デバッグ用数字の生成
-	CDebugPointNumber::Create(m_nNumAll - 1);
+	m_pMultiNumber[m_nNumAll] = CDebugPointNumber::Create(m_nNumAll - 1);
 
 	// 総数加算
 	m_nNumAll++;
@@ -189,6 +190,8 @@ void CMapManager::Update(void)
 	for (int i = 0; i < m_nNumAll; i++)
 	{
 		CEffect3D::Create(m_posAll[i], D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 50.0f, 2, CEffect3D::MOVEEFFECT_NONE, CEffect3D::TYPE_NORMAL);
+		m_pMultiNumber[i]->SetPosition(D3DXVECTOR3(m_posAll[i].x, m_posAll[i].y + 50.0f, m_posAll[i].z));
+
 	}
 #endif
 }
@@ -213,7 +216,7 @@ HRESULT CMapManager::ReadText(const std::string pFileName)
 		{
 			// 位置生成
 			m_posAll.push_back(mylib_const::DEFAULT_VECTOR3);
-			CDebugPointNumber::Create(i - 1);
+			m_pMultiNumber[i] = CDebugPointNumber::Create(i - 1);
 		}
 
 		fread(&m_posAll[0], sizeof(D3DXVECTOR3), m_nNumAll, pFile);
@@ -231,7 +234,7 @@ HRESULT CMapManager::ReadText(const std::string pFileName)
 		{
 			// 位置生成
 			m_posAll.push_back(mylib_const::DEFAULT_VECTOR3);
-			CDebugPointNumber::Create(i - 1);
+			m_pMultiNumber[i] = CDebugPointNumber::Create(i - 1);
 		}
 
 		for (int nCount = 0; nCount < m_nNumAll; nCount++)
@@ -299,6 +302,31 @@ D3DXVECTOR3 CMapManager::GetControlPoint(int nIdx)
 		return m_posAll[nMaxIdx];
 	}
 	return m_posAll[nIdx];
+}
+
+//==========================================================================
+// 目標の位置取得
+//==========================================================================
+D3DXVECTOR3 CMapManager::GetTargetPosition(int nIdx, float fRatio)
+{
+	D3DXVECTOR3 pos = mylib_const::DEFAULT_VECTOR3;
+
+	// 曲線作る為の4点
+	int nP0, nP1, nP2, nP3;
+	nP0 = nIdx;
+	nP1 = nIdx + 1;
+	nP2 = nIdx + 2;
+	nP3 = nIdx + 3;
+
+	// 目標地点
+	D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
+	D3DXVECTOR3 TargetPoint1 = GetControlPoint(nP1);
+	D3DXVECTOR3 TargetPoint2 = GetControlPoint(nP2);
+	D3DXVECTOR3 TargetPoint3 = GetControlPoint(nP3);
+
+	pos = CatmullRomSplineInterp(TargetPoint0, TargetPoint1, TargetPoint2, TargetPoint3, fRatio);
+
+	return pos;
 }
 
 //==========================================================================

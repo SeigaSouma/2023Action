@@ -254,7 +254,9 @@ void CDebugProc::SetText(void)
 	pDebug->Print("\n--------------------------------[ F系 ]--------------------------------\n");
 	pDebug->Print("[F2]：ワイヤーフレーム切り替え\n");
 	pDebug->Print("[F3]：起伏のエディット切り替え\n");
+	pDebug->Print("[F4]：マップ制御点エディット切り替え\n");
 	pDebug->Print("[F5]：プレイヤー配置リセット\n");
+	pDebug->Print("[F6]：カメラの軸エディット切り替え\n");
 	pDebug->Print("[F7]：カメラ追従切り替え\n");
 	pDebug->Print("[F8]：エディットモード切り替え\n");
 	pDebug->Print("[P]：敵リスポーン\n");

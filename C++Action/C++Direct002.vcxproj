@@ -163,9 +163,11 @@
     <ClCompile Include="bulletmanager.cpp" />
     <ClCompile Include="calculation.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="cameraaxis.cpp" />
     <ClCompile Include="debugpointnumber.cpp" />
     <ClCompile Include="debugproc.cpp" />
     <ClCompile Include="edit.cpp" />
+    <ClCompile Include="edit_cameraaxis.cpp" />
     <ClCompile Include="edit_controlpoint.cpp" />
     <ClCompile Include="elevation.cpp" />
     <ClCompile Include="enemy.cpp" />
@@ -244,11 +246,13 @@
     <ClInclude Include="bulletmanager.h" />
     <ClInclude Include="calculation.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="cameraaxis.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="constans.h" />
     <ClInclude Include="debugpointnumber.h" />
     <ClInclude Include="debugproc.h" />
     <ClInclude Include="edit.h" />
+    <ClInclude Include="edit_cameraaxis.h" />
     <ClInclude Include="edit_controlpoint.h" />
     <ClInclude Include="elevation.h" />
     <ClInclude Include="enemy.h" />

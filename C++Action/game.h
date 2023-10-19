@@ -20,6 +20,7 @@ class CTimer;
 class CPowerGauge;
 class CEditControlPoint;
 class CBulletManager;
+class CEditCameraAxis;
 
 //==========================================================================
 // クラス定義
@@ -52,6 +53,7 @@ private:
 	static CPowerGauge *m_pPowerGauge;			// パワーゲージのオブジェクト
 	static CEditControlPoint *m_pEditControlPoint;	// 制御点エディターのオブジェクト
 	static CBulletManager *m_pBulletManager;		// 弾マネージャのオブジェクト
+	static CEditCameraAxis *m_pEditCameraAxis;		// カメラ軸エディターのオブジェクト
 };
 
 
