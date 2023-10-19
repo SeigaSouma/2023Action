@@ -644,7 +644,7 @@ void CPlayer::Controll(void)
 	}
 	else if (MoveAngle == ANGLE_UP)
 	{
-		fRotDest = atan2f((pos.x - 0.0f), (pos.z - 0.0f));
+		fRotDest = atan2f((pos.x - pCamera->GetTargetPosition().x), (pos.z - pCamera->GetTargetPosition().z));
 	}
 
 	// 角度の正規化
@@ -1217,12 +1217,19 @@ void CPlayer::CollisionChaseChanger(void)
 		return;
 	}
 
+	// マップマネージャの取得
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
 	// カメラの情報取得
 	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 	// 情報取得
 	CCameraChaseChanger::sChaseChangeInfo ChaseChangerInfo;
-	//CCamera::CHASETYPE CameraChaseType;
+	CCamera::CHASETYPE CameraChaseType = CCamera::CHASETYPE_MAP;
 
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -1234,7 +1241,14 @@ void CPlayer::CollisionChaseChanger(void)
 		// 情報取得
 		ChaseChangerInfo = pCameraChaseChanger->GetChaseChangeInfo(i);
 
-		if (nMapIdx > ChaseChangerInfo.nMapIdx && i != nChangeNumAll - 1)
+		if (nMapIdx == ChaseChangerInfo.nMapIdx && i != nChangeNumAll - 1)
+		{// 一緒な場合
+			if (pMapManager->GetTargetAngle(nMapIdx, ChaseChangerInfo.nMapIdx, GetMapMoveValue(), ChaseChangerInfo.fMapMoveValue) == CObject::ANGLE_LEFT)
+			{// 左にいたら
+				continue;
+			}
+		}
+		else if (nMapIdx > ChaseChangerInfo.nMapIdx && i != nChangeNumAll - 1)
 		{// 自分のマップインデックスより小さい場合 && 終端じゃない
 			continue;
 		}
@@ -1247,11 +1261,17 @@ void CPlayer::CollisionChaseChanger(void)
 		switch (ChaseChangerInfo.chaseType)
 		{
 		case CCamera::CHASETYPE_NORMAL:
+		
+			CameraChaseType = CCamera::CHASETYPE_MAP;
 			pCamera->SetChaseType(CCamera::CHASETYPE_MAP);
+		
 			break;
 
 		case CCamera::CHASETYPE_MAP:
 			pCamera->SetChaseType(CCamera::CHASETYPE_NORMAL);
+			D3DXVECTOR3 AxisPos = CManager::GetInstance()->GetScene()->GetCameraAxis()->GetAxis(ChaseChangerInfo.nByTypeIdx);
+			pCamera->SetTargetPosition(AxisPos);
+			CameraChaseType = CCamera::CHASETYPE_NORMAL;
 			break;
 		}
 
@@ -1282,6 +1302,11 @@ void CPlayer::CollisionChaseChanger(void)
 		//	break;
 		//}
 	}
+
+	// デバッグ表示
+	CManager::GetInstance()->GetDebugProc()->Print(
+		"------------------[マップの追従]------------------\n"
+		"種類：【%d】\n", CameraChaseType);
 
 }
 
