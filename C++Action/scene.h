@@ -19,6 +19,7 @@ class CEnemyManager;
 class CMapManager;
 class CPlayer;
 class CCameraAxis;
+class CCameraChaseChanger;
 
 //==========================================================================
 // クラス定義
@@ -54,6 +55,7 @@ public:
 	static CEnemyManager *GetEnemyManager(void);
 	static CMapManager *GetMapManager(void);	// マップマネージャ取得
 	static CCameraAxis *GetCameraAxis(void);	// カメラの軸取得
+	static CCameraChaseChanger *GetCameraChaseChanger(void);	// カメラ追従種類の変更者取得
 	CPlayer *GetPlayer(void);
 	void UninitPlayer();// プレイヤーの情報取得
 	MODE GetMode(void);		// 現在のモード取得
@@ -66,6 +68,7 @@ private:
 	static CEnemyManager *m_pEnemyManager;		// 敵マネージャのオブジェクト
 	static CMapManager *m_pMapManager;			// マップマネージャのオブジェクト
 	static CCameraAxis *m_pCameraAxis;	// カメラの軸のオブジェクト
+	static CCameraChaseChanger *m_pCameraChaseChanger;	// カメラ追従変更者のオブジェクト
 };
 
 

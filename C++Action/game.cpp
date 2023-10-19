@@ -22,6 +22,7 @@
 #include "sound.h"
 #include "edit_controlpoint.h"
 #include "edit_cameraaxis.h"
+#include "edit_camerachasechanger.h"
 #include "bulletmanager.h"
 
 //==========================================================================
@@ -33,6 +34,7 @@ CPowerGauge *CGame::m_pPowerGauge = NULL;		// パワーゲージのオブジェクト
 CEditControlPoint *CGame::m_pEditControlPoint = NULL;	// 制御点エディターのオブジェクト
 CBulletManager *CGame::m_pBulletManager = NULL;		// 弾マネージャのオブジェクト
 CEditCameraAxis *CGame::m_pEditCameraAxis = NULL;		// カメラ軸エディターのオブジェクト
+CEditCameraChaseChanger *CGame::m_pEditCmaeraChaseChanger = NULL;	// カメラ追従変更者エディターのオブジェクト
 
 //==========================================================================
 // コンストラクタ
@@ -138,6 +140,14 @@ void CGame::Uninit(void)
 		m_pEditCameraAxis = NULL;
 	}
 
+	if (m_pEditCmaeraChaseChanger != NULL)
+	{
+		// 終了させる
+		m_pEditCmaeraChaseChanger->Uninit();
+		delete m_pEditCmaeraChaseChanger;
+		m_pEditCmaeraChaseChanger = NULL;
+	}
+
 	if (m_pBulletManager != NULL)
 	{
 		// 終了させる
@@ -206,6 +216,29 @@ void CGame::Update(void)
 	{// 制御点マネージャの更新処理
 		m_pEditControlPoint->Update();
 	}
+
+	if (pInputKeyboard->GetTrigger(DIK_F5) == true)
+	{// F5が押された,カメラ追従変更者
+		if (m_pEditCmaeraChaseChanger == NULL)
+		{// NULLだったら
+
+			// エディットの生成処理
+			m_pEditCmaeraChaseChanger = CEditCameraChaseChanger::Create();
+		}
+		else
+		{
+			// 終了させる
+			m_pEditCmaeraChaseChanger->Uninit();
+			delete m_pEditCmaeraChaseChanger;
+			m_pEditCmaeraChaseChanger = NULL;
+		}
+	}
+
+	if (m_pEditCmaeraChaseChanger != NULL)
+	{// カメラ追従変更者マネージャの更新処理
+		m_pEditCmaeraChaseChanger->Update();
+	}
+
 
 	if (pInputKeyboard->GetTrigger(DIK_F6))
 	{// F6でカメラ軸エディット

@@ -25,14 +25,15 @@ private:
 		CAMERASTATE_SHAKE,		// 振動
 	};
 
+public:
+
+	// 追従の種類
 	enum CHASETYPE
 	{
 		CHASETYPE_NORMAL = 0,	// 通常
 		CHASETYPE_MAP,			// マップに追従
 		CHASETYPE_MAX
 	};
-
-public:
 
 	CCamera();
 	~CCamera();
@@ -49,6 +50,7 @@ public:
 	void SetShake(int nTime, float fLength, float fLengthY);	// 振動設定
 	void SetLenDest(float fLength, int nCntTime = 120, float DecrementValue = 2.0f, float fCorrection = 0.1f);	// 目標の長さ設定
 	void SetTargetPos(const D3DXVECTOR3 pos);	// 目標の位置設定
+	void SetChaseType(CHASETYPE type);	// 追従の種類設定
 	void Reset(CScene::MODE mode);	// リセット
 private:
 

@@ -32,6 +32,8 @@
 #include "edit_controlpoint.h"
 #include "bullet.h"
 #include "slash.h"
+#include "camerachasechanger.h"
+#include "cameraaxis.h"
 
 // ”h¶æ
 #include "tutorialplayer.h"
@@ -287,6 +289,7 @@ void CPlayer::Update(void)
 
 	// ‘€ì
 	Controll();
+	CollisionChaseChanger();
 
 	// ƒ‚[ƒVƒ‡ƒ“‚Ìİ’èˆ—
 	MotionSet();
@@ -1199,6 +1202,49 @@ void CPlayer::Collision(void)
 
 	// Œü‚«İ’è
 	SetRotation(rot);
+}
+
+//==========================================================================
+// ’Ç]‚Ì•ÏXÒ‚Æ‚Ì”»’è
+//==========================================================================
+void CPlayer::CollisionChaseChanger(void)
+{
+	// ’Ç]‚Ì•ÏXÒæ“¾
+	CCameraChaseChanger *pCameraChaseChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+	if (pCameraChaseChanger == NULL)
+	{// NULL‚¾‚Á‚½‚ç
+		return;
+	}
+
+	// ƒJƒƒ‰‚Ìî•ñæ“¾
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
+
+	// î•ñæ“¾
+	CCameraChaseChanger::sChaseChangeInfo ChaseChangerInfo;
+
+	// ˆÊ’uæ“¾
+	D3DXVECTOR3 pos = GetPosition();
+
+	for (int i = 0; i < pCameraChaseChanger->GetNumAll(); i++)
+	{
+		// î•ñæ“¾
+		ChaseChangerInfo = pCameraChaseChanger->GetChaseChangeInfo(i);
+
+		// ‰~‚Ì”»’è
+		if (CircleRange(pos, ChaseChangerInfo.pos, GetRadius(), 50.0f))
+		{
+			// ’Ç]‚Ìí—Şİ’è
+			pCamera->SetChaseType(ChaseChangerInfo.chaseType);
+
+			if (ChaseChangerInfo.chaseType == CCamera::CHASETYPE_NORMAL)
+			{
+				D3DXVECTOR3 AxisPos = CManager::GetInstance()->GetScene()->GetCameraAxis()->GetAxis(ChaseChangerInfo.nByTypeIdx);
+				pCamera->SetTargetPos(AxisPos);
+			}
+			break;
+		}
+	}
+
 }
 
 //==========================================================================

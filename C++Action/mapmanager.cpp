@@ -307,9 +307,10 @@ D3DXVECTOR3 CMapManager::GetControlPoint(int nIdx)
 //==========================================================================
 // 目標の位置取得
 //==========================================================================
-D3DXVECTOR3 CMapManager::GetTargetPosition(int nIdx, float fRatio)
+D3DXVECTOR3 CMapManager::GetTargetPosition(int nIdx, float fMoveValue)
 {
 	D3DXVECTOR3 pos = mylib_const::DEFAULT_VECTOR3;
+	float fRatio = 0.0f;
 
 	// 曲線作る為の4点
 	int nP0, nP1, nP2, nP3;
@@ -323,6 +324,47 @@ D3DXVECTOR3 CMapManager::GetTargetPosition(int nIdx, float fRatio)
 	D3DXVECTOR3 TargetPoint1 = GetControlPoint(nP1);
 	D3DXVECTOR3 TargetPoint2 = GetControlPoint(nP2);
 	D3DXVECTOR3 TargetPoint3 = GetControlPoint(nP3);
+
+	// 2点間の距離取得
+	float fPosLength = GetPosLength(TargetPoint1, TargetPoint2);
+
+	// 割合を求める
+	fRatio = fMoveValue / fPosLength;
+
+	if (fRatio >= 1.0f && nIdx < GetControlPointNum() - 1)
+	{
+		// マップの位置加算
+		nIdx++;
+		if (nP1 < GetControlPointNum() - 1)
+		{
+			fMoveValue = fMoveValue - fPosLength;
+			fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
+		}
+	}
+	else if (fRatio < 0.0f)
+	{
+		// マップの位置減算
+		nIdx--;
+		if (nIdx < -1)
+		{
+			nIdx = -1;
+		}
+
+		fMoveValue = GetPosLength(TargetPoint0, TargetPoint1) - (-fMoveValue);
+		fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
+	}
+
+	// 補正の4点更新
+	nP0 = nIdx;
+	nP1 = nIdx + 1;
+	nP2 = nIdx + 2;
+	nP3 = nIdx + 3;
+
+	// 4点の位置も更新
+	TargetPoint0 = GetControlPoint(nP0);
+	TargetPoint1 = GetControlPoint(nP1);
+	TargetPoint2 = GetControlPoint(nP2);
+	TargetPoint3 = GetControlPoint(nP3);
 
 	pos = CatmullRomSplineInterp(TargetPoint0, TargetPoint1, TargetPoint2, TargetPoint3, fRatio);
 

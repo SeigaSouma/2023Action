@@ -84,6 +84,7 @@ protected:
 	};
 
 	void Collision(void);	// 当たり判定
+	void CollisionChaseChanger(void);	// 追従の変更者との判定
 
 	bool m_bJump;				// ジャンプ中かどうか
 	bool m_bKnockback;			// ノックバック中かどうか

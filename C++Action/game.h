@@ -21,6 +21,7 @@ class CPowerGauge;
 class CEditControlPoint;
 class CBulletManager;
 class CEditCameraAxis;
+class CEditCameraChaseChanger;
 
 //==========================================================================
 // クラス定義
@@ -54,6 +55,7 @@ private:
 	static CEditControlPoint *m_pEditControlPoint;	// 制御点エディターのオブジェクト
 	static CBulletManager *m_pBulletManager;		// 弾マネージャのオブジェクト
 	static CEditCameraAxis *m_pEditCameraAxis;		// カメラ軸エディターのオブジェクト
+	static CEditCameraChaseChanger *m_pEditCmaeraChaseChanger;	// カメラ追従変更者エディターのオブジェクト
 };
 
 

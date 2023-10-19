@@ -1,10 +1,11 @@
 //=============================================================================
 // 
-//  カメラ軸エディット処理 [edit_cameraaxis.cpp]
+//  カメラ追従種類変更エディット処理 [edit_camerachasechanger.cpp]
 //  Author : 相馬靜雅
 // 
 //=============================================================================
-#include "edit_cameraaxis.h"
+#include "edit_camerachasechanger.h"
+#include "camerachasechanger.h"
 #include "objectX.h"
 #include "XLoad.h"
 #include "manager.h"
@@ -13,9 +14,8 @@
 #include "debugproc.h"
 #include "input.h"
 #include "elevation.h"
-#include "camera.h"
-#include "cameraaxis.h"
 #include "3D_effect.h"
+#include "mapmanager.h"
 
 //==========================================================================
 // マクロ定義
@@ -30,17 +30,20 @@
 //==========================================================================
 // コンストラクタ
 //==========================================================================
-CEditCameraAxis::CEditCameraAxis()
+CEditCameraChaseChanger::CEditCameraChaseChanger()
 {
 	// ゼロクリア
 	m_pos = mylib_const::DEFAULT_VECTOR3;	// 位置
-
+	m_ChaseType = CCamera::CHASETYPE_NORMAL;	// 追従の種類
+	m_nIdxMapPoint = 0;			// マップポイントのインデックス番号
+	m_fPointRatio = 0.0f;		// 移動割合
+	m_fMoveValue = 0.0f;		// 移動量
 }
 
 //==========================================================================
 // デストラクタ
 //==========================================================================
-CEditCameraAxis::~CEditCameraAxis()
+CEditCameraChaseChanger::~CEditCameraChaseChanger()
 {
 
 }
@@ -48,16 +51,16 @@ CEditCameraAxis::~CEditCameraAxis()
 //==========================================================================
 // 生成処理
 //==========================================================================
-CEditCameraAxis *CEditCameraAxis::Create(void)
+CEditCameraChaseChanger *CEditCameraChaseChanger::Create(void)
 {
 	// 生成用のオブジェクト
-	CEditCameraAxis *pObjectX = NULL;
+	CEditCameraChaseChanger *pObjectX = NULL;
 
 	if (pObjectX == NULL)
 	{// NULLだったら
 
 		// メモリの確保
-		pObjectX = DEBUG_NEW CEditCameraAxis;
+		pObjectX = DEBUG_NEW CEditCameraChaseChanger;
 
 		if (pObjectX != NULL)
 		{// メモリの確保が出来ていたら
@@ -79,7 +82,7 @@ CEditCameraAxis *CEditCameraAxis::Create(void)
 //==========================================================================
 // 初期化処理
 //==========================================================================
-HRESULT CEditCameraAxis::Init(void)
+HRESULT CEditCameraChaseChanger::Init(void)
 {
 	m_pos = CManager::GetInstance()->GetCamera()->GetPositionR();
 	return S_OK;
@@ -88,7 +91,7 @@ HRESULT CEditCameraAxis::Init(void)
 //==========================================================================
 // 終了処理
 //==========================================================================
-void CEditCameraAxis::Uninit(void)
+void CEditCameraChaseChanger::Uninit(void)
 {
 
 }
@@ -96,14 +99,24 @@ void CEditCameraAxis::Uninit(void)
 //==========================================================================
 // 更新処理
 //==========================================================================
-void CEditCameraAxis::Update(void)
+void CEditCameraChaseChanger::Update(void)
 {
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 操作
 	Control(m_pos);
-	CEffect3D::Create(m_pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(0.1f, 0.6f, 1.0f, 1.0f), 50.0f, 2, CEffect3D::MOVEEFFECT_NONE, CEffect3D::TYPE_SMOKE);
+
+	switch (m_ChaseType)
+	{
+	case CCamera::CHASETYPE_NORMAL:
+		CEffect3D::Create(m_pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(0.0f, 1.0f, 1.0f, 1.0f), 50.0f, 2, CEffect3D::MOVEEFFECT_NONE, CEffect3D::TYPE_NORMAL);
+		break;
+
+	case CCamera::CHASETYPE_MAP:
+		CEffect3D::Create(m_pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 1.0f, 1.0f), 50.0f, 2, CEffect3D::MOVEEFFECT_NONE, CEffect3D::TYPE_NORMAL);
+		break;
+	}
 
 	// 掴み処理
 	if (pInputKeyboard->GetPress(DIK_SPACE) == true)
@@ -111,16 +124,21 @@ void CEditCameraAxis::Update(void)
 		Grab();
 	}
 
+	if (pInputKeyboard->GetTrigger(DIK_C) == true)
+	{// Cキーで追従種類変更
+		m_ChaseType = (CCamera::CHASETYPE)(((int)m_ChaseType + 1) % (int)CCamera::CHASETYPE_MAX);	// 追従の種類
+	}
+
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) == true)
 	{// ENTERで配置
 
 		// マップマネージャの取得
-		CCameraAxis *pCameraAxis = CManager::GetInstance()->GetScene()->GetCameraAxis();
-		if (pCameraAxis == NULL)
+		CCameraChaseChanger *pCmaeraChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+		if (pCmaeraChanger == NULL)
 		{
 			return;
 		}
-		pCameraAxis->CreatePos(m_pos);
+		pCmaeraChanger->CreatePos(m_ChaseType, m_pos);
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_DELETE) == true)
@@ -136,27 +154,28 @@ void CEditCameraAxis::Update(void)
 		{
 			return;
 		}
-		CCameraAxis *pCameraAxis = CManager::GetInstance()->GetScene()->GetCameraAxis();
-		pCameraAxis->Save("data\\BIN\\cameraaxis.bin");
+		CCameraChaseChanger *pCmaeraChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+		pCmaeraChanger->Save("data\\BIN\\camerachanger.bin");
 	}
 
 	// デバッグ情報
 	CManager::GetInstance()->GetDebugProc()->Print(
-		"------------------[ エディット情報 ]------------------\n"
+		"------------------[ 追従種類変更情報 ]------------------\n"
 		"<配置>         [ENTER]\n"
 		"<ファイル保存> [F9] 【data/TEXT/edit_info.txt】\n"
+		"<種類>         [C：%d]\n"
 		"<移動>         高速：[↑,↓,←,→]　低速：[W,A,S,D]\n"
 		"<上昇,下降>    [I,K]\n"
 		"<掴み移動>     [SPACE]\n"
 		"<削除>         [DELETE]\n"
 		"<位置>         [X：%f Y：%f Z：%f]\n"
-		"\n", m_pos.x, m_pos.y, m_pos.z);
+		"\n", m_ChaseType, m_pos.x, m_pos.y, m_pos.z);
 }
 
 //==========================================================================
 // 操作処理
 //==========================================================================
-void CEditCameraAxis::Control(D3DXVECTOR3 &pos)
+void CEditCameraChaseChanger::Control(D3DXVECTOR3 &pos)
 {
 	// カメラの情報取得
 	CCamera *pCamera = CManager::GetInstance()->GetCamera();
@@ -170,115 +189,23 @@ void CEditCameraAxis::Control(D3DXVECTOR3 &pos)
 	if (pInputKeyboard->GetPress(DIK_LEFT) == true)
 	{// ←キーが押された,左移動
 
-		if (pInputKeyboard->GetPress(DIK_UP) == true)
-		{// A+W,左上移動
-
-			pos.x += sinf(-D3DX_PI * MOVE_LRDW + Camerarot.y) * MOVE;
-			pos.z += cosf(-D3DX_PI * MOVE_LRDW + Camerarot.y) * MOVE;
-		}
-		else if (pInputKeyboard->GetPress(DIK_DOWN) == true)
-		{// A+S,左下移動
-
-			pos.x += sinf(-D3DX_PI * MOVE_LRUP + Camerarot.y) * MOVE;
-			pos.z += cosf(-D3DX_PI * MOVE_LRUP + Camerarot.y) * MOVE;
-		}
-		else
-		{// A,左移動
-
-			pos.x += sinf(-D3DX_PI * MOVE_LR + Camerarot.y) * MOVE;
-			pos.z += cosf(-D3DX_PI * MOVE_LR + Camerarot.y) * MOVE;
-		}
+		m_fMoveValue -= MOVE;
 	}
 	else if (pInputKeyboard->GetPress(DIK_RIGHT) == true)
 	{// Dキーが押された,右移動
 
-		if (pInputKeyboard->GetPress(DIK_UP) == true)
-		{// D+W,右上移動
-
-			pos.x += sinf(D3DX_PI * MOVE_LRDW + Camerarot.y) * MOVE;
-			pos.z += cosf(D3DX_PI * MOVE_LRDW + Camerarot.y) * MOVE;
-		}
-		else if (pInputKeyboard->GetPress(DIK_DOWN) == true)
-		{// D+S,右下移動
-
-			pos.x += sinf(D3DX_PI * MOVE_LRUP + Camerarot.y) * MOVE;
-			pos.z += cosf(D3DX_PI * MOVE_LRUP + Camerarot.y) * MOVE;
-		}
-		else
-		{// D,右移動
-
-			pos.x += sinf(D3DX_PI * MOVE_LR + Camerarot.y) * MOVE;
-			pos.z += cosf(D3DX_PI * MOVE_LR + Camerarot.y) * MOVE;
-		}
-	}
-	else if (pInputKeyboard->GetPress(DIK_UP) == true)
-	{// Wが押された、奥移動
-
-		pos.x += sinf(Camerarot.y) * MOVE;
-		pos.z += cosf(Camerarot.y) * MOVE;
-	}
-	else if (pInputKeyboard->GetPress(DIK_DOWN) == true)
-	{// Sが押された、手前移動
-
-		pos.x += sinf(D3DX_PI + Camerarot.y) * MOVE;
-		pos.z += cosf(D3DX_PI + Camerarot.y) * MOVE;
+		m_fMoveValue += MOVE;
 	}
 
 	if (pInputKeyboard->GetPress(DIK_A) == true)
 	{// ←キーが押された,左移動
 
-		if (pInputKeyboard->GetPress(DIK_W) == true)
-		{// A+W,左上移動
-
-			pos.x += sinf(-D3DX_PI * MOVE_LRDW + Camerarot.y) * MOVE_SLOW;
-			pos.z += cosf(-D3DX_PI * MOVE_LRDW + Camerarot.y) * MOVE_SLOW;
-		}
-		else if (pInputKeyboard->GetPress(DIK_S) == true)
-		{// A+S,左下移動
-
-			pos.x += sinf(-D3DX_PI * MOVE_LRUP + Camerarot.y) * MOVE_SLOW;
-			pos.z += cosf(-D3DX_PI * MOVE_LRUP + Camerarot.y) * MOVE_SLOW;
-		}
-		else
-		{// A,左移動
-
-			pos.x += sinf(-D3DX_PI * MOVE_LR + Camerarot.y) * MOVE_SLOW;
-			pos.z += cosf(-D3DX_PI * MOVE_LR + Camerarot.y) * MOVE_SLOW;
-		}
+		m_fMoveValue -= MOVE_SLOW;
 	}
 	else if (pInputKeyboard->GetPress(DIK_D) == true)
 	{// Dキーが押された,右移動
 
-		if (pInputKeyboard->GetPress(DIK_W) == true)
-		{// D+W,右上移動
-
-			pos.x += sinf(D3DX_PI * MOVE_LRDW + Camerarot.y) * MOVE_SLOW;
-			pos.z += cosf(D3DX_PI * MOVE_LRDW + Camerarot.y) * MOVE_SLOW;
-		}
-		else if (pInputKeyboard->GetPress(DIK_S) == true)
-		{// D+S,右下移動
-
-			pos.x += sinf(D3DX_PI * MOVE_LRUP + Camerarot.y) * MOVE_SLOW;
-			pos.z += cosf(D3DX_PI * MOVE_LRUP + Camerarot.y) * MOVE_SLOW;
-		}
-		else
-		{// D,右移動
-
-			pos.x += sinf(D3DX_PI * MOVE_LR + Camerarot.y) * MOVE_SLOW;
-			pos.z += cosf(D3DX_PI * MOVE_LR + Camerarot.y) * MOVE_SLOW;
-		}
-	}
-	else if (pInputKeyboard->GetPress(DIK_W) == true)
-	{// Wが押された、奥移動
-
-		pos.x += sinf(Camerarot.y) * MOVE_SLOW;
-		pos.z += cosf(Camerarot.y) * MOVE_SLOW;
-	}
-	else if (pInputKeyboard->GetPress(DIK_S) == true)
-	{// Sが押された、手前移動
-
-		pos.x += sinf(D3DX_PI + Camerarot.y) * MOVE_SLOW;
-		pos.z += cosf(D3DX_PI + Camerarot.y) * MOVE_SLOW;
+		m_fMoveValue += MOVE_SLOW;
 	}
 
 	if (pInputKeyboard->GetPress(DIK_I) == true)
@@ -304,20 +231,31 @@ void CEditCameraAxis::Control(D3DXVECTOR3 &pos)
 		// 高さ代入
 		pos.y = fHeight;
 	}
+
+	// マップマネージャの取得
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	// 位置更新
+	pos = pMapManager->UpdateNowPosition(m_nIdxMapPoint, m_fPointRatio, m_fMoveValue, pos.y);
+
 }
 
 //==========================================================================
 // モデル掴む
 //==========================================================================
-void CEditCameraAxis::Grab(void)
+void CEditCameraChaseChanger::Grab(void)
 {
 
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// マップマネージャ取得
-	CCameraAxis *pCameraAxis = CManager::GetInstance()->GetScene()->GetCameraAxis();
-	if (pCameraAxis == NULL)
+	CCameraChaseChanger *pCmaeraChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+	if (pCmaeraChanger == NULL)
 	{// NULLで抜ける
 		return;
 	}
@@ -328,9 +266,9 @@ void CEditCameraAxis::Grab(void)
 		bAll = true;
 	}
 
-	for (int i = 0; i < pCameraAxis->GetNumAll(); i++)
+	for (int i = 0; i < pCmaeraChanger->GetNumAll(); i++)
 	{
-		D3DXVECTOR3 TargetPoint = pCameraAxis->GetAxis(i);
+		D3DXVECTOR3 TargetPoint = pCmaeraChanger->GetAxis(i);
 		if (bAll == true || SphereRange(m_pos, TargetPoint, 50.0f, 50.0f))
 		{// 球に当たってたら
 
@@ -338,7 +276,7 @@ void CEditCameraAxis::Grab(void)
 			Control(TargetPoint);
 
 			// 位置設定
-			pCameraAxis->SetAxis(TargetPoint, i);
+			pCmaeraChanger->SetAxis(TargetPoint, i);
 		}
 	}
 }
@@ -346,7 +284,7 @@ void CEditCameraAxis::Grab(void)
 //==========================================================================
 // モデル掴む
 //==========================================================================
-void CEditCameraAxis::Delete(void)
+void CEditCameraChaseChanger::Delete(void)
 {
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
@@ -357,14 +295,14 @@ void CEditCameraAxis::Delete(void)
 	}
 
 	// マップマネージャ取得
-	CCameraAxis *pCameraAxis = CManager::GetInstance()->GetScene()->GetCameraAxis();
+	CCameraChaseChanger *pCmaeraChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
 
-	for (int i = 0; i < pCameraAxis->GetNumAll(); i++)
+	for (int i = 0; i < pCmaeraChanger->GetNumAll(); i++)
 	{
-		D3DXVECTOR3 TargetPoint = pCameraAxis->GetAxis(i);
+		D3DXVECTOR3 TargetPoint = pCmaeraChanger->GetAxis(i);
 		if (SphereRange(m_pos, TargetPoint, 50.0f, 50.0f))
 		{// 球に当たってたら
-			pCameraAxis->DeletePos(i);
+			pCmaeraChanger->DeletePos(i);
 		}
 	}
 }
@@ -372,7 +310,7 @@ void CEditCameraAxis::Delete(void)
 //==========================================================================
 // 描画処理
 //==========================================================================
-void CEditCameraAxis::Draw(void)
+void CEditCameraChaseChanger::Draw(void)
 {
 
 }

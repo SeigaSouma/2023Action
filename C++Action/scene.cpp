@@ -15,6 +15,7 @@
 #include "mapmanager.h"
 #include "player.h"
 #include "cameraaxis.h"
+#include "camerachasechanger.h"
 
 // 遷移先
 #include "game.h"
@@ -31,6 +32,7 @@ CElevation *CScene::m_pObject3DMesh = NULL;		// オブジェクト3Dメッシュのオブジェ
 CEnemyManager *CScene::m_pEnemyManager = NULL;	// 敵マネージャのオブジェクト
 CMapManager *CScene::m_pMapManager = NULL;		// マップマネージャのオブジェクト
 CCameraAxis *CScene::m_pCameraAxis = NULL;		// カメラの軸のオブジェクト
+CCameraChaseChanger *CScene::m_pCameraChaseChanger = NULL;	// カメラ追従変更者のオブジェクト
 
 //==========================================================================
 // コンストラクタ
@@ -140,6 +142,15 @@ HRESULT CScene::Init(void)
 	{// NULLだったら
 		return E_FAIL;
 	}
+
+	//**********************************
+	// カメラ追従変更者
+	//**********************************
+	m_pCameraChaseChanger = CCameraChaseChanger::Create("data\\BIN\\camerachanger.bin");
+	if (m_pCameraChaseChanger == NULL)
+	{// NULLだったら
+		return E_FAIL;
+	}
 	
 	//**********************************
 	// 敵マネージャ
@@ -211,6 +222,14 @@ void CScene::Uninit(void)
 		m_pCameraAxis = NULL;
 	}
 
+	// カメラ追従変更者
+	if (m_pCameraChaseChanger != NULL)
+	{
+		m_pCameraChaseChanger->Uninit();
+		delete m_pCameraChaseChanger;
+		m_pCameraChaseChanger = NULL;
+	}
+
 	// 敵マネージャ
 	if (m_pEnemyManager != NULL)
 	{
@@ -239,6 +258,9 @@ void CScene::Update(void)
 
 	// カメラの軸の更新処理
 	m_pCameraAxis->Update();
+
+	// カメラ追従変更者
+	m_pCameraChaseChanger->Update();
 }
 
 //==========================================================================
@@ -295,6 +317,14 @@ CMapManager *CScene::GetMapManager(void)
 CCameraAxis *CScene::GetCameraAxis(void)
 {
 	return m_pCameraAxis;
+}
+
+//==========================================================================
+// カメラ追従変更者の取得
+//==========================================================================
+CCameraChaseChanger *CScene::GetCameraChaseChanger(void)
+{
+	return m_pCameraChaseChanger;
 }
 
 //==========================================================================

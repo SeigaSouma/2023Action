@@ -42,6 +42,9 @@
 #define RESULT_LEN	(280.0f)
 //#define RESULT_LEN	(1000.0f)
 #define RANKINGROT_NONE		(D3DXVECTOR3(0.0f, -0.79f + D3DX_PI, -0.30f))
+#define ROTHOSEI	(0.01f)	// 向きの補正係数
+#define POSV_HOSEI	(0.12f)
+#define POSR_HOSEI	(0.08f)
 
 //==========================================================================
 // コンストラクタ
@@ -129,6 +132,7 @@ HRESULT CCamera::Init(void)
 	m_fDistanceCorrection = 0;					// 距離の慣性補正係数
 	m_fDistanceDecrementValue = 0.0f;			// 距離の減少係数
 	m_fHeightMaxDest = 0.0f;					// カメラの最大高さの目標
+	m_ChaseType = CHASETYPE_MAP;				// 追従の種類
 
 	// 視点の代入処理
 	SetCameraV();
@@ -181,31 +185,6 @@ void CCamera::Update(void)
 		m_bFollow = m_bFollow ? false : true;
 	}
 
-	if (pInputKeyboard->GetTrigger(DIK_C) == true)
-	{
-		m_ChaseType = (CHASETYPE)(((int)m_ChaseType + 1) % (int)CHASETYPE_MAX);	// 追従の種類
-	}
-
-
-	if (pInputKeyboard->GetTrigger(DIK_F5) == true)
-	{// F7が押された,追従切り替え
-		//m_posR = D3DXVECTOR3(0.0f, 100.0f, 0.0f);				// 注視点(見たい場所)
-		//m_posV = D3DXVECTOR3(0.0f, 200.0f, m_posR.z + -500.0f);	// 視点(カメラの位置)
-		//m_posVDest = m_posV;									// 目標の視点
-		//m_posRDest = m_posR;									// 目標の注視点
-		//m_vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
-		m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);					// 移動量
-		m_rot = D3DXVECTOR3(m_rot.x, 0.0f, m_rot.z);					// 向き
-		m_rotVDest = m_rot;										// 目標の視点の向き
-		m_fOriginDistance = START_CAMERALEN;					// 元の距離
-		m_fDestDistance = m_fOriginDistance;
-		m_fDistance = m_fOriginDistance;
-		//m_fDistance = START_CAMERALEN;							// 距離
-		//m_state = CAMERASTATE_NONE;								// 状態
-
-		//// 視点の代入処理
-		//SetCameraV();
-	}
 //#endif
 
 	// テキストの描画
@@ -742,7 +721,7 @@ void CCamera::SetCameraRTitle(void)
 		m_posRDest.y = fYcamera - m_fDiffHeight;
 
 		// 補正する
-		m_posR += (m_posRDest - m_posR) * 0.08f;
+		m_posR += (m_posRDest - m_posR) * POSR_HOSEI;
 	}
 }
 
@@ -796,13 +775,54 @@ void CCamera::SetCameraRGame(void)
 		m_fDiffHeight += (m_fDiffHeightDest - m_fDiffHeight) * 0.001f;
 
 
+
+
+
+
+		// マップマネージャの取得
+		CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+		if (pMapManager == NULL)
+		{// NULLだったら
+			return;
+		}
+
+		// マップ情報取得
+		int nMapIdx = pPlayer->GetMapIndex();
+		float fMapRatio = pPlayer->GetMapPointRatio();
+		float fMapMoveValue = pPlayer->GetMapMoveValue();
+
+		// 曲線作る為の4点
+		int nP0 = nMapIdx;
+		int nP1 = nMapIdx + 1;
+		int nP2 = nMapIdx + 2;
+
+		// 目標地点
+		D3DXVECTOR3 TargetPoint0 = pMapManager->GetControlPoint(nP0);
+		D3DXVECTOR3 TargetPoint1 = pMapManager->GetControlPoint(nP1);
+		D3DXVECTOR3 TargetPoint2 = pMapManager->GetControlPoint(nP2);
+
+		int nAngle = 1;
+		if (pPlayer->GetMoveAngle() == CObject::ANGLE_LEFT)
+		{
+			nAngle = -1;
+		}
+
+		// 少し先の地点取得
+		float fMoveValue = fMapMoveValue + 150.0f * nAngle;
+		D3DXVECTOR3 DestPoint = pMapManager->GetTargetPosition(nMapIdx, fMoveValue);
+
+
+
+
+
+
 		// 注視点の代入処理
-		m_posRDest.x = (PlayerPos.x + sinf(D3DX_PI + PlayerRot.y) * 0.0f);
-		m_posRDest.z = (PlayerPos.z + cosf(D3DX_PI + PlayerRot.y) * 0.0f);
+		m_posRDest.x = DestPoint.x;
+		m_posRDest.z = DestPoint.z;
 		m_posRDest.y = fYcamera - m_fDiffHeight;
 
 		// 補正する
-		m_posR += (m_posRDest - m_posR) * 0.08f;
+		m_posR += (m_posRDest - m_posR) * POSR_HOSEI;
 
 	}
 }
@@ -837,13 +857,13 @@ void CCamera::ChaseNormal(void)
 	float fYcamera = 100.0f;
 
 	// 目標の視点の向き
-	m_rotVDest.y = atan2f((0.0f - PlayerPos.x), (0.0f - PlayerPos.z));
+	m_rotVDest.y = atan2f((m_TargetPos.x - PlayerPos.x), (m_TargetPos.z - PlayerPos.z));
 
 	//現在と目標の差分を求める
 	float fRotDiff = m_rotVDest.y - m_rot.y;
 	RotNormalize(fRotDiff);
 
-	m_rot.y += fRotDiff * 0.025f;
+	m_rot.y += fRotDiff * ROTHOSEI;
 	RotNormalize(m_rot.y);
 
 	// 視点の代入処理
@@ -907,7 +927,7 @@ void CCamera::ChaseNormal(void)
 	}
 
 	// 補正する
-	m_posV += (m_posVDest - m_posV) * 0.12f;
+	m_posV += (m_posVDest - m_posV) * POSV_HOSEI;
 }
 
 //==================================================================================
@@ -933,6 +953,7 @@ void CCamera::ChaseMap(void)
 	// マップ情報取得
 	int nMapIdx = pPlayer->GetMapIndex();
 	float fMapRatio = pPlayer->GetMapPointRatio();
+	float fMapMoveValue = pPlayer->GetMapMoveValue();
 
 	// 曲線作る為の4点
 	int nP0 = nMapIdx;
@@ -944,9 +965,15 @@ void CCamera::ChaseMap(void)
 	D3DXVECTOR3 TargetPoint1 = pMapManager->GetControlPoint(nP1);
 	D3DXVECTOR3 TargetPoint2 = pMapManager->GetControlPoint(nP2);
 
+	int nAngle = 1;
+	if (pPlayer->GetMoveAngle() == CObject::ANGLE_LEFT)
+	{
+		nAngle = -1;
+	}
+
 	// 少し先の地点取得
-	float fRatio = fMapRatio + 0.05f;
-	D3DXVECTOR3 DestPoint = pMapManager->GetTargetPosition(nMapIdx, fRatio);
+	float fMoveValue = fMapMoveValue + 50.0f * nAngle;
+	D3DXVECTOR3 DestPoint = pMapManager->GetTargetPosition(nMapIdx, fMoveValue);
 
 	// ベクトル
 	D3DXVECTOR3 vec = mylib_const::DEFAULT_VECTOR3;
@@ -956,7 +983,14 @@ void CCamera::ChaseMap(void)
 	float fPosLength = GetPosLength(TargetPoint1, TargetPoint2);
 
 	// ベクトル
-	vec = DestPoint - TargetPoint1;
+	if (fMapMoveValue < fMoveValue)
+	{
+		vec = DestPoint - PlayerPos;
+	}
+	else
+	{
+		vec = PlayerPos - DestPoint;
+	}
 	D3DXVec3Normalize(&vec, &vec);
 
 	// 90度傾ける
@@ -970,7 +1004,7 @@ void CCamera::ChaseMap(void)
 	float fRotDiff = m_rotVDest.y - m_rot.y;
 	RotNormalize(fRotDiff);
 
-	m_rot.y += fRotDiff * 0.025f;
+	m_rot.y += fRotDiff * ROTHOSEI;
 	RotNormalize(m_rot.y);
 
 	// 視点の代入処理
@@ -1037,7 +1071,7 @@ void CCamera::ChaseMap(void)
 	}
 
 	// 補正する
-	m_posV += (m_posVDest - m_posV) * 0.12f;
+	m_posV += (m_posVDest - m_posV) * POSV_HOSEI;
 
 }
 
@@ -1117,11 +1151,16 @@ void CCamera::SetShake(int nTime, float fLength, float fLengthY)
 //==================================================================================
 void CCamera::SetTargetPos(const D3DXVECTOR3 pos)
 {
-	if (CManager::GetInstance()->GetMode() == CScene::MODE_TITLE)
-	{
-		// 目標の位置
-		m_TargetPos = pos;
-	}
+	// 目標の位置
+	m_TargetPos = pos;
+}
+
+//==================================================================================
+// 追従の種類設定
+//==================================================================================
+void CCamera::SetChaseType(CHASETYPE type)
+{
+	m_ChaseType = type;
 }
 
 //==================================================================================
