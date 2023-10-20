@@ -63,7 +63,7 @@ public:
 	int GetIdxXFile(void) const;				// Xファイルのインデックス取得
 	bool GetUseShadow(void) const;				// 影を使っているかどうか
 
-	float GetHeight(D3DXVECTOR3 pos);	// 高さ取得
+	float GetHeight(D3DXVECTOR3 pos, bool &bLand);	// 高さ取得
 
 	void Kill(void);
 	static CObjectX *Create();

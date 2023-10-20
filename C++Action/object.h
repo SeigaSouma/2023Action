@@ -118,6 +118,8 @@ public:
 	float GetMapPointRatio(void);			// マップポイント間の割合設定
 	void SetMapMoveValue(float fValue);		// マップポイント間の移動量設定
 	float GetMapMoveValue(void);			// マップポイント間の移動量設定
+	void SetOldMapMoveValue(float fValue);		// マップポイント間の移動量設定
+	float GetOldMapMoveValue(void);			// マップポイント間の移動量設定
 	void SetMoveAngle(ANGLE angle);			// 移動方向設定
 	ANGLE GetMoveAngle(void);				// 移動方向取得
 	void SetOldMoveAngle(ANGLE angle);		// 過去の移動方向設定
@@ -171,6 +173,7 @@ private:
 	int m_nIdxMapPoint;			// マップポイントのインデックス番号
 	float m_fPointRatio;		// 移動割合
 	float m_fMoveValue;			// 移動量
+	float m_fOldMoveValue;			// 過去の移動量
 
 };
 

@@ -265,7 +265,7 @@ void CTutorialPlayer::Controll(void)
 	//**********************************
 	// “–‚½‚è”»’è
 	//**********************************
-	Collision();
+	//Collision();
 
 	if ((pInputKeyboard->GetTrigger(DIK_RETURN) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_A, 0) == true) &&
 		m_bATK == false)

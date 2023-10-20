@@ -359,7 +359,7 @@ void CObjectX::Update(void)
 //==========================================================================
 // 高さ取得
 //==========================================================================
-float CObjectX::GetHeight(D3DXVECTOR3 pos)
+float CObjectX::GetHeight(D3DXVECTOR3 pos, bool &bLand)
 {
 	// Xファイルのデータ取得
 	CXLoad::SXFile *pXData = CScene::GetXLoad()->GetObjectX(m_nIdxXFile);
@@ -400,15 +400,16 @@ float CObjectX::GetHeight(D3DXVECTOR3 pos)
 		}
 
 		// 三角で高さを求める
-		bool bLand = false;
-		float fNowHeight = GetVtxHeight(pos, pos1, pos3, pos2, bLand);
-		//fNowHeight += pos.y;
+		
+		bool bNowLand = false;
+		float fNowHeight = GetVtxHeight(pos, pos1, pos3, pos2, bNowLand);
 
-		if (bLand == true && fNowHeight > fHeightMax)
+		if (bNowLand == true && fNowHeight > fHeightMax)
 		{// 着地してたら
 
 			// 最大高さ更新
 			fHeightMax = fNowHeight;
+			bLand = true;
 		}
 	}
 

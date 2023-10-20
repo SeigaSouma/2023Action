@@ -83,13 +83,15 @@ protected:
 		ATKRUSH_MAX
 	};
 
-	void Collision(void);	// 当たり判定
+	bool Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move);	// 当たり判定
 	void CollisionChaseChanger(void);	// 追従の変更者との判定
 
 	bool m_bJump;				// ジャンプ中かどうか
 	bool m_bKnockback;			// ノックバック中かどうか
 	bool m_bMove;				// 移動中かどうか
 	bool m_bATK;				// 攻撃中かどうか
+	bool m_bLandOld;			// 過去の着地情報
+	bool m_bHitStage;			// ステージの当たり判定
 	int m_nCntWalk;				// 歩行カウンター
 	STATE m_state;			// 状態
 	CMotion *m_pMotion;		// モーションの情報

@@ -156,6 +156,10 @@ void CEnemyBoss::UpdateAttackBullet(void)
 		m_sAct.nCntWait = 120;
 		m_state = STATE_WAIT;
 		m_sMotionFrag.bATK = false;
+
+
+		// 通常モーション設定
+		m_pMotion->Set(MOTION_DEF);
 		return;
 	}
 	
@@ -376,11 +380,6 @@ void CEnemyBoss::MotionSet(void)
 
 			// やられモーション
 			m_pMotion->Set(MOTION_KNOCKBACK);
-		}
-		else
-		{
-			// ニュートラルモーション
-			m_pMotion->Set(MOTION_DEF);
 		}
 	}
 }

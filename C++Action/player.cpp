@@ -67,6 +67,7 @@ CPlayer::CPlayer(int nPriority) : CObjectChara(nPriority)
 	m_atkRush = ATKRUSH_RIGHT;	// 連続アタックの種類
 	m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// マテリアルの色
 	m_rotConfusion = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 混乱の向き
+	m_bLandOld = false;				// 過去の着地情報
 	m_bJump = false;				// ジャンプ中かどうか
 	m_bKnockback = false;			// ノックバック中かどうか
 	m_bMove = false;				// 移動中かどうか
@@ -288,6 +289,9 @@ void CPlayer::Update(void)
 
 	// 過去の位置保存
 	SetOldPosition(GetPosition());
+
+	// 過去の移動量保存
+	SetOldMapMoveValue(GetMapMoveValue());
 
 	// 操作
 	Controll();
@@ -628,7 +632,8 @@ void CPlayer::Controll(void)
 	float fPointRatio = GetMapPointRatio();
 
 	// 位置更新
-	pos = pMapManager->UpdateNowPosition(nIdxMapPoint, fPointRatio, fMoveValue, pos.y);
+	D3DXVECTOR3 newPosition = pos;
+	newPosition = pMapManager->UpdateNowPosition(nIdxMapPoint, fPointRatio, fMoveValue, pos.y);
 
 	// 目標地点
 	float fDest = (fMoveValue + fMove * m_nAngle);
@@ -670,8 +675,23 @@ void CPlayer::Controll(void)
 		move.y -= mylib_const::GRAVITY;
 	}
 
+	//**********************************
+	// 当たり判定
+	//**********************************
+	bool bLandStage = Collision(newPosition, move);
+
+	if (bLandStage == true)
+	{
+		pos = newPosition;
+	}
+	else
+	{
+		pos = GetOldPosition();
+		fMoveValue = GetOldMapMoveValue();
+	}
+
 	// 位置更新
-	pos += move;
+	pos.y += move.y;
 
 	// 慣性補正
 	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG)
@@ -704,10 +724,6 @@ void CPlayer::Controll(void)
 	// 移動方向設定
 	SetMoveAngle(MoveAngle);
 
-	//**********************************
-	// 当たり判定
-	//**********************************
-	Collision();
 
 	if (pInputGamepad->GetStickPositionRatioR(0).y <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).y >= -0.5f &&
 		pInputGamepad->GetStickPositionRatioR(0).x <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).x >= -0.5f)
@@ -1177,13 +1193,8 @@ void CPlayer::Atack(void)
 //==========================================================================
 // 当たり判定
 //==========================================================================
-void CPlayer::Collision(void)
+bool CPlayer::Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move)
 {
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
-
-	// 移動量取得
-	D3DXVECTOR3 move = GetMove();
 
 	// 向き取得
 	D3DXVECTOR3 rot = GetRotation();
@@ -1207,6 +1218,7 @@ void CPlayer::Collision(void)
 
 		// 地面の高さに補正
 		pos.y = fHeight;
+		m_bLandOld = false;
 
 		if (bLand == true)
 		{// 着地してたら
@@ -1222,9 +1234,10 @@ void CPlayer::Collision(void)
 	CStage *pStage = CGame::GetStage();
 	if (pStage == NULL)
 	{// NULLだったら
-		return;
+		return false;
 	}
 
+	static bool bNowLand = false;
 	for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
 	{
 		// オブジェクト取得
@@ -1236,23 +1249,60 @@ void CPlayer::Collision(void)
 		}
 
 		// 高さ取得
-		fHeight = pObjX->GetHeight(pos);
+		bool bLand = false;
+		fHeight = pObjX->GetHeight(pos, bLand);
 
-		if (fHeight > pos.y)
-		{// 地面の方が自分より高かったら
+		if (bLand == true)
+		{
+			bNowLand = true;
+		}
 
-			// 地面の高さに補正
-			pos.y = fHeight;
+		if (bLand == true && fHeight > pos.y)
+		{// 自分の方が地面よりたかかったら
+			bLand = false;
+			move = mylib_const::DEFAULT_VECTOR3;
+		}
 
-			if (bLand == true)
-			{// 着地してたら
+		if (m_bLandOld == false && bLand == true)
+		{// 前回は着地してなくて、今回は着地している場合
 
-				// ジャンプ使用可能にする
-				m_bJump = false;
-				move.y = 0.0f;
+			if (fHeight > pos.y)
+			{// 地面の方が自分より高かったら
+
+				// 地面の高さに補正
+				pos.y = fHeight;
+
+				if (bLand == true)
+				{// 着地してたら
+
+					// ジャンプ使用可能にする
+					m_bJump = false;
+					move.y = 0.0f;
+					bNowLand = true;
+				}
+			}
+			else
+			{// 自分の方が高い
+
 			}
 		}
+
+		//if (fHeight > pos.y && m_bLandOld == true)
+		//{// 地面の方が自分より高かったら
+
+		//	// 地面の高さに補正
+		//	pos.y = fHeight;
+
+		//	if (bLand == true)
+		//	{// 着地してたら
+
+		//		// ジャンプ使用可能にする
+		//		m_bJump = false;
+		//		move.y = 0.0f;
+		//	}
+		//}
 	}
+	m_bLandOld = false;
 
 
 
@@ -1267,15 +1317,11 @@ void CPlayer::Collision(void)
 	if (pos.x - GetRadius() <= -fLen * nBlock) { pos.x = -fLen * nBlock + GetRadius(); }
 	if (pos.z + GetRadius() >= fLen * nBlock) { pos.z = fLen * nBlock - GetRadius(); }
 	if (pos.z - GetRadius() <= -fLen * nBlock) { pos.z = -fLen * nBlock + GetRadius(); }
-	
-	// 位置設定
-	SetPosition(pos);
-
-	// 移動量設定
-	SetMove(move);
 
 	// 向き設定
 	SetRotation(rot);
+
+	return !bNowLand;
 }
 
 //==========================================================================

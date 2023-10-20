@@ -178,6 +178,9 @@ HRESULT CSlash::Init(void)
 	m_pObj3D->SetOriginRotation(rot);
 #endif
 
+	SetRotation(rotOrigin);
+	SetOriginRotation(rot);
+
 	return S_OK;
 }
 

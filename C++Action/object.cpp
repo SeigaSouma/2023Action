@@ -46,6 +46,7 @@ CObject::CObject(int nPriority)
 	m_nIdxMapPoint = 0;			// マップポイントのインデックス番号
 	m_fPointRatio = 0.0f;		// 移動割合
 	m_fMoveValue = 0.0f;		// 移動量
+	m_fOldMoveValue = 0.0f;		// 過去の移動量
 	m_nNumAll++;				// 総数加算
 	m_nNumPriorityAll[nPriority]++;
 
@@ -578,6 +579,22 @@ void CObject::SetMapMoveValue(float fValue)
 float CObject::GetMapMoveValue(void)
 {
 	return m_fMoveValue;
+}
+
+//==========================================================================
+// マップポイント間の移動量設定
+//==========================================================================
+void CObject::SetOldMapMoveValue(float fValue)
+{
+	m_fOldMoveValue = fValue;
+}
+
+//==========================================================================
+// マップポイント間の移動量設定
+//==========================================================================
+float CObject::GetOldMapMoveValue(void)
+{
+	return m_fOldMoveValue;
 }
 
 //==========================================================================
