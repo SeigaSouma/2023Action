@@ -62,6 +62,7 @@ bool CollisionSquareSquare2D(D3DXVECTOR3 &MainPos, D3DXVECTOR3 &TargetPos, D3DXV
 bool CollisionCircleSquare2D(D3DXVECTOR3 &posCircle, D3DXVECTOR3 &posSquare, D3DXVECTOR3 rotSquare, float fCircleRadius, D3DXVECTOR2 SquareSize);	// 円と矩形の当たり判定(2D)
 bool CollisionFan(D3DXVECTOR3 posChar, D3DXVECTOR3 posLeft, D3DXVECTOR3 posRight, D3DXVECTOR3 TargetPos, float fTargetRadius);	// 扇の当たり判定
 bool CollisionLine(D3DXVECTOR3 pos0, D3DXVECTOR3 pos1, D3DXVECTOR3 MainPos, D3DXVECTOR3 MainPosOld);							// 線分の右にいるかどうか
+float GetVtxHeight(D3DXVECTOR3 pos, D3DXVECTOR3 NowPos, D3DXVECTOR3 posRight, D3DXVECTOR3 posLeft, bool &bLand);				// 高さを求める
 int SetMoveLog(void);																											// ロゴ拡縮する時のインデックス取得
 float MoveLog(int nIdxMoveLog, float pos, int nCntElapsed);																		// pVtx[?].posの長さになるやつ
 void ResetMoveLog(int nIdxMoveLog);																								// もう一回拡縮したいとき

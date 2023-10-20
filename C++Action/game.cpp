@@ -24,6 +24,7 @@
 #include "edit_cameraaxis.h"
 #include "edit_camerachasechanger.h"
 #include "bulletmanager.h"
+#include "stage.h"
 
 //==========================================================================
 // ê√ìIÉÅÉìÉoïœêîêÈåæ
@@ -35,6 +36,7 @@ CEditControlPoint *CGame::m_pEditControlPoint = NULL;	// êßå‰ì_ÉGÉfÉBÉ^Å[ÇÃÉIÉuÉ
 CBulletManager *CGame::m_pBulletManager = NULL;		// íeÉ}ÉlÅ[ÉWÉÉÇÃÉIÉuÉWÉFÉNÉg
 CEditCameraAxis *CGame::m_pEditCameraAxis = NULL;		// ÉJÉÅÉâé≤ÉGÉfÉBÉ^Å[ÇÃÉIÉuÉWÉFÉNÉg
 CEditCameraChaseChanger *CGame::m_pEditCmaeraChaseChanger = NULL;	// ÉJÉÅÉâí«è]ïœçXé“ÉGÉfÉBÉ^Å[ÇÃÉIÉuÉWÉFÉNÉg
+CStage *CGame::m_pStage = NULL;	// ÉXÉeÅ[ÉWÇÃÉIÉuÉWÉFÉNÉg
 
 //==========================================================================
 // ÉRÉìÉXÉgÉâÉNÉ^
@@ -81,6 +83,9 @@ HRESULT CGame::Init(void)
 	//**********************************
 	m_pBulletManager = CBulletManager::Create();
 
+	// ÉXÉeÅ[ÉW
+	m_pStage = CStage::Create();
+
 
 	// ÉXÉRÉAÇÃê∂ê¨èàóù
 	m_pScore = CScore::Create(D3DXVECTOR3(1000.0f, 50.0f, 0.0f));
@@ -122,6 +127,16 @@ void CGame::Uninit(void)
 		// ÉÅÉÇÉäÇÃäJï˙
 		delete m_pTimer;
 		m_pTimer = NULL;
+	}
+
+	// ÉXÉeÅ[ÉWÇÃîjä¸
+	if (m_pStage != NULL)
+	{// ÉÅÉÇÉäÇÃämï€Ç™èoóàÇƒÇ¢ÇΩÇÁ
+
+		// èIóπèàóù
+		m_pStage->Uninit();
+		delete m_pStage;
+		m_pStage = NULL;
 	}
 
 	if (m_pEditControlPoint != NULL)
@@ -322,6 +337,14 @@ CEditControlPoint *CGame::GetEditControlPoint(void)
 CBulletManager *CGame::GetBulletManager(void)
 {
 	return m_pBulletManager;
+}
+
+//==========================================================================
+// ÉXÉeÅ[ÉWÇÃéÊìæ
+//==========================================================================
+CStage *CGame::GetStage(void)
+{
+	return m_pStage;
 }
 
 //==========================================================================

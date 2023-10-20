@@ -797,6 +797,44 @@ bool CollisionCircleSquare2D(D3DXVECTOR3 &posCircle, D3DXVECTOR3 &posSquare, D3D
 }
 
 //==================================================================================
+// 高さを求める
+//==================================================================================
+float GetVtxHeight(D3DXVECTOR3 pos, D3DXVECTOR3 NowPos, D3DXVECTOR3 posRight, D3DXVECTOR3 posLeft, bool &bLand)
+{
+	// 高さ
+	float fHeight = pos.y;
+
+	// 直角部分と位置のベクトル
+	D3DXVECTOR3 calvec = pos - NowPos;
+
+	// ベクトルと法線
+	D3DXVECTOR3 
+		vec1 = posRight - NowPos,
+		vec2 = posLeft - posRight,
+		nor = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+
+	if (CollisionTriangle(NowPos, posRight, posLeft, pos, pos) == true)
+	{// 三角に入っていたら
+
+		// 外積を求める
+		D3DXVec3Cross(&nor, &vec1, &vec2);
+
+		// 外積の正規化をして法線にする
+		D3DXVec3Normalize(&nor, &nor);
+
+		if (nor.y != 0.0f)
+		{// 法線が0.0fじゃなかったら
+
+			// 高さを求める
+			fHeight = -((calvec.x * nor.x) + (-NowPos.y * nor.y) + (calvec.z * nor.z)) / nor.y;
+			bLand = true;
+		}
+	}
+
+	return fHeight;
+}
+
+//==================================================================================
 //  線の当たり判定  
 //==================================================================================
 bool CollisionLine(D3DXVECTOR3 pos0, D3DXVECTOR3 pos1, D3DXVECTOR3 MainPos, D3DXVECTOR3 MainPosOld)

@@ -357,6 +357,68 @@ void CObjectX::Update(void)
 }
 
 //==========================================================================
+// 高さ取得
+//==========================================================================
+float CObjectX::GetHeight(D3DXVECTOR3 pos)
+{
+	// Xファイルのデータ取得
+	CXLoad::SXFile *pXData = CScene::GetXLoad()->GetObjectX(m_nIdxXFile);
+
+	if (pXData == NULL)
+	{// NULLだったら
+		return 0.0f;
+	}
+
+	// 最大の高さ
+	float fHeightMax = 0.0f;
+
+	// 自分の位置
+	D3DXVECTOR3 MyPosition = GetPosition();
+
+	WORD* pIndexBuff;
+
+	// インデックスバッファをロック
+	pXData->pMesh->LockIndexBuffer(D3DLOCK_READONLY, (void**)&pIndexBuff);
+
+	for (int nCntTri = 0; nCntTri < pXData->nFaceNum; nCntTri++) 
+	{
+		
+		int nIdx1 = (int)pIndexBuff[nCntTri * 3];
+		int nIdx2 = (int)pIndexBuff[nCntTri * 3 + 1];
+		int nIdx3 = (int)pIndexBuff[nCntTri * 3 + 2];
+
+		// 頂点位置代入
+		D3DXVECTOR3 pos1 = pXData->pVtxPos[nIdx1] + MyPosition;
+		D3DXVECTOR3 pos2 = pXData->pVtxPos[nIdx2] + MyPosition;
+		D3DXVECTOR3 pos3 = pXData->pVtxPos[nIdx3] + MyPosition;
+
+		// 絶対値(マイナスいかない)と最大の距離比較
+		if (fabsf(pos1.x - pos.x) > pXData->fMaxVtxDistance ||
+			fabsf(pos1.z - pos.z) > pXData->fMaxVtxDistance)
+		{// 頂点距離の方が長い
+			continue;
+		}
+
+		// 三角で高さを求める
+		bool bLand = false;
+		float fNowHeight = GetVtxHeight(pos, pos1, pos3, pos2, bLand);
+		//fNowHeight += pos.y;
+
+		if (bLand == true && fNowHeight > fHeightMax)
+		{// 着地してたら
+
+			// 最大高さ更新
+			fHeightMax = fNowHeight;
+		}
+	}
+
+	// インデックスバッファをアンロック
+	pXData->pMesh->UnlockIndexBuffer();
+
+	return fHeightMax;
+}
+
+//==========================================================================
 // 描画処理
 //==========================================================================
 void CObjectX::Draw(void)

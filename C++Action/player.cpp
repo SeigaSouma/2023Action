@@ -34,6 +34,8 @@
 #include "slash.h"
 #include "camerachasechanger.h"
 #include "cameraaxis.h"
+#include "stage.h"
+#include "objectX.h"
 
 // 派生先
 #include "tutorialplayer.h"
@@ -1182,6 +1184,45 @@ void CPlayer::Collision(void)
 			move.y = 0.0f;
 		}
 	}
+
+
+	// Xファイルとの判定
+	CStage *pStage = CGame::GetStage();
+	if (pStage == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
+	{
+		// オブジェクト取得
+		CObjectX *pObjX = pStage->GetObj(nCntStage);
+
+		if (pObjX == NULL)
+		{// NULLだったら
+			continue;
+		}
+
+		// 高さ取得
+		fHeight = pObjX->GetHeight(pos);
+
+		if (fHeight > pos.y)
+		{// 地面の方が自分より高かったら
+
+			// 地面の高さに補正
+			pos.y = fHeight;
+
+			if (bLand == true)
+			{// 着地してたら
+
+				// ジャンプ使用可能にする
+				m_bJump = false;
+				move.y = 0.0f;
+			}
+		}
+	}
+
+
 
 	// 位置取得
 	D3DXVECTOR3 posOld = GetPosition();

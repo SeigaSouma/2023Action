@@ -33,6 +33,10 @@ public:
 		LPD3DXBUFFER pBuffMat;					// マテリアルへのポインタ
 		DWORD dwNumMat;							// マテリアルの数
 		D3DXMATERIAL pMatData[MAX_MAT];			// マテリアルのデータ
+		int nVtxNum;							// 頂点数
+		int nFaceNum;							// 面の数
+		D3DXVECTOR3 *pVtxPos;					// 頂点座標
+		float fMaxVtxDistance;					// 頂点間の最大距離
 		int *nIdxTexture;						// テクスチャのインデックス番号
 		char acFilename[mylib_const::MAX_STRING];				// ファイル名
 		int nFileNameLen;						// ファイル名の文字数

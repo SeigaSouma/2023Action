@@ -54,6 +54,7 @@ public:
 		TYPE_SHADOW,		// 影
 		TYPE_MAP,			// マップ
 		TYPE_XFILE,			// Xファイル
+		TYPE_STAGE,			// Xファイル
 		TYPE_MODEL,			// モデル
 		TYPE_EDIT,			// エディット
 		TYPE_MESHFIELD,		// メッシュフィールド

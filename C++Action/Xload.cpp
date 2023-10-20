@@ -110,6 +110,12 @@ void CXLoad::Uninit(void)
 			m_pXFile[nCntData].pBuffMat->Release();
 			m_pXFile[nCntData].pBuffMat = NULL;
 		}
+
+		// 頂点座標の破棄
+		if (m_pXFile[nCntData].pVtxPos != NULL)
+		{
+			delete[] m_pXFile[nCntData].pVtxPos;
+		}
 	}
 
 	m_nNumAll = 0;
@@ -216,6 +222,15 @@ HRESULT CXLoad::Load(const char *pFileName)
 		return E_FAIL;
 	}
 
+	// 頂点数取得
+	m_pXFile[nIdx].nVtxNum = m_pXFile[nIdx].pMesh->GetNumVertices();
+
+	// 頂点数分でメモリ確保
+	m_pXFile[nIdx].pVtxPos = DEBUG_NEW D3DXVECTOR3[m_pXFile[nIdx].nVtxNum];
+
+	// 面の数取得
+	m_pXFile[nIdx].nFaceNum = m_pXFile[nIdx].pMesh->GetNumFaces();
+
 	D3DXMATERIAL *pMat;		// マテリアルデータへのポインタ
 
 	// マテリアルデータへのポインタを取得
@@ -239,8 +254,86 @@ HRESULT CXLoad::Load(const char *pFileName)
 		}
 	}
 
-	// テクスチャ割り当て
-	//pCObjX->BindTexture(m_pXFile[nIdx].nIdxTexture);
+	BYTE* pVtxBuff;
+
+	// 頂点バッファをロック
+	m_pXFile[nIdx].pMesh->LockVertexBuffer(D3DLOCK_READONLY, (void**)&pVtxBuff);
+
+	// 頂点フォーマットのサイズを取得
+	DWORD dwSizeFVF = D3DXGetFVFVertexSize(m_pXFile[nIdx].pMesh->GetFVF());
+
+	// 頂点座標
+	for (int nCntVtx = 0; nCntVtx < m_pXFile[nIdx].nVtxNum; nCntVtx++)
+	{
+		// 頂点座標代入
+		m_pXFile[nIdx].pVtxPos[nCntVtx] = *(D3DXVECTOR3*)pVtxBuff;
+
+		// サイズ分ポインタ移動
+		pVtxBuff += dwSizeFVF;
+	}
+
+	// 頂点バッファをアンロック
+	m_pXFile[nIdx].pMesh->UnlockVertexBuffer();
+
+	// 全頂点チェック
+	CheckVtx(0.0f, &m_pXFile[nIdx].vtxMax, &m_pXFile[nIdx].vtxMin, m_pXFile[nIdx].pMesh, m_pXFile[nIdx].pVtxBuff);
+
+
+
+	// インデックスバッファをロック
+	WORD* pIndexBuff;
+	m_pXFile[nIdx].pMesh->LockIndexBuffer(D3DLOCK_READONLY, (void**)&pIndexBuff);
+
+	for (int nCntIdx = 0; nCntIdx < m_pXFile[nIdx].nFaceNum; nCntIdx++)
+	{
+		// 三角形を形成するインデックス, 面毎だから3つずつ見る
+		int nIdx1 = (int)pIndexBuff[nCntIdx * 3];
+		int nIdx2 = (int)pIndexBuff[nCntIdx * 3 + 1];
+		int nIdx3 = (int)pIndexBuff[nCntIdx * 3 + 2];
+
+		// 一時代入
+		D3DXVECTOR3 pos1 = m_pXFile[nIdx].pVtxPos[nIdx1];
+		D3DXVECTOR3 pos2 = m_pXFile[nIdx].pVtxPos[nIdx2];
+		D3DXVECTOR3 pos3 = m_pXFile[nIdx].pVtxPos[nIdx3];
+
+		// 頂点間の最大距離
+		float fVtxDistance = 0.0f;
+
+		// 2点の距離
+		fVtxDistance = sqrtf(
+			((pos1.x - pos2.x) * (pos1.x - pos2.x)) +
+			((pos1.z - pos2.z) * (pos1.z - pos2.z)));
+
+		if (fVtxDistance > m_pXFile[nIdx].fMaxVtxDistance)
+		{
+			// 最大距離保存
+			m_pXFile[nIdx].fMaxVtxDistance = fVtxDistance;
+		}
+
+		// 2点の距離
+		fVtxDistance = sqrtf(
+			((pos2.x - pos3.x) * (pos2.x - pos3.x)) +
+			((pos2.z - pos3.z) * (pos2.z - pos3.z)));
+		if (fVtxDistance > m_pXFile[nIdx].fMaxVtxDistance)
+		{
+			// 最大距離保存
+			m_pXFile[nIdx].fMaxVtxDistance = fVtxDistance;
+		}
+
+		// 2点の距離
+		fVtxDistance = sqrtf(
+			((pos3.x - pos1.x) * (pos3.x - pos1.x)) +
+			((pos3.z - pos1.z) * (pos3.z - pos1.z)));
+		if (fVtxDistance > m_pXFile[nIdx].fMaxVtxDistance)
+		{
+			// 最大距離保存
+			m_pXFile[nIdx].fMaxVtxDistance = fVtxDistance;
+		}
+	}
+
+	// インデックスバッファをアンロック
+	m_pXFile[nIdx].pMesh->UnlockIndexBuffer();
+
 
 	// 総数加算
 	m_nNumAll++;
