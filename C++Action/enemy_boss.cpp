@@ -1,10 +1,10 @@
 //=============================================================================
 // 
-//  群体敵処理 [enemy_crowd.cpp]
+//  ボス処理 [enemy_boss.cpp]
 //  Author : 相馬靜雅
 // 
 //=============================================================================
-#include "enemy_crowd.h"
+#include "enemy_boss.h"
 #include "manager.h"
 #include "renderer.h"
 #include "game.h"
@@ -30,9 +30,12 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
+#define WIDTH			(60.0f)							// 横幅
+#define HEIGHT			(60.0f)							// 縦幅
+#define MAX_LIFE		(5)								// 体力
 #define PLAYER_SERCH	(800.0f)	// プレイヤー探索範囲
 #define CHACE_DISTABCE	(50.0f)		// 追い掛ける時の間隔
-#define JUMP			(18.0f)		// ジャンプ力初期値
+#define JUMP			(18.0f)					// ジャンプ力初期値
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -41,50 +44,40 @@
 //==========================================================================
 // コンストラクタ
 //==========================================================================
-CEnemyCrowd::CEnemyCrowd(int nPriority) : CEnemy(nPriority)
+CEnemyBoss::CEnemyBoss(int nPriority) : CEnemy(nPriority)
 {
 	// 値のクリア
+	m_sAct.nCntWait = 0;				// 待機時間
+	m_sAct.AtkType = ATKTYPE_BULLET;	// 攻撃の種類
 }
 
 //==========================================================================
 // デストラクタ
 //==========================================================================
-CEnemyCrowd::~CEnemyCrowd()
+CEnemyBoss::~CEnemyBoss()
 {
 
 }
 
+
 //==========================================================================
 // 初期化処理
 //==========================================================================
-HRESULT CEnemyCrowd::Init(void)
+HRESULT CEnemyBoss::Init(void)
 {
 	// 初期化処理
 	CEnemy::Init();
 
-	// 体力取得
-	int nLife = GetLife();
-
-	//// 体力ゲージ
-	//m_pHPGauge = CHP_Gauge::Create(80.0f, nLife, 0.8f);
-	m_state = STATE_SPAWN;	// 親追い掛け状態
-	m_Oldstate = STATE_PLAYERCHASE;
-	m_ActType = ACTTYPE_CHASE;
-	//if (m_pHPGauge == NULL)
-	//{// NULLだったら
-	//	m_pHPGauge = NULL;
-	//}
-
-	
-	// 生存時間
-	m_nSurvivalLifeOrigin = m_nSurvivalLife;
+	m_state = STATE_WAIT;	// 親追い掛け状態
+	m_Oldstate = STATE_NONE;
+	m_ActType = ACTTYPE_BOSS;
 	return S_OK;
 }
 
 //==========================================================================
 // 終了処理
 //==========================================================================
-void CEnemyCrowd::Uninit(void)
+void CEnemyBoss::Uninit(void)
 {
 	// 終了処理
 	CEnemy::Uninit();
@@ -93,7 +86,7 @@ void CEnemyCrowd::Uninit(void)
 //==========================================================================
 // 死亡処理
 //==========================================================================
-void CEnemyCrowd::Kill(void)
+void CEnemyBoss::Kill(void)
 {
 	// 死亡処理
 	CEnemy::Kill();
@@ -102,7 +95,7 @@ void CEnemyCrowd::Kill(void)
 //==========================================================================
 // 更新処理
 //==========================================================================
-void CEnemyCrowd::Update(void)
+void CEnemyBoss::Update(void)
 {
 	// 死亡の判定
 	if (IsDeath() == true)
@@ -121,9 +114,67 @@ void CEnemyCrowd::Update(void)
 }
 
 //==========================================================================
+// 種類別更新処理
+//==========================================================================
+void CEnemyBoss::UpdateByType(void)
+{
+	//// 待機時間
+	//m_sAct.nCntWait--;
+	//if (m_sAct.nCntWait <= 0)
+	//{// ゼロになったら
+
+	//	m_sAct.nCntWait = 0;
+	//	m_sAct.AtkType = ATKTYPE_BULLET;
+	//}
+}
+
+//==========================================================================
+// 攻撃別処理
+//==========================================================================
+void CEnemyBoss::UpdateByAttack(void)
+{
+	switch (m_sAct.AtkType)
+	{
+	case ATKTYPE_BULLET:
+		UpdateAttackBullet();
+		break;
+
+	default:
+		break;
+	}
+}
+
+//==========================================================================
+// 弾攻撃
+//==========================================================================
+void CEnemyBoss::UpdateAttackBullet(void)
+{
+	if (m_pMotion->GetType() == MOTION_BULLETATK && m_pMotion->IsFinish() == true)
+	{// 弾攻撃が終わってたら
+
+		// 待機時間
+		m_sAct.nCntWait = 120;
+		m_state = STATE_WAIT;
+		m_sMotionFrag.bATK = false;
+		return;
+	}
+	
+	if (m_pMotion->GetType() != MOTION_BULLETATK)
+	{// 弾攻撃じゃない場合
+
+		// 弾攻撃モーション設定
+		m_pMotion->Set(MOTION_BULLETATK);
+	}
+
+	// 攻撃中にする
+	m_sMotionFrag.bATK = true;
+
+}
+
+//==========================================================================
 // 着地時の処理
 //==========================================================================
-void CEnemyCrowd::ProcessLanding(void)
+void CEnemyBoss::ProcessLanding(void)
 {
 	// 着地時の処理
 	CEnemy::ProcessLanding();
@@ -132,7 +183,7 @@ void CEnemyCrowd::ProcessLanding(void)
 //==========================================================================
 // 攻撃状態移行処理
 //==========================================================================
-void CEnemyCrowd::ChangeToAttackState(void)
+void CEnemyBoss::ChangeToAttackState(void)
 {
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -162,7 +213,7 @@ void CEnemyCrowd::ChangeToAttackState(void)
 //==========================================================================
 // 出現
 //==========================================================================
-void CEnemyCrowd::Spawn(void)
+void CEnemyBoss::Spawn(void)
 {
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -192,12 +243,28 @@ void CEnemyCrowd::Spawn(void)
 }
 
 //==========================================================================
+// 待機処理
+//==========================================================================
+void CEnemyBoss::StateWait(void)
+{
+	// 待機時間
+	m_sAct.nCntWait--;
+	if (m_sAct.nCntWait <= 0)
+	{// ゼロになったら
+		m_sAct.nCntWait = 0;
+		m_sAct.AtkType = ATKTYPE_BULLET;
+		m_state = STATE_ATTACK;
+	}
+}
+
+//==========================================================================
 // 攻撃処理
 //==========================================================================
-void CEnemyCrowd::StateAttack(void)
+void CEnemyBoss::StateAttack(void)
 {
-	// 攻撃処理
-	CEnemy::StateAttack();
+	
+	// 攻撃別処理
+	UpdateByAttack();
 
 	// モーションの情報取得
 	CMotion::Info aInfo = m_pMotion->GetInfo(m_pMotion->GetType());
@@ -269,7 +336,7 @@ void CEnemyCrowd::StateAttack(void)
 //==========================================================================
 // 追い掛け移動
 //==========================================================================
-void CEnemyCrowd::ChaseMove(float fMove)
+void CEnemyBoss::ChaseMove(float fMove)
 {
 	// 向き取得
 	D3DXVECTOR3 rot = GetRotation();
@@ -288,7 +355,7 @@ void CEnemyCrowd::ChaseMove(float fMove)
 //==========================================================================
 // モーションの設定
 //==========================================================================
-void CEnemyCrowd::MotionSet(void)
+void CEnemyBoss::MotionSet(void)
 {
 	if (m_pMotion->IsFinish() == true)
 	{// 終了していたら
@@ -310,14 +377,6 @@ void CEnemyCrowd::MotionSet(void)
 			// やられモーション
 			m_pMotion->Set(MOTION_KNOCKBACK);
 		}
-		else if (m_sMotionFrag.bATK == true)
-		{// 攻撃していたら
-
-			m_sMotionFrag.bATK = false;		// 攻撃判定OFF
-
-			// 攻撃モーション
-			m_pMotion->Set(MOTION_ATK);
-		}
 		else
 		{
 			// ニュートラルモーション
@@ -329,7 +388,7 @@ void CEnemyCrowd::MotionSet(void)
 //==========================================================================
 // 攻撃時処理
 //==========================================================================
-void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
+void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 {
 	D3DXMATRIX mtxTrans;	// 計算用マトリックス宣言
 
@@ -377,7 +436,7 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		CBullet::MOVETYPE_NORMAL,
 		D3DXVECTOR3(pos.x, 50.0f, pos.z),
 		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
+		D3DXVECTOR3(13.0f, 0.0f, 0.0f),
 		40.0f);
 
 	// マップマネージャの取得
@@ -387,8 +446,6 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		return;
 	}
 	ANGLE setAngle = pMapManager->GetTargetAngle(GetMapIndex(), pPlayer->GetMapIndex(), GetMapMoveValue(), pPlayer->GetMapMoveValue());
-
-	setAngle = ANGLE_UP;
 
 	pBullet->SetMapIndex(GetMapIndex());
 	pBullet->SetMapMoveValue(GetMapMoveValue());
@@ -401,7 +458,7 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		CBullet::MOVETYPE_NORMAL,
 		D3DXVECTOR3(pos.x, 150.0f, pos.z),
 		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
+		D3DXVECTOR3(13.0f, 0.0f, 0.0f),
 		40.0f);
 	pBullet->SetMapIndex(GetMapIndex());
 	pBullet->SetMapMoveValue(GetMapMoveValue());
@@ -414,7 +471,7 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		CBullet::MOVETYPE_NORMAL,
 		D3DXVECTOR3(pos.x, 250.0f, pos.z),
 		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
+		D3DXVECTOR3(13.0f, 0.0f, 0.0f),
 		40.0f);
 	pBullet->SetMapIndex(GetMapIndex());
 	pBullet->SetMapMoveValue(GetMapMoveValue());
@@ -425,7 +482,7 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 //==========================================================================
 // 描画処理
 //==========================================================================
-void CEnemyCrowd::Draw(void)
+void CEnemyBoss::Draw(void)
 {
 	// 描画処理
 	CEnemy::Draw();
@@ -434,7 +491,7 @@ void CEnemyCrowd::Draw(void)
 //==========================================================================
 // 敵の情報取得
 //==========================================================================
-CEnemyCrowd *CEnemyCrowd::GetEnemy(void)
+CEnemyBoss *CEnemyBoss::GetEnemy(void)
 {
 	// 自分自身のポインタを取得
 	return this;

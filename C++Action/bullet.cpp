@@ -143,7 +143,7 @@ HRESULT CBullet::Init(void)
 	HRESULT hr;
 
 	// 各種変数の初期化
-	m_nLifeMax = 60 * 8;
+	m_nLifeMax = 60 * 18;
 	m_nLife = m_nLifeMax;	// 寿命
 
 	// テクスチャの割り当て

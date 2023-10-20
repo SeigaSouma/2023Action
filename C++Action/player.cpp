@@ -741,7 +741,9 @@ void CPlayer::Controll(void)
 			m_StickAngle = ANGLE_DOWN;		// スティックの向き
 		}
 
-
+		// 攻撃判定ON
+		if (m_StickAngle != m_OldStickAngle)
+		{
 		// スティックの向き
 		m_fAtkStickRot = pInputGamepad->GetStickRotR(0);
 
@@ -767,27 +769,31 @@ void CPlayer::Controll(void)
 			//	m_fAtkStickRot = D3DX_PI * 0.75f;
 			//}
 
-			if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot < D3DX_PI * 0.15f)
-			{// 右上
-				m_fAtkStickRot = D3DX_PI * 0.15f;
-			}
-			else if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot >= D3DX_PI * 0.85f)
-			{// 右下
-				m_fAtkStickRot = D3DX_PI * 0.85f;
-			}
-			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot > -D3DX_PI * 0.15f)
-			{// 左上
-				m_fAtkStickRot = -D3DX_PI * 0.15f;
-			}
-			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot <= -D3DX_PI * 0.85f)
-			{// 左下
-				m_fAtkStickRot = -D3DX_PI * 0.85f;
-			}
+			//if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot < D3DX_PI * 0.15f)
+			//{// 右上
+			//	m_fAtkStickRot = -D3DX_PI * 0.15f;
+			//	m_nAtkAngle = 1;
+			//}
+			//else if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot >= D3DX_PI * 0.85f)
+			//{// 右下
+			//	m_fAtkStickRot = -D3DX_PI * 0.85f;
+			//	m_nAtkAngle = 1;
+			//}
+			//else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot > -D3DX_PI * 0.15f)
+			//{// 左上
+			//	m_fAtkStickRot = -D3DX_PI * 0.15f;
+			//	m_nAtkAngle = -1;
+			//}
+			//else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot <= -D3DX_PI * 0.85f)
+			//{// 左下
+			//	m_fAtkStickRot = -D3DX_PI * 0.85f;
+			//	m_nAtkAngle = -1;
+			//}
 
-			if (m_fAtkStickRot < 0.0f)
-			{
-				m_fAtkStickRot += D3DX_PI;	// 半周分
-			}
+			//if (m_fAtkStickRot < 0.0f)
+			//{
+			//	m_fAtkStickRot += D3DX_PI;	// 半周分
+			//}
 
 			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
 
@@ -799,24 +805,28 @@ void CPlayer::Controll(void)
 
 		case CPlayer::ANGLE_LEFT:
 
-			if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot < D3DX_PI * 0.15f)
-			{// 右上
-				m_fAtkStickRot = D3DX_PI * 0.15f;
-			}
-			else if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot >= D3DX_PI * 0.85f)
-			{// 右下
-				m_fAtkStickRot = D3DX_PI * 0.85f;
-			}
-			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot > -D3DX_PI * 0.15f)
-			{// 左上
-				m_fAtkStickRot = -D3DX_PI * 0.15f;
-			}
-			else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot <= -D3DX_PI * 0.85f)
-			{// 左下
-				m_fAtkStickRot = -D3DX_PI * 0.85f;
-			}
+			//if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot < D3DX_PI * 0.15f)
+			//{// 右上
+			//	m_fAtkStickRot = D3DX_PI * 0.15f;
+			//	m_nAtkAngle = -1;
+			//}
+			//else if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot >= D3DX_PI * 0.85f)
+			//{// 右下
+			//	m_fAtkStickRot = D3DX_PI * 0.85f;
+			//	m_nAtkAngle = -1;
+			//}
+			//else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot > -D3DX_PI * 0.15f)
+			//{// 左上
+			//	m_fAtkStickRot = D3DX_PI * 0.15f;
+			//	m_nAtkAngle = 1;
+			//}
+			//else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot <= -D3DX_PI * 0.85f)
+			//{// 左下
+			//	m_fAtkStickRot = D3DX_PI * 0.85f;
+			//	m_nAtkAngle = 1;
+			//}
 
-			m_fAtkStickRot *= -1;
+			//m_fAtkStickRot *= -1;
 
 			/*if (m_fAtkStickRot <= 0.0f)
 			{
@@ -826,7 +836,8 @@ void CPlayer::Controll(void)
 			{
 				m_fAtkStickRot = D3DX_PI * 0.75f;
 			}*/
-			m_fAtkStickRot += D3DX_PI * 0.5f;	// 半周分
+			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
+			//m_fAtkStickRot += D3DX_PI * 0.5f;	// 半周分
 			break;
 
 		default:
@@ -834,9 +845,7 @@ void CPlayer::Controll(void)
 		}
 		RotNormalize(m_fAtkStickRot);
 
-		// 攻撃判定ON
-		if (m_StickAngle != m_OldStickAngle)
-		{
+		
 			switch (MoveAngle)
 			{
 			case CPlayer::ANGLE_UP:
@@ -1034,12 +1043,20 @@ void CPlayer::Atack(void)
 				// 振動
 				//CManager::GetInstance()->GetCamera()->SetShake(20, 10.0f, 0.0f);
 
+				float fRotY = rot.y;
+				int nA = 1;
+				if (GetMoveAngle() == ANGLE_LEFT)
+				{
+					nA = -1;
+					fRotY += D3DX_PI;
+				}
+
 				// 斬撃生成
 				CSlash::Create
 				(
 					D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),	// 位置
+					D3DXVECTOR3(0.0f, D3DX_PI + fRotY, 0.0f),		// 向き
 					D3DXVECTOR3(m_fAtkStickRot, 0.0f, 0.0f),		// 向き
-					D3DXVECTOR3(0.0f, D3DX_PI + rot.y, 0.0f),		// 向き
 					D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f),	// 色
 					200.0f,								// 幅
 					50.0f,								// 中心からの間隔
@@ -1049,6 +1066,21 @@ void CPlayer::Atack(void)
 					false,								// 加算合成するかどうか
 					GetMoveAngle()
 				);
+
+				//CSlash::Create
+				//(
+				//	D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),	// 位置
+				//	D3DXVECTOR3(0.0f, D3DX_PI + rot.y * nA, 0.0f),		// 向き
+				//	D3DXVECTOR3(m_fAtkStickRot, 0.0f, 0.0f),		// 向き
+				//	D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f),	// 色
+				//	200.0f,								// 幅
+				//	50.0f,								// 中心からの間隔
+				//	10,									// 寿命
+				//	20.0f,								// 幅の移動量
+				//	CImpactWave::TYPE_GIZAWHITE,			// テクスチャの種類
+				//	false,								// 加算合成するかどうか
+				//	GetMoveAngle()
+				//);
 
 				// 歩行音再生
 				CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_IMPACT01);

@@ -37,6 +37,7 @@ private:
 	D3DXCOLOR m_colOrigin;	// 元の色
 	float m_fSizeDest;		// 目標のサイズ
 	D3DXVECTOR3 collisionRotation;	// 当たり判定の向き
+	CObject3D *m_pObj3D;
 };
 
 

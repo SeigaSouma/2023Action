@@ -30,7 +30,7 @@ public:
 	// 列挙型定義
 	typedef enum
 	{
-		TYPE_POWER = 0,	// パワー
+		TYPE_BOSS = 0,	// ボス
 		TYPE_CROUWD,
 		TYPE_FLY,
 		TYPE_MAX
@@ -54,7 +54,7 @@ public:
 	CEnemy(int nPriority = mylib_const::ENEMY_PRIORITY);
 	virtual ~CEnemy();
 
-	static CEnemy *Create(int nIdx, const char *pFileName, D3DXVECTOR3 pos, TYPE type = TYPE_POWER);
+	static CEnemy *Create(int nIdx, const char *pFileName, D3DXVECTOR3 pos, TYPE type = TYPE_BOSS);
 
 	// オーバーライドされた関数
 	virtual HRESULT Init(void) override;
@@ -97,7 +97,8 @@ protected:
 	{
 		ACTTYPE_FIXED = 0,	// 一定の動き
 		ACTTYPE_CHASE,		// 追い掛け
-		ACTTYPE_TURRET,	// タレット
+		ACTTYPE_TURRET,		// タレット
+		ACTTYPE_BOSS,		// ボス
 		ACTTYPE_MAX
 	};
 
@@ -169,7 +170,7 @@ private:
 	
 	void UpdateState(void);					// 状態更新処理
 	virtual void UpdateStateByType(void);	// 種類別状態更新処理
-	void UpdateByType(void);				// 種類別更新処理
+	virtual void UpdateByType(void);		// 種類別更新処理
 	void Collision(void);					// 当たり判定
 	virtual void MotionSet(void) = 0;		// モーションの設定
 	void RegistrChild(CEnemy *pChild);

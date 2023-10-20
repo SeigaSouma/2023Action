@@ -30,7 +30,7 @@
 #include "enemyfixedmove_manager.h"
 
 // 子クラス
-#include "enemy_power.h"
+#include "enemy_boss.h"
 #include "enemy_crowd.h"
 #include "enemy_fly.h"
 
@@ -61,7 +61,7 @@ CEnemy::CEnemy(int nPriority) : CObjectChara(nPriority)
 	memset(&m_sFormationInfo, NULL, sizeof(m_sFormationInfo));	// 隊列の情報
 	m_posKnokBack = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// ノックバックの位置
 	m_rotOrigin = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 最初の向き
-	m_type = TYPE_POWER;	// 種類
+	m_type = TYPE_BOSS;	// 種類
 	m_state = STATE_NONE;	// 状態
 	m_Oldstate = m_state;	// 前回の状態
 	m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// マテリアルの色
@@ -112,8 +112,8 @@ CEnemy *CEnemy::Create(int nIdx, const char *pFileName, D3DXVECTOR3 pos, TYPE ty
 		// メモリの確保
 		switch (type)
 		{
-		case TYPE_POWER:
-			pEnemy = DEBUG_NEW CEnemyPower;
+		case TYPE_BOSS:
+			pEnemy = DEBUG_NEW CEnemyBoss;
 			break;
 
 		case TYPE_CROUWD:
@@ -179,12 +179,6 @@ HRESULT CEnemy::Init(void)
 
 	// 体力取得
 	int nLife = GetLife();
-
-	switch (m_type)
-	{
-	case TYPE_POWER:
-		break;
-	}
 
 	//if (m_pHPGauge == NULL)
 	//{// NULLだったら
@@ -680,17 +674,7 @@ bool CEnemy::Hit(const int nValue)
 //==========================================================================
 void CEnemy::UpdateByType(void)
 {
-	// 現在のモーション種類取得
-	int nType = m_pMotion->GetType();
 
-	switch (m_type)
-	{
-	case TYPE_POWER:
-		break;
-
-	default:
-		break;
-	}
 }
 
 //==========================================================================

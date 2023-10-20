@@ -115,6 +115,7 @@ private:
 	int m_nTexIdx;				// テクスチャのインデックス番号
 	int m_nIdxXFile;			// Xファイルのインデックス番号
 	float m_fAtkStickRot;		// 攻撃時のスティック向き
+	int m_nAtkAngle;			// 攻撃時のY軸の向き
 	float m_fBodyRot;			// 攻撃時の身体向き
 	bool m_bStick;				// スティック倒した判定
 	ANGLE m_StickAngle;			// スティックの向き

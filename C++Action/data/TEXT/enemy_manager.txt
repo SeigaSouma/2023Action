@@ -14,7 +14,7 @@ NUM_CHARACTER = 3
 #------------------------------------------------------------------
 # キャラクターファイル名
 #------------------------------------------------------------------
-MOTION_FILENAME = data/TEXT/motion_set_woodman.txt			# [0]パワー+3
+MOTION_FILENAME = data/TEXT/motion_enemyboss.txt			# [0]ボス
 MOTION_FILENAME = data/TEXT/motion_crowd_poison.txt			# [1]きのこ
 MOTION_FILENAME = data/TEXT/motion_enemyfly_01.txt			# [2]飛行
 
@@ -22,15 +22,19 @@ MOTION_FILENAME = data/TEXT/motion_enemyfly_01.txt			# [2]飛行
 # 敵の情報
 #===================================================================================================
 #------------------------------------------------------------------
-# パワー+3単騎
+# ボス
 #------------------------------------------------------------------
 PATTERNSET
 	TYPE = 0	# パターンの種類(読み込みはしない)
 	
+	FIXEDMOVE = 0		# 一定の動きの種類
+	
 	ENEMYSET
 		TYPE = 0		# キャラの種類
 		INDEX = 0
-		PARENT = -1		# 親
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 0		# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 END_PATTERNSET
@@ -41,9 +45,14 @@ END_PATTERNSET
 PATTERNSET
 	TYPE = 1	# パターンの種類(読み込みはしない)
 	
+	FIXEDMOVE = 0		# 一定の動きの種類
+	
 	ENEMYSET
 		TYPE = 1		# キャラの種類
 		INDEX = 0
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 0		# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 END_PATTERNSET
@@ -58,10 +67,11 @@ PATTERNSET
 	FIXEDMOVE = 0		# 一定の動きの種類
 	
 	ENEMYSET
-		TYPE = 2		# キャラの種類
+		TYPE = 2			# キャラの種類
 		INDEX = 0
-		STARTKEY = 0	# 初期キー
-		STARTFRAME = 0	# 初期フレーム
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 0		# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 	ENEMYSET
@@ -69,6 +79,7 @@ PATTERNSET
 		INDEX = 1
 		STARTKEY = 0		# 初期キー
 		STARTFRAME = 110	# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 	ENEMYSET
@@ -76,6 +87,7 @@ PATTERNSET
 		INDEX = 2
 		STARTKEY = 0		# 初期キー
 		STARTFRAME = 220	# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 	ENEMYSET
@@ -83,6 +95,7 @@ PATTERNSET
 		INDEX = 3
 		STARTKEY = 0		# 初期キー
 		STARTFRAME = 330	# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 END_PATTERNSET
@@ -93,13 +106,14 @@ END_PATTERNSET
 PATTERNSET
 	TYPE = 3	# パターンの種類(読み込みはしない)
 	
-	FIXEDMOVE = 1		# 一定の動きの種類
+	FIXEDMOVE = 1	# 一定の動きの種類
 	
 	ENEMYSET
-		TYPE = 2		# キャラの種類
+		TYPE = 2			# キャラの種類
 		INDEX = 0
-		STARTKEY = 0	# 初期キー
-		STARTFRAME = 0	# 初期フレーム
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 0		# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 	ENEMYSET
@@ -107,6 +121,7 @@ PATTERNSET
 		INDEX = 1
 		STARTKEY = 0		# 初期キー
 		STARTFRAME = 110	# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 	ENEMYSET
@@ -114,6 +129,7 @@ PATTERNSET
 		INDEX = 2
 		STARTKEY = 0		# 初期キー
 		STARTFRAME = 220	# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 	ENEMYSET
@@ -121,6 +137,7 @@ PATTERNSET
 		INDEX = 3
 		STARTKEY = 0		# 初期キー
 		STARTFRAME = 330	# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
 	END_ENEMYSET
 	
 END_PATTERNSET

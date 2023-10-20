@@ -119,14 +119,22 @@ HRESULT CSlash::Init(void)
 
 	// 計算用マトリックス宣言
 	D3DXMATRIX mtxRot, mtxTrans, mtxRotOrigin, mtxCollision;
+
+#if 0
 	D3DXVECTOR3 rotOrigin = GetRotation();
 	D3DXVECTOR3 rot = GetOriginRotation();
+#else
+	D3DXVECTOR3 rotOrigin = GetOriginRotation();
+	D3DXVECTOR3 rot = GetRotation();
+#endif
 	D3DXVECTOR3 pos = GetPosition();
+	RotNormalize(rotOrigin);
+	RotNormalize(rot);
 
 	// ワールドマトリックスの初期化
 	D3DXMatrixIdentity(&mtxCollision);
 	D3DXMatrixIdentity(&mtxRotOrigin);
-
+#if 1
 	// 元の向きを反映する
 	D3DXMatrixRotationYawPitchRoll(&mtxRotOrigin, rotOrigin.y, rotOrigin.x, rotOrigin.z);
 	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxRotOrigin);
@@ -134,7 +142,17 @@ HRESULT CSlash::Init(void)
 	// 向きを反映する
 	D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
 	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxRot);
+#else
 
+	// 向きを反映する
+	D3DXMatrixRotationYawPitchRoll(&mtxRot, rot.y, rot.x, rot.z);
+	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxRot);
+
+	// 元の向きを反映する
+	D3DXMatrixRotationYawPitchRoll(&mtxRotOrigin, rotOrigin.y, rotOrigin.x, rotOrigin.z);
+	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxRotOrigin);
+
+#endif
 	// 位置を反映する
 	D3DXMatrixTranslation(&mtxTrans, pos.x, pos.y, pos.z);
 	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxTrans);
@@ -144,6 +162,21 @@ HRESULT CSlash::Init(void)
 	collisionRotation.y = atan2f(-mtxCollision._31, sqrtf(mtxCollision._32 * mtxCollision._32 + mtxCollision._33 * mtxCollision._33));
 	collisionRotation.z = atan2f(mtxCollision._21, mtxCollision._11);
 	RotNormalize(collisionRotation);
+
+	// 外側の幅
+	float fOutWidth = GetOutWidth();
+
+	m_pObj3D = CObject3D::Create();
+	m_pObj3D->SetSize(D3DXVECTOR3(fOutWidth, 0.0f, fOutWidth));
+	m_pObj3D->SetPosition(pos);
+
+#if 0
+	m_pObj3D->SetRotation(rot);
+	m_pObj3D->SetOriginRotation(rotOrigin);
+#else
+	m_pObj3D->SetRotation(rotOrigin);
+	m_pObj3D->SetOriginRotation(rot);
+#endif
 
 	return S_OK;
 }
@@ -155,6 +188,10 @@ void CSlash::Uninit(void)
 {
 	// 終了処理
 	CImpactWave::Uninit();
+
+	m_pObj3D->Uninit();
+	m_pObj3D = NULL;
+
 }
 
 //==========================================================================
@@ -162,6 +199,10 @@ void CSlash::Uninit(void)
 //==========================================================================
 void CSlash::Update(void)
 {
+	if (IsDeath() == true)
+	{
+		return;
+	}
 
 	// 外側の幅
 	float fOutWidth = GetOutWidth();
@@ -176,6 +217,12 @@ void CSlash::Update(void)
 
 	// 外側の幅
 	SetOutWidth(fOutWidth);
+
+	if (m_pObj3D != NULL)
+	{
+		m_pObj3D->Update();
+		m_pObj3D->SetSize(D3DXVECTOR3(fOutWidth, 0.0f, fOutWidth));
+	}
 
 	// 当たり判定
 	Collision();
@@ -289,8 +336,7 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 	float fOutWidth = GetOutWidth();
 
 	D3DXVECTOR3 rectCenter = GetPosition();							// 矩形の中心座標
-	D3DXVECTOR3 rectSize = D3DXVECTOR3(fOutWidth, 40.0f, fOutWidth);	// 矩形のサイズ
-	D3DXMATRIX rectWorldMatrix = GetWorldMtx();						// 回転した矩形のワールド変換行列
+	D3DXVECTOR3 rectSize = D3DXVECTOR3(fOutWidth, 10.0f, fOutWidth);	// 矩形のサイズ
 	D3DXVECTOR3 sphereCenter = TargetPos;							// 球の中心座標
 	float sphereRadius = fTargetRadius;								// 球の半径
 
@@ -333,4 +379,24 @@ void CSlash::Draw(void)
 {
 	// 描画処理
 	CImpactWave::Draw();
+
+
+	// デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
+
+
+	// 背面のカリングなし
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+
+	// ライティングを無効にする
+	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+
+	m_pObj3D->Draw();
+
+	// ライティングを有効にする
+	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);
+
+	// カリングのデフォルト
+	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+
 }
