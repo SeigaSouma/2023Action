@@ -1496,7 +1496,7 @@ bool CPlayer::Hit(const int nValue)
 		// ëÃóÕå∏ÇÁÇ∑
 		nLife -= nValue;
 
-		m_KnokBackMove.y += JUMP;
+		m_KnokBackMove.y += 18.0f;
 		m_bHitStage = false;
 
 		// ï‚ê≥

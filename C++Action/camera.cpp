@@ -26,7 +26,7 @@
 #define MAX_LENGTH		(20000.0f)			// 最大距離
 #define MIN_LENGTH		(10.0f)				// 最少距離
 //#define START_CAMERALEN	(5100.0f)			// 元の距離
-#define START_CAMERALEN	(635.0f)			// 元の距離
+#define START_CAMERALEN	(1200.0f)			// 元の距離
 #define ROT_MOVE_MOUSE	(0.01f)				// 回転移動量
 #define ROT_MOVE_STICK	(0.0015f)			// 回転移動量
 #define ROT_MOVE		(0.025f)			// 回転移動量
@@ -45,7 +45,7 @@
 #define ROTHOSEI	(0.01f)	// 向きの補正係数
 #define POSV_HOSEI	(0.12f)
 #define POSR_HOSEI	(0.08f)
-#define CHASEDISTANCE_DEST	(150.0f)
+#define CHASEDISTANCE_DEST	(250.0f)
 
 //==========================================================================
 // コンストラクタ
@@ -1339,7 +1339,7 @@ void CCamera::ResetGame(void)
 	m_posRDest = m_posR;									// 目標の注視点
 	m_vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
 	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);					// 移動量
-	m_rot = D3DXVECTOR3(0.0f, 0.0f, -0.05f);					// 向き
+	m_rot = D3DXVECTOR3(0.0f, 0.0f, -0.15f);					// 向き
 	m_rotVDest = m_rot;										// 目標の視点の向き
 	m_TargetPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);			// 目標の位置
 	m_fDistance = START_CAMERALEN;							// 距離
