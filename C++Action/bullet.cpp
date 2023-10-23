@@ -143,7 +143,7 @@ HRESULT CBullet::Init(void)
 	HRESULT hr;
 
 	// 各種変数の初期化
-	m_nLifeMax = 60 * 18;
+	m_nLifeMax = 60 * 5;
 	m_nLife = m_nLifeMax;	// 寿命
 
 	// テクスチャの割り当て
@@ -374,11 +374,11 @@ void CBullet::CollisionPlayer(void)
 	if (SphereRange(pos, PlayerPosition, fRadius, fPlayerRadius))
 	{// 当たっていたら
 
-		//// ヒット処理
-		//pPlayer->Hit(1);
+		// ヒット処理
+		pPlayer->Hit(1);
 
-		//// 終了処理
-		//Uninit();
+		// 終了処理
+		Uninit();
 	}
 
 }
@@ -404,12 +404,14 @@ void CBullet::CollisionEnemy(void)
 	float fRadius = GetRadius();
 	bool bHit = false;
 
-	for (int nCntEnemy = 0; nCntEnemy < nNumEnemy; nCntEnemy++)
+	int nUse = 0;
+	for (int nCntEnemy = 0; nUse < nNumEnemy; nCntEnemy++)
 	{
 		if (ppEnemy[nCntEnemy] == NULL)
 		{// NULLだったら
 			continue;
 		}
+		nUse++;
 
 		// 敵の情報取得
 		D3DXVECTOR3 EnemyPosition = ppEnemy[nCntEnemy]->GetPosition();
@@ -419,8 +421,8 @@ void CBullet::CollisionEnemy(void)
 		{// 当たっていたら
 
 			// ヒット処理
-			/*ppEnemy[nCntEnemy]->Hit(1);
-			bHit = true;*/
+			ppEnemy[nCntEnemy]->Hit(1);
+			bHit = true;
 		}
 	}
 

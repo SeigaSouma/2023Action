@@ -829,6 +829,12 @@ float GetVtxHeight(D3DXVECTOR3 pos, D3DXVECTOR3 NowPos, D3DXVECTOR3 posRight, D3
 			fHeight = -((calvec.x * nor.x) + (-NowPos.y * nor.y) + (calvec.z * nor.z)) / nor.y;
 			bLand = true;
 		}
+		else
+		{
+			// çÇÇ≥ÇãÅÇﬂÇÈ
+			fHeight = -((calvec.x * nor.x) + (-NowPos.y * nor.y) + (calvec.z * nor.z)) / nor.y;
+			bLand = true;
+		}
 	}
 
 	return fHeight;

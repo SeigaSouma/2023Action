@@ -112,7 +112,7 @@ private:
 	ATKRUSH m_atkRush;			// 連続アタックの種類
 	D3DXCOLOR m_mMatcol;		// マテリアルの色
 	D3DXVECTOR3 m_posKnokBack;	// ノックバックの位置
-	D3DXVECTOR3 m_rotConfusion;	// 混乱の向き
+	D3DXVECTOR3 m_KnokBackMove;	// ノックバックの移動量
 	int m_nAngle;				// 向き
 	int m_nCntState;			// 状態遷移カウンター
 	int m_nCntConfusion;		// 混乱カウンター

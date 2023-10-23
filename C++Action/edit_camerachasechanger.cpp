@@ -18,6 +18,7 @@
 #include "mapmanager.h"
 #include "stage.h"
 #include "game.h"
+#include "player.h"
 
 //==========================================================================
 // ƒ}ƒNƒ’è‹`
@@ -87,6 +88,7 @@ CEditCameraChaseChanger *CEditCameraChaseChanger::Create(void)
 HRESULT CEditCameraChaseChanger::Init(void)
 {
 	m_pos = CManager::GetInstance()->GetCamera()->GetPositionR();
+	m_nIdxMapPoint = CManager::GetInstance()->GetScene()->GetPlayer()->GetMapIndex();
 	return S_OK;
 }
 

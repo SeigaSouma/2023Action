@@ -66,7 +66,8 @@ CPlayer::CPlayer(int nPriority) : CObjectChara(nPriority)
 	m_Oldstate = m_state;	// 前回の状態
 	m_atkRush = ATKRUSH_RIGHT;	// 連続アタックの種類
 	m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// マテリアルの色
-	m_rotConfusion = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 混乱の向き
+	m_posKnokBack = mylib_const::DEFAULT_VECTOR3;	// ノックバックの位置
+	m_KnokBackMove = mylib_const::DEFAULT_VECTOR3;	// ノックバックの移動量
 	m_bLandOld = false;				// 過去の着地情報
 	m_bJump = false;				// ジャンプ中かどうか
 	m_bKnockback = false;			// ノックバック中かどうか
@@ -654,7 +655,21 @@ void CPlayer::Controll(void)
 	}
 	else if (MoveAngle == ANGLE_UP)
 	{
-		fRotDest = atan2f((pos.x - pCamera->GetTargetPosition().x), (pos.z - pCamera->GetTargetPosition().z));
+		// カメラの情報取得
+		CCamera *pCamera = CManager::GetInstance()->GetCamera();
+
+		// カメラの追従種類取得
+		CCamera::CHASETYPE CameraChaseType = pCamera->GetChaseType();
+
+		if (CameraChaseType == CCamera::CHASETYPE_NORMAL)
+		{
+			fRotDest = atan2f((pos.x - pCamera->GetTargetPosition().x), (pos.z - pCamera->GetTargetPosition().z));
+		}
+		else if (CameraChaseType == CCamera::CHASETYPE_MAP)
+		{
+			fRotDest = fRotDest - D3DX_PI * 0.5f;
+		}
+
 	}
 
 	// 角度の正規化
@@ -676,11 +691,11 @@ void CPlayer::Controll(void)
 	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG)
 	{
 		move.y -= mylib_const::GRAVITY;
-	}
 
-	// 位置更新
-	newPosition.y += move.y;
-	sakiPos.y = newPosition.y;
+		// 位置更新
+		newPosition.y += move.y;
+		sakiPos.y = newPosition.y;
+	}
 
 	//**********************************
 	// 当たり判定
@@ -705,7 +720,7 @@ void CPlayer::Controll(void)
 	//m_bLandOld = bLandStage;
 
 	if (m_bHitWall == false && 
-		(bLandStage == false || bMove == true || m_bLandField == true || m_bJump == true))
+		(bLandStage == false || bMove == true || m_bLandField == true || m_bJump == true || m_bKnockback == true))
 	{
 		pos.x = newPosition.x;
 		pos.z = newPosition.z;
@@ -849,7 +864,7 @@ void CPlayer::Controll(void)
 
 			//if (m_fAtkStickRot < 0.0f)
 			//{
-			//	m_fAtkStickRot += D3DX_PI;	// 半周分
+			//	//m_fAtkStickRot += D3DX_PI;	// 半周分
 			//}
 
 			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
@@ -893,6 +908,11 @@ void CPlayer::Controll(void)
 			{
 				m_fAtkStickRot = D3DX_PI * 0.75f;
 			}*/
+
+			//if (m_fAtkStickRot > 0.0f)
+			//{
+			//	//m_fAtkStickRot += D3DX_PI;	// 半周分
+			//}
 			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
 			//m_fAtkStickRot += D3DX_PI * 0.5f;	// 半周分
 			break;
@@ -1318,7 +1338,7 @@ bool CPlayer::Collision(D3DXVECTOR3 &pos, D3DXVECTOR3 &move)
 			if (bLand == true)
 			{// 着地してたら
 
-				if (m_bJump == true && GetPosition().y  >= fHeight)
+				if ((m_bKnockback || m_bJump == true) && GetPosition().y  >= fHeight)
 				{
 					m_bLandOld = true;
 				}
@@ -1476,6 +1496,9 @@ bool CPlayer::Hit(const int nValue)
 		// 体力減らす
 		nLife -= nValue;
 
+		m_KnokBackMove.y += JUMP;
+		m_bHitStage = false;
+
 		// 補正
 		ValueNormalize(nLife, MAX_LIFE, 0);
 
@@ -1627,23 +1650,50 @@ void CPlayer::Damage(void)
 	m_mMatcol = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
 
 	// 位置更新
-	pos.y = (-0.4f * (float)(m_nCntState * m_nCntState) + move.y * (float)m_nCntState) + m_posKnokBack.y;
-	pos.x += move.x;
-	pos.z += move.z;
+	pos.y = (-0.4f * (float)(m_nCntState * m_nCntState) + m_KnokBackMove.y * (float)m_nCntState) + m_posKnokBack.y;
+	/*pos.x += move.x;
+	pos.z += move.z;*/
 
 	// 起伏との判定
-	if (CGame::GetElevation()->IsHit(pos) && m_nCntState >= 20)
+	if (m_bHitStage && m_nCntState >= 10)
 	{// 地面と当たっていたら
 		m_state = STATE_INVINCIBLE;
 		m_nCntState = INVINCIBLE_TIME;
-		move.y = 0.0f;			// 移動量ゼロ
-		
+		m_KnokBackMove.y = 0.0f;	// 移動量ゼロ
+		m_bLandOld = true;
+
 		// 色設定
 		m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// ノックバック判定消す
 		m_bKnockback = false;
 		m_pMotion->ToggleFinish(true);
+
+
+		// Xファイルとの判定
+		CStage *pStage = CGame::GetStage();
+		if (pStage == NULL)
+		{// NULLだったら
+			return;
+		}
+
+		// ステージに当たった判定
+		for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
+		{
+			// オブジェクト取得
+			CObjectX *pObjX = pStage->GetObj(nCntStage);
+
+			if (pObjX == NULL)
+			{// NULLだったら
+				continue;
+			}
+
+			// 高さ取得
+			bool bLand = false;
+			pos.y = pObjX->GetHeight(pos, bLand);
+		}
+
+
 	}
 	else if (m_nCntState >= 30)
 	{// 遷移カウンターが30になったら
@@ -1697,23 +1747,47 @@ void CPlayer::KnockBack(void)
 	m_nCntState++;
 
 	// 位置更新
-	pos.y = (-0.4f * (float)(m_nCntState * m_nCntState) + move.y * (float)m_nCntState) + m_posKnokBack.y;
-	pos.x += move.x;
-	pos.z += move.z;
+	pos.y = (-0.4f * (float)(m_nCntState * m_nCntState) + m_KnokBackMove.y * (float)m_nCntState) + m_posKnokBack.y;
+	/*pos.x += move.x;
+	pos.z += move.z;*/
 
 	// 起伏との判定
-	if (CGame::GetElevation()->IsHit(pos) && m_nCntState >= 20)
+	if (m_bHitStage)
 	{// 地面と当たっていたら
 		m_state = STATE_INVINCIBLE;
 		m_nCntState = INVINCIBLE_TIME;
-		move.y = 0.0f;	// 移動量ゼロ
-		
+		m_KnokBackMove.y = 0.0f;	// 移動量ゼロ
+		m_bLandOld = true;
+
 		// 色設定
 		m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		
 		// ノックバック判定消す
 		m_bKnockback = false;
 		m_pMotion->ToggleFinish(true);
+
+		// Xファイルとの判定
+		CStage *pStage = CGame::GetStage();
+		if (pStage == NULL)
+		{// NULLだったら
+			return;
+		}
+
+		// ステージに当たった判定
+		for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
+		{
+			// オブジェクト取得
+			CObjectX *pObjX = pStage->GetObj(nCntStage);
+
+			if (pObjX == NULL)
+			{// NULLだったら
+				continue;
+			}
+
+			// 高さ取得
+			bool bLand = false;
+			pos.y = pObjX->GetHeight(pos, bLand);
+		}
 	}
 
 
