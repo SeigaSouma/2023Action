@@ -16,6 +16,8 @@
 #include "camera.h"
 #include "mapmanager.h"
 #include "3D_effect.h"
+#include "stage.h"
+#include "game.h"
 
 //==========================================================================
 // マクロ定義
@@ -293,17 +295,44 @@ void CEditControlPoint::Control(D3DXVECTOR3 &pos)
 	}
 
 
-	// 着地したかどうか
-	bool bLand = false;
+	//// 着地したかどうか
+	//bool bLand = false;
 
-	// 高さ取得
-	float fHeight = CManager::GetInstance()->GetScene()->GetElevation()->GetHeight(pos, bLand);
+	//// 高さ取得
+	//float fHeight = CManager::GetInstance()->GetScene()->GetElevation()->GetHeight(pos, bLand);
 
-	if (bLand == true)
-	{
-		// 高さ代入
-		pos.y = fHeight;
+
+
+	// Xファイルとの判定
+	CStage *pStage = CGame::GetStage();
+	if (pStage == NULL)
+	{// NULLだったら
+		return;
 	}
+
+	float fHeight = 0.0f;
+	for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
+	{
+		// オブジェクト取得
+		CObjectX *pObjX = pStage->GetObj(nCntStage);
+
+		if (pObjX == NULL)
+		{// NULLだったら
+			continue;
+		}
+
+		// 高さ取得
+		bool bLand = false;
+		pos.y = pObjX->GetHeight(pos, bLand);
+	}
+
+
+
+	//if (bLand == true)
+	//{
+	//	// 高さ代入
+	//	pos.y = fHeight;
+	//}
 }
 
 //==========================================================================

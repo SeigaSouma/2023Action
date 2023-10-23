@@ -12,6 +12,7 @@
 #include "debugpointnumber.h"
 #include "objectX.h"
 #include "mapmanager.h"
+#include "stage.h"
 #include "manager.h"
 
 //==========================================================================
@@ -177,6 +178,13 @@ void CCameraChaseChanger::Update(void)
 		return;
 	}
 
+	// Xファイルとの判定
+	CStage *pStage = CGame::GetStage();
+	if (pStage == NULL)
+	{// NULLだったら
+		return;
+	}
+
 	for (int i = 0; i < m_nNumAll; i++)
 	{
 		if (m_apObjX[i] == NULL)
@@ -187,6 +195,22 @@ void CCameraChaseChanger::Update(void)
 
 		// マップ情報から位置取得
 		D3DXVECTOR3 pos = pMapManager->GetTargetPosition(m_ChaseChangeInfo[i].nMapIdx, m_ChaseChangeInfo[i].fMapMoveValue);
+
+		float fHeight = 0.0f;
+		for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
+		{
+			// オブジェクト取得
+			CObjectX *pObjX = pStage->GetObj(nCntStage);
+
+			if (pObjX == NULL)
+			{// NULLだったら
+				continue;
+			}
+
+			// 高さ取得
+			bool bLand = false;
+			pos.y = pObjX->GetHeight(pos, bLand);
+		}
 
 		m_apObjX[i]->SetPosition(pos);
 		m_pMultiNumber[i]->SetPosition(D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z));

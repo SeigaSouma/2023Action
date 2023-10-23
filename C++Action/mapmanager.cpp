@@ -10,6 +10,8 @@
 #include "game.h"
 #include "3D_effect.h"
 #include "debugpointnumber.h"
+#include "stage.h"
+#include "objectX.h"
 
 //==========================================================================
 // マクロ定義
@@ -189,6 +191,29 @@ void CMapManager::Update(void)
 #if _DEBUG
 	for (int i = 0; i < m_nNumAll; i++)
 	{
+		//// Xファイルとの判定
+		//CStage *pStage = CGame::GetStage();
+		//if (pStage == NULL)
+		//{// NULLだったら
+		//	return;
+		//}
+
+		//float fHeight = 0.0f;
+		//for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
+		//{
+		//	// オブジェクト取得
+		//	CObjectX *pObjX = pStage->GetObj(nCntStage);
+
+		//	if (pObjX == NULL)
+		//	{// NULLだったら
+		//		continue;
+		//	}
+
+		//	// 高さ取得
+		//	bool bLand = false;
+		//	m_posAll[i].y = pObjX->GetHeight(m_posAll[i], bLand);
+		//}
+
 		CEffect3D::Create(m_posAll[i], D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f), 50.0f, 2, CEffect3D::MOVEEFFECT_NONE, CEffect3D::TYPE_NORMAL);
 		m_pMultiNumber[i]->SetPosition(D3DXVECTOR3(m_posAll[i].x, m_posAll[i].y + 50.0f, m_posAll[i].z));
 

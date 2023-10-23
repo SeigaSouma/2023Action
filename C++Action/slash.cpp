@@ -353,6 +353,7 @@ void  CSlash::Collision(void)
 //==========================================================================
 bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 {
+#if 0
 	// ŠO‘¤‚Ì•
 	float fOutWidth = GetOutWidth();
 
@@ -385,7 +386,7 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 
 
 	// Å‚à‹ß‚¢“_‚Æ‹…‚Ì’†S‚Æ‚Ì‹——£‚ðŒvŽZ
-	distanceSquared = 
+	distanceSquared =
 		(transformedSphereCenter.x - closestX) * (transformedSphereCenter.x - closestX) +
 		(transformedSphereCenter.y - closestY) * (transformedSphereCenter.y - closestY) +
 		(transformedSphereCenter.z - closestZ) * (transformedSphereCenter.z - closestZ);
@@ -410,6 +411,90 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 	{
 		return true;
 	}
+
+#else
+
+	// î•ñŽæ“¾
+	D3DXVECTOR3 pos = GetPosition();
+	D3DXVECTOR3 rot = GetOriginRotation();
+	float fOutWidth = GetOutWidth();
+
+	float fLength = sqrtf(fOutWidth * fOutWidth + fOutWidth * fOutWidth);	// ‘ÎŠpü‚Ì’·‚³
+	float fAngle = atan2f(fOutWidth, fOutWidth);							// ‘ÎŠpü‚ÌŒü‚«
+
+	if (GetMoveAngle() == ANGLE_LEFT)
+	{
+		rot.x += D3DX_PI;
+	}
+	rot.y += D3DX_PI;
+
+	float fPosY = sinf(rot.x) * fOutWidth;
+
+	// ”»’è‚·‚éŽlŠp‚Ì4’¸“_
+	bool bLine1 = false, bLine2 = false, bLine3 = false, bLine4 = false;
+
+	D3DXVECTOR3 LeftUp = D3DXVECTOR3(
+		pos.x + cosf(rot.x) * sinf(rot.y - fAngle) * fLength,
+		pos.y + fPosY,
+		pos.z + cosf(rot.x) * cosf(rot.y - fAngle) * fLength);
+
+	D3DXVECTOR3 RightUp = D3DXVECTOR3(
+		pos.x + cosf(rot.x) * sinf(rot.y + fAngle) * fLength,
+		pos.y + fPosY,
+		pos.z + cosf(rot.x) * cosf(rot.y + fAngle) * fLength);
+
+	D3DXVECTOR3 LeftDown = D3DXVECTOR3(
+		pos.x + cosf(rot.x) * sinf(rot.y - D3DX_PI + fAngle) * fLength,
+		pos.y - fPosY,
+		pos.z + cosf(rot.x) * cosf(rot.y - D3DX_PI + fAngle) * fLength);
+
+	D3DXVECTOR3 RightDown = D3DXVECTOR3(
+		pos.x + cosf(rot.x) * sinf(rot.y + D3DX_PI - fAngle) * fLength,
+		pos.y - fPosY,
+		pos.z + cosf(rot.x) * cosf(rot.y + D3DX_PI - fAngle) * fLength);
+
+	float fWidth = sqrtf(
+		((LeftUp.x - RightUp.x) * (LeftUp.x - RightUp.x)) +
+		((LeftUp.z - RightUp.z) * (LeftUp.z - RightUp.z))) * 0.5f;
+
+	float fHeight = sqrtf(
+		((RightUp.x - RightDown.x) * (RightUp.x - RightDown.x)) +
+		((RightUp.z - RightDown.z) * (RightUp.z - RightDown.z))) * 0.5f;
+
+	D3DXVECTOR3 collisionRot = D3DXVECTOR3(0.0f, rot.y, 0.0f);
+	bool bHitY = CollisionCircleSquare2D(TargetPos, pos, D3DXVECTOR3(0.0f, rot.y, 0.0f), fTargetRadius * 0.5f, D3DXVECTOR2(fWidth, fHeight));
+
+	if (bHitY == false)
+	{// Y‚Å‚·‚ç“–‚½‚Á‚Ä‚È‚©‚Á‚½‚ç
+		return false;
+	}
+
+	bool bTri1 = false, bTri2 = false;
+	float fTriHeight1 = 0.0f, fTriHeight2 = 0.0f;
+	fTriHeight1 = GetVtxHeight(TargetPos, LeftUp, LeftDown, RightUp, bTri1);
+	fTriHeight2 = GetVtxHeight(TargetPos, RightDown, RightUp, LeftDown, bTri2);
+
+	if (bTri1 == false && bTri2 == false)
+	{// ‚Ç‚Á‚¿‚ÌŽOŠp‚É‚à‚ ‚½‚Á‚Ä‚È‚©‚Á‚½‚ç
+		return false;
+	}
+
+	if (bTri1 == true &&
+		fTriHeight1 >= TargetPos.y - fTargetRadius &&
+		fTriHeight1 <= TargetPos.y + fTargetRadius)
+	{// 1‚Â–Ú‚ÌŽOŠp‚É‚ ‚½‚Á‚Ä‚½‚ç && ”¼ŒaˆÈ“à‚É“ü‚Á‚Ä‚½‚ç
+		return true;
+	}
+	
+	if (bTri2 == true &&
+		fTriHeight2 >= TargetPos.y - fTargetRadius &&
+		fTriHeight2 <= TargetPos.y + fTargetRadius)
+	{// 2‚Â–Ú‚ÌŽOŠp‚É‚ ‚½‚Á‚Ä‚½‚ç && ”¼ŒaˆÈ“à‚É“ü‚Á‚Ä‚½‚ç
+		return true;
+	}
+
+
+#endif
 
 	return false;
 

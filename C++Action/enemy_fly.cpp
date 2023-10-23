@@ -404,7 +404,7 @@ void CEnemyFly::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		CBullet::MOVETYPE_NORMAL,
 		D3DXVECTOR3(pos.x, pos.y, pos.z),
 		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
+		D3DXVECTOR3(10.0f, 0.0f, 0.0f),
 		40.0f);
 
 	pBullet->SetMapIndex(GetMapIndex());
