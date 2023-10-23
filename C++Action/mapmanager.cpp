@@ -713,7 +713,7 @@ CObject::ANGLE CMapManager::GetTargetAngle(CObject *pMyObj, CObject *pTargetObj)
 float CMapManager::GetThusFarMoveValue(int nIdx)
 {
 
-	int nCalIdx = nIdx;
+	int nCalIdx = -1;
 	float fMoveValue = 0.0f;
 
 	// 曲線作る為の4点
@@ -724,7 +724,7 @@ float CMapManager::GetThusFarMoveValue(int nIdx)
 		nP0 = nCalIdx;
 		nP1 = nCalIdx + 1;
 
-		if (nP1 > nIdx)
+		if (nP0 >= nIdx)
 		{// 最終点超えたら終了
 			break;
 		}

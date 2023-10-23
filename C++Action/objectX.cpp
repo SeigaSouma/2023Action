@@ -342,14 +342,14 @@ void CObjectX::Update(void)
 	CXLoad::SXFile *pXData = CScene::GetXLoad()->GetObjectX(m_nIdxXFile);
 
 	D3DXVECTOR3 pos = GetPosition();
-	bool bLand = false;
+	/*bool bLand = false;
 	float fHeight = CScene::GetElevation()->GetHeight(pos, bLand);
 	if (bLand == true)
 	{
 		pos.y = fHeight;
 	}
 
-	SetPosition(pos);
+	SetPosition(pos);*/
 #endif
 
 	// 全頂点チェック

@@ -23,6 +23,7 @@
 #include "edit_controlpoint.h"
 #include "edit_cameraaxis.h"
 #include "edit_camerachasechanger.h"
+#include "edit_enemybase.h"
 #include "bulletmanager.h"
 #include "stage.h"
 
@@ -36,7 +37,9 @@ CEditControlPoint *CGame::m_pEditControlPoint = NULL;	// §Œä“_ƒGƒfƒBƒ^[‚ÌƒIƒuƒ
 CBulletManager *CGame::m_pBulletManager = NULL;		// ’eƒ}ƒl[ƒWƒƒ‚ÌƒIƒuƒWƒFƒNƒg
 CEditCameraAxis *CGame::m_pEditCameraAxis = NULL;		// ƒJƒƒ‰Ž²ƒGƒfƒBƒ^[‚ÌƒIƒuƒWƒFƒNƒg
 CEditCameraChaseChanger *CGame::m_pEditCmaeraChaseChanger = NULL;	// ƒJƒƒ‰’Ç]•ÏXŽÒƒGƒfƒBƒ^[‚ÌƒIƒuƒWƒFƒNƒg
+CEditEnemyBase *CGame::m_pEditEnemyBase = NULL;		// “G‚Ì‹’“_ƒGƒfƒBƒ^[
 CStage *CGame::m_pStage = NULL;	// ƒXƒe[ƒW‚ÌƒIƒuƒWƒFƒNƒg
+CGame::EEditType CGame::m_EditType = EDITTYPE_OFF;		// ƒGƒfƒBƒbƒg‚ÌŽí—Þ
 
 //==========================================================================
 // ƒRƒ“ƒXƒgƒ‰ƒNƒ^
@@ -74,7 +77,7 @@ HRESULT CGame::Init(void)
 	//**********************************
 	if (CManager::GetInstance()->GetScene()->GetPlayer() != NULL)
 	{
-		CManager::GetInstance()->GetScene()->GetPlayer()->SetPosition(D3DXVECTOR3(0.0f, 0.0f, -1000.0f));
+		CManager::GetInstance()->GetScene()->GetPlayer()->SetPosition(D3DXVECTOR3(0.0f, 1000.0f, -1000.0f));
 		CManager::GetInstance()->GetScene()->GetPlayer()->SetRotation(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 	}
 
@@ -163,6 +166,14 @@ void CGame::Uninit(void)
 		m_pEditCmaeraChaseChanger = NULL;
 	}
 
+	if (m_pEditEnemyBase != NULL)
+	{
+		// I—¹‚³‚¹‚é
+		m_pEditEnemyBase->Uninit();
+		delete m_pEditEnemyBase;
+		m_pEditEnemyBase = NULL;
+	}
+
 	if (m_pBulletManager != NULL)
 	{
 		// I—¹‚³‚¹‚é
@@ -204,27 +215,65 @@ void CGame::Update(void)
 	}
 #endif
 
+	if (pInputKeyboard->GetTrigger(DIK_F4))
+	{// F4‚ÅƒGƒfƒBƒbƒgØ‚è‘Ö‚¦
+
+		// Ø‚è‘Ö‚¦
+		m_EditType = (EEditType)(((int)m_EditType + 1) % (int)EDITTYPE_MAX);	// ’Ç]‚ÌŽí—Þ
+
+		EditReset();
+
+		switch (m_EditType)
+		{
+		case CGame::EDITTYPE_OFF:	// ‘S•”ƒIƒt
+
+			break;
+
+		case CGame::EDITTYPE_MAPCONTROL:
+
+			if (m_pEditControlPoint == NULL)
+			{// NULL‚¾‚Á‚½‚ç
+
+				// ƒGƒfƒBƒbƒg‚Ì¶¬ˆ—
+				m_pEditControlPoint = CEditControlPoint::Create();
+			}
+			break;
+
+		case CGame::EDITTYPE_CAMERACHASE:
+
+			if (m_pEditCmaeraChaseChanger == NULL)
+			{// NULL‚¾‚Á‚½‚ç
+
+				// ƒGƒfƒBƒbƒg‚Ì¶¬ˆ—
+				m_pEditCmaeraChaseChanger = CEditCameraChaseChanger::Create();
+			}
+			break;
+
+		case CGame::EDITTYPE_CAMERAAXIS:
+
+			if (m_pEditCameraAxis == NULL)
+			{// NULL‚¾‚Á‚½‚ç
+
+				// ƒGƒfƒBƒbƒg‚Ì¶¬ˆ—
+				m_pEditCameraAxis = CEditCameraAxis::Create();
+			}
+			break;
+
+		case EDITTYPE_ENEMYBASE:
+			if (m_pEditEnemyBase == NULL)
+			{// NULL‚¾‚Á‚½‚ç
+
+				// ƒGƒfƒBƒbƒg‚Ì¶¬ˆ—
+				m_pEditEnemyBase = CEditEnemyBase::Create();
+			}
+			break;
+
+		}
+	}
+
 	if (GetEnemyManager() != NULL)
 	{// “Gƒ}ƒl[ƒWƒƒ‚ÌXVˆ—
 		GetEnemyManager()->Update();
-	}
-
-	if (pInputKeyboard->GetTrigger(DIK_F4))
-	{// F4‚Åƒ}ƒbƒvƒGƒfƒBƒbƒg
-
-		if (m_pEditControlPoint == NULL)
-		{// NULL‚¾‚Á‚½‚ç
-
-			// ƒGƒfƒBƒbƒg‚Ì¶¬ˆ—
-			m_pEditControlPoint = CEditControlPoint::Create();
-		}
-		else
-		{
-			// I—¹‚³‚¹‚é
-			m_pEditControlPoint->Uninit();
-			delete m_pEditControlPoint;
-			m_pEditControlPoint = NULL;
-		}
 	}
 
 	if (m_pEditControlPoint != NULL)
@@ -232,50 +281,19 @@ void CGame::Update(void)
 		m_pEditControlPoint->Update();
 	}
 
-	if (pInputKeyboard->GetTrigger(DIK_F5) == true)
-	{// F5‚ª‰Ÿ‚³‚ê‚½,ƒJƒƒ‰’Ç]•ÏXŽÒ
-		if (m_pEditCmaeraChaseChanger == NULL)
-		{// NULL‚¾‚Á‚½‚ç
-
-			// ƒGƒfƒBƒbƒg‚Ì¶¬ˆ—
-			m_pEditCmaeraChaseChanger = CEditCameraChaseChanger::Create();
-		}
-		else
-		{
-			// I—¹‚³‚¹‚é
-			m_pEditCmaeraChaseChanger->Uninit();
-			delete m_pEditCmaeraChaseChanger;
-			m_pEditCmaeraChaseChanger = NULL;
-		}
-	}
-
 	if (m_pEditCmaeraChaseChanger != NULL)
 	{// ƒJƒƒ‰’Ç]•ÏXŽÒƒ}ƒl[ƒWƒƒ‚ÌXVˆ—
 		m_pEditCmaeraChaseChanger->Update();
 	}
 
-
-	if (pInputKeyboard->GetTrigger(DIK_F6))
-	{// F6‚ÅƒJƒƒ‰Ž²ƒGƒfƒBƒbƒg
-
-		if (m_pEditCameraAxis == NULL)
-		{// NULL‚¾‚Á‚½‚ç
-
-			// ƒGƒfƒBƒbƒg‚Ì¶¬ˆ—
-			m_pEditCameraAxis = CEditCameraAxis::Create();
-		}
-		else
-		{
-			// I—¹‚³‚¹‚é
-			m_pEditCameraAxis->Uninit();
-			delete m_pEditCameraAxis;
-			m_pEditCameraAxis = NULL;
-		}
-	}
-
 	if (m_pEditCameraAxis != NULL)
 	{// ƒJƒƒ‰Ž²ƒGƒfƒBƒ^[‚ÌXVˆ—
 		m_pEditCameraAxis->Update();
+	}
+
+	if (m_pEditEnemyBase != NULL)
+	{// “G‚Ì‹’“_ƒGƒfƒBƒ^[‚ÌXVˆ—
+		m_pEditEnemyBase->Update();
 	}
 
 #if _DEBUG
@@ -352,5 +370,45 @@ CStage *CGame::GetStage(void)
 //==========================================================================
 void CGame::Reset(void)
 {
+
+}
+
+//==========================================================================
+// ƒGƒfƒBƒ^[ƒŠƒZƒbƒgˆ—
+//==========================================================================
+void CGame::EditReset(void)
+{
+	if (m_pEditControlPoint != NULL)
+	{
+		// I—¹‚³‚¹‚é
+		m_pEditControlPoint->Uninit();
+		delete m_pEditControlPoint;
+		m_pEditControlPoint = NULL;
+	}
+
+	if (m_pEditCameraAxis != NULL)
+	{
+		// I—¹‚³‚¹‚é
+		m_pEditCameraAxis->Uninit();
+		delete m_pEditCameraAxis;
+		m_pEditCameraAxis = NULL;
+	}
+
+	if (m_pEditCmaeraChaseChanger != NULL)
+	{
+		// I—¹‚³‚¹‚é
+		m_pEditCmaeraChaseChanger->Uninit();
+		delete m_pEditCmaeraChaseChanger;
+		m_pEditCmaeraChaseChanger = NULL;
+	}
+
+	if (m_pEditEnemyBase != NULL)
+	{
+		// I—¹‚³‚¹‚é
+		m_pEditEnemyBase->Release();
+		m_pEditEnemyBase->Uninit();
+		delete m_pEditEnemyBase;
+		m_pEditEnemyBase = NULL;
+	}
 
 }

@@ -115,6 +115,7 @@ void CXLoad::Uninit(void)
 		if (m_pXFile[nCntData].pVtxPos != NULL)
 		{
 			delete[] m_pXFile[nCntData].pVtxPos;
+			m_pXFile[nCntData].pVtxPos = NULL;
 		}
 	}
 

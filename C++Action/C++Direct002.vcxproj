@@ -171,8 +171,10 @@
     <ClCompile Include="edit_cameraaxis.cpp" />
     <ClCompile Include="edit_camerachasechanger.cpp" />
     <ClCompile Include="edit_controlpoint.cpp" />
+    <ClCompile Include="edit_enemybase.cpp" />
     <ClCompile Include="elevation.cpp" />
     <ClCompile Include="enemy.cpp" />
+    <ClCompile Include="enemybase.cpp" />
     <ClCompile Include="enemyfixedmove_manager.cpp" />
     <ClCompile Include="enemymanager.cpp" />
     <ClCompile Include="enemy_boss.cpp" />
@@ -260,8 +262,10 @@
     <ClInclude Include="edit_cameraaxis.h" />
     <ClInclude Include="edit_camerachasechanger.h" />
     <ClInclude Include="edit_controlpoint.h" />
+    <ClInclude Include="edit_enemybase.h" />
     <ClInclude Include="elevation.h" />
     <ClInclude Include="enemy.h" />
+    <ClInclude Include="enemybase.h" />
     <ClInclude Include="enemyfixedmove_manager.h" />
     <ClInclude Include="enemymanager.h" />
     <ClInclude Include="enemy_boss.h" />

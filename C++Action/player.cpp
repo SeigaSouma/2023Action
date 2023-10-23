@@ -147,6 +147,7 @@ HRESULT CPlayer::Init(void)
 
 	m_state = STATE_NONE;	// 状態
 	m_nCntState = 0;		// 状態遷移カウンター
+	m_bLandOld = true;
 
 	// キャラ作成
 	HRESULT hr = SetCharacter(CHARAFILE);
@@ -177,6 +178,7 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
+	//SetMapIndex(29);
 
 	return S_OK;
 }
@@ -276,7 +278,7 @@ void CPlayer::Update(void)
 	}
 
 	// エディット中は抜ける
-	if (CGame::GetEditControlPoint() != NULL)
+	if (CGame::GetEditType() != CGame::EDITTYPE_OFF)
 	{
 		return;
 	}
@@ -573,7 +575,8 @@ void CPlayer::Controll(void)
 			m_bMove = false;
 		}
 
-		if (pInputKeyboard->GetTrigger(DIK_SPACE) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_LB, 0))
+		if (m_bJump == false &&
+			(pInputKeyboard->GetTrigger(DIK_SPACE) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_LB, 0)))
 		{//SPACEが押された,ジャンプ
 
 			m_bJump = true;
@@ -636,7 +639,7 @@ void CPlayer::Controll(void)
 	newPosition = pMapManager->UpdateNowPosition(nIdxMapPoint, fPointRatio, fMoveValue, pos.y);
 
 	// 目標地点
-	float fDest = (fMoveValue + fMove * m_nAngle);
+	float fDest = (fMoveValue + (fMove + GetRadius() * 0.5f) * m_nAngle);
 	int nDestIdx = nIdxMapPoint;
 	float fDestPointRatio = fPointRatio;
 	sakiPos = pMapManager->UpdateNowPosition(nDestIdx, fDestPointRatio, fDest, pos.y);
@@ -675,23 +678,61 @@ void CPlayer::Controll(void)
 		move.y -= mylib_const::GRAVITY;
 	}
 
+	// 位置更新
+	newPosition.y += move.y;
+	sakiPos.y = newPosition.y;
+
 	//**********************************
 	// 当たり判定
 	//**********************************
-	bool bLandStage = Collision(newPosition, move);
+	bool bLandStage = Collision(sakiPos, move);
 
-	if (bLandStage == true)
+	m_bHitStage;
+
+	bool bMove = false;
+	if (m_bLandOld == false && bLandStage == true)
+	{// 前回は着地していなくて、今回は着地している場合
+
+		bMove = false;
+	}
+
+	if (m_bLandOld == true && bLandStage == true)
+	{// 前回も今回も着地している場合
+		bMove = true;
+	}
+
+	// 過去の着地判定保存
+	//m_bLandOld = bLandStage;
+
+	if (m_bHitWall == false && 
+		(bLandStage == false || bMove == true || m_bLandField == true || m_bJump == true))
 	{
-		pos = newPosition;
+		pos.x = newPosition.x;
+		pos.z = newPosition.z;
+		pos.y = sakiPos.y;
+
+		//if (m_bHitStage == true)
+		{// ステージで移動する場合
+
+			// 前回は乗ってたことにする
+			m_bLandOld = true;
+		}
 	}
 	else
 	{
-		pos = GetOldPosition();
+		D3DXVECTOR3 posOld = GetOldPosition();
+		pos.x = posOld.x;
+		pos.z = posOld.z;
+		pos = posOld;
+		move.x = 0.0f;
 		fMoveValue = GetOldMapMoveValue();
+
+		// 前回は乗ってなかったってことにする
+		//m_bLandOld = false;
 	}
 
 	// 位置更新
-	pos.y += move.y;
+	//pos.y += move.y;
 
 	// 慣性補正
 	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG)
@@ -1071,8 +1112,8 @@ void CPlayer::Atack(void)
 				CSlash::Create
 				(
 					D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),	// 位置
-					D3DXVECTOR3(0.0f, D3DX_PI + fRotY, 0.0f),		// 向き
-					D3DXVECTOR3(m_fAtkStickRot, 0.0f, 0.0f),		// 向き
+					D3DXVECTOR3(0.0f, 0.0f, 0.0f),		// 向き
+					D3DXVECTOR3(m_fAtkStickRot, D3DX_PI + fRotY, 0.0f),		// 向き
 					D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f),	// 色
 					200.0f,								// 幅
 					50.0f,								// 中心からの間隔
@@ -1193,7 +1234,7 @@ void CPlayer::Atack(void)
 //==========================================================================
 // 当たり判定
 //==========================================================================
-bool CPlayer::Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move)
+bool CPlayer::Collision(D3DXVECTOR3 &pos, D3DXVECTOR3 &move)
 {
 
 	// 向き取得
@@ -1202,6 +1243,8 @@ bool CPlayer::Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move)
 	// 着地したかどうか
 	bool bLand = false;
 	float fHeight = 0.0f;
+	m_bLandField = false;
+	m_bHitWall = false;			// 壁の当たり判定
 
 	// 高さ取得
 	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG)
@@ -1218,7 +1261,7 @@ bool CPlayer::Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move)
 
 		// 地面の高さに補正
 		pos.y = fHeight;
-		m_bLandOld = false;
+		m_bLandField = true;
 
 		if (bLand == true)
 		{// 着地してたら
@@ -1226,6 +1269,7 @@ bool CPlayer::Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move)
 			// ジャンプ使用可能にする
 			m_bJump = false;
 			move.y = 0.0f;
+			m_bLandOld = false;
 		}
 	}
 
@@ -1237,7 +1281,10 @@ bool CPlayer::Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move)
 		return false;
 	}
 
-	static bool bNowLand = false;
+	bool bNowLand = false;
+
+	// ステージに当たった判定
+	m_bHitStage = false;
 	for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
 	{
 		// オブジェクト取得
@@ -1252,57 +1299,40 @@ bool CPlayer::Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move)
 		bool bLand = false;
 		fHeight = pObjX->GetHeight(pos, bLand);
 
-		if (bLand == true)
-		{
-			bNowLand = true;
-		}
-
 		if (bLand == true && fHeight > pos.y)
-		{// 自分の方が地面よりたかかったら
-			bLand = false;
-			move = mylib_const::DEFAULT_VECTOR3;
-		}
+		{// 地面の方が自分より高かったら
 
-		if (m_bLandOld == false && bLand == true)
-		{// 前回は着地してなくて、今回は着地している場合
-
-			if (fHeight > pos.y)
-			{// 地面の方が自分より高かったら
-
-				// 地面の高さに補正
-				pos.y = fHeight;
-
-				if (bLand == true)
-				{// 着地してたら
-
-					// ジャンプ使用可能にする
-					m_bJump = false;
-					move.y = 0.0f;
-					bNowLand = true;
-				}
+			// 地面の高さに補正
+			if (pos.y + 50.0f <= fHeight)
+			{// 自分より壁が高すぎる
+				m_bHitWall = true;
 			}
 			else
-			{// 自分の方が高い
+			{
+				pos.y = fHeight;
+			}
 
+			m_bHitStage = true;
+			m_bLandField = false;
+
+			if (bLand == true)
+			{// 着地してたら
+
+				if (m_bJump == true && GetPosition().y  >= fHeight)
+				{
+					m_bLandOld = true;
+				}
+
+				// ジャンプ使用可能にする
+				m_bJump = false;
+				move.y = 0.0f;
+				bNowLand = true;
 			}
 		}
-
-		//if (fHeight > pos.y && m_bLandOld == true)
-		//{// 地面の方が自分より高かったら
-
-		//	// 地面の高さに補正
-		//	pos.y = fHeight;
-
-		//	if (bLand == true)
-		//	{// 着地してたら
-
-		//		// ジャンプ使用可能にする
-		//		m_bJump = false;
-		//		move.y = 0.0f;
-		//	}
-		//}
 	}
-	m_bLandOld = false;
+
+	// 過去の着地判定保存
+	//m_bLandOld = bNowLand;
 
 
 
@@ -1321,7 +1351,10 @@ bool CPlayer::Collision(D3DXVECTOR3 pos, D3DXVECTOR3 &move)
 	// 向き設定
 	SetRotation(rot);
 
-	return !bNowLand;
+	// 位置設定
+	//SetPosition(pos);
+
+	return bNowLand;
 }
 
 //==========================================================================
@@ -1355,25 +1388,25 @@ void CPlayer::CollisionChaseChanger(void)
 	int nMapIdx = GetMapIndex();
 	int nChangeNumAll = pCameraChaseChanger->GetNumAll();
 
-	for (int i = 0; i < nChangeNumAll; i++)
+	for (int i = 0; i < nChangeNumAll + 1; i++)
 	{
 		// 情報取得
 		ChaseChangerInfo = pCameraChaseChanger->GetChaseChangeInfo(i);
 
-		if (nMapIdx == ChaseChangerInfo.nMapIdx && i != nChangeNumAll - 1)
+		if (nMapIdx == ChaseChangerInfo.nMapIdx && i != nChangeNumAll)
 		{// 一緒な場合
 			if (pMapManager->GetTargetAngle(nMapIdx, ChaseChangerInfo.nMapIdx, GetMapMoveValue(), ChaseChangerInfo.fMapMoveValue) == CObject::ANGLE_LEFT)
 			{// 左にいたら
 				continue;
 			}
 		}
-		else if (nMapIdx > ChaseChangerInfo.nMapIdx && i != nChangeNumAll - 1)
+		else if (nMapIdx > ChaseChangerInfo.nMapIdx && i != nChangeNumAll)
 		{// 自分のマップインデックスより小さい場合 && 終端じゃない
 			continue;
 		}
-		else if (i == nChangeNumAll - 1)
+		else if (i == nChangeNumAll)
 		{// 最後
-			pCamera->SetChaseType(CCamera::CHASETYPE_MAP);
+			ChaseChangerInfo.chaseType = CCamera::CHASETYPE_NORMAL;
 		}
 
 		// 種類別処理

@@ -16,6 +16,7 @@
 #include "player.h"
 #include "cameraaxis.h"
 #include "camerachasechanger.h"
+#include "enemybase.h"
 
 // 遷移先
 #include "game.h"
@@ -33,6 +34,7 @@ CEnemyManager *CScene::m_pEnemyManager = NULL;	// 敵マネージャのオブジェクト
 CMapManager *CScene::m_pMapManager = NULL;		// マップマネージャのオブジェクト
 CCameraAxis *CScene::m_pCameraAxis = NULL;		// カメラの軸のオブジェクト
 CCameraChaseChanger *CScene::m_pCameraChaseChanger = NULL;	// カメラ追従変更者のオブジェクト
+CEnemyBase *CScene::m_pEnemyBase = NULL;	// 敵の拠点
 
 //==========================================================================
 // コンストラクタ
@@ -135,6 +137,16 @@ HRESULT CScene::Init(void)
 	}
 
 	//**********************************
+	// 敵マネージャ
+	//**********************************
+	m_pEnemyManager = CEnemyManager::Create("data\\TEXT\\enemy_manager.txt");
+
+	if (m_pEnemyManager == NULL)
+	{// NULLだったら
+		return E_FAIL;
+	}
+
+	//**********************************
 	// カメラの軸
 	//**********************************
 	m_pCameraAxis = CCameraAxis::Create("data\\BIN\\cameraaxis.bin");
@@ -151,13 +163,12 @@ HRESULT CScene::Init(void)
 	{// NULLだったら
 		return E_FAIL;
 	}
-	
-	//**********************************
-	// 敵マネージャ
-	//**********************************
-	m_pEnemyManager = CEnemyManager::Create("data\\TEXT\\enemy_manager.txt");
 
-	if (m_pEnemyManager == NULL)
+	//**********************************
+	// 敵の拠点
+	//**********************************
+	m_pEnemyBase = CEnemyBase::Create();
+	if (m_pEnemyBase == NULL)
 	{// NULLだったら
 		return E_FAIL;
 	}
@@ -230,6 +241,14 @@ void CScene::Uninit(void)
 		m_pCameraChaseChanger = NULL;
 	}
 
+	// 敵の拠点
+	if (m_pEnemyBase != NULL)
+	{
+		m_pEnemyBase->Uninit();
+		delete m_pEnemyBase;
+		m_pEnemyBase = NULL;
+	}
+
 	// 敵マネージャ
 	if (m_pEnemyManager != NULL)
 	{
@@ -261,6 +280,9 @@ void CScene::Update(void)
 
 	// カメラ追従変更者
 	m_pCameraChaseChanger->Update();
+
+	// 敵の拠点
+	m_pEnemyBase->Update();
 }
 
 //==========================================================================
@@ -325,6 +347,14 @@ CCameraAxis *CScene::GetCameraAxis(void)
 CCameraChaseChanger *CScene::GetCameraChaseChanger(void)
 {
 	return m_pCameraChaseChanger;
+}
+
+//==========================================================================
+// 敵の拠点
+//==========================================================================
+CEnemyBase *CScene::GetEnemyBase(void)
+{
+	return m_pEnemyBase;
 }
 
 //==========================================================================

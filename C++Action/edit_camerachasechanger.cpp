@@ -160,7 +160,7 @@ void CEditCameraChaseChanger::Update(void)
 
 	// デバッグ情報
 	CManager::GetInstance()->GetDebugProc()->Print(
-		"------------------[ 追従種類変更情報 ]------------------\n"
+		"------------------[ カメラ追従種類変更情報 ]------------------\n"
 		"<配置>         [ENTER]\n"
 		"<ファイル保存> [F9] 【data/TEXT/edit_info.txt】\n"
 		"<種類>         [C：%d]\n"

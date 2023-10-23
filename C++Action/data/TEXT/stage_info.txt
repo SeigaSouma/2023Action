@@ -13,7 +13,7 @@ NUM_MODEL = 3
 # モデルファイル名
 #------------------------------------------------------------------------------
 MODEL_FILENAME = data/MODEL/map/bill_00.x		# [0]
-MODEL_FILENAME = data/MODEL/smplestage_01.x		# [1]
+MODEL_FILENAME = data/MODEL/stage_01.x		# [1]
 MODEL_FILENAME = data/MODEL/smplestage_02.x		# [2]
 
 
@@ -21,10 +21,10 @@ MODEL_FILENAME = data/MODEL/smplestage_02.x		# [2]
 # モデルの配置
 #==============================================================================
 MODELSET
-	TYPE = 2
-	POS = -1876.00 0.00 -3935.00
+	TYPE = 1
+	POS = -1276.00 0.00 -3935.00
 	ROT = 0.00 0.00 0.00
-	SHADOW = 1
+	SHADOW = 0
 END_MODELSET
 
 

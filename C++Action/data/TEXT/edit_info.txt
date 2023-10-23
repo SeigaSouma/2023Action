@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/glass.jpg		# [14]
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 43
+NUM_MODEL = 36
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -55,24 +55,17 @@ MODEL_FILENAME = data/MODEL/map_object/tree_02_big.x		# [21]
 MODEL_FILENAME = data/MODEL/map_object/tree_03.x		# [22]
 MODEL_FILENAME = data/MODEL/map_object/treegroup_02.x		# [23]
 MODEL_FILENAME = data/MODEL/map_object/treegroup_01.x		# [24]
-MODEL_FILENAME = data/MODEL/map_object/kusa_01.x		# [25]
-MODEL_FILENAME = data/MODEL/map_object/kusa_03.x		# [26]
-MODEL_FILENAME = data/MODEL/map_object/mashroom_01.x		# [27]
-MODEL_FILENAME = data/MODEL/map_object/mashroom_02.x		# [28]
-MODEL_FILENAME = data/MODEL/map_object/flowers_01.x		# [29]
-MODEL_FILENAME = data/MODEL/map_object/flowers_02.x		# [30]
-MODEL_FILENAME = data/MODEL/map_object/flowers_03.x		# [31]
-MODEL_FILENAME = data/MODEL/map_object/flowers_04.x		# [32]
-MODEL_FILENAME = data/MODEL/map_object/rock_01.x		# [33]
-MODEL_FILENAME = data/MODEL/map_object/rock_02.x		# [34]
-MODEL_FILENAME = data/MODEL/map_object/rock_03.x		# [35]
-MODEL_FILENAME = data/MODEL/map_object/rock_04.x		# [36]
-MODEL_FILENAME = data/MODEL/map_object/rock_05.x		# [37]
-MODEL_FILENAME = data/MODEL/map_object/rock_02_big.x		# [38]
-MODEL_FILENAME = data/MODEL/map_object/rock_03_big.x		# [39]
-MODEL_FILENAME = data/MODEL/map_object/rock_04_big.x		# [40]
-MODEL_FILENAME = data/MODEL/map_object/rock_05_big.x		# [41]
-MODEL_FILENAME = data/MODEL/arow.x		# [42]
+MODEL_FILENAME = data/MODEL/map_object/rock_01.x		# [25]
+MODEL_FILENAME = data/MODEL/map_object/rock_02.x		# [26]
+MODEL_FILENAME = data/MODEL/map_object/rock_03.x		# [27]
+MODEL_FILENAME = data/MODEL/map_object/rock_04.x		# [28]
+MODEL_FILENAME = data/MODEL/map_object/rock_05.x		# [29]
+MODEL_FILENAME = data/MODEL/map_object/rock_01_huge.x		# [30]
+MODEL_FILENAME = data/MODEL/map_object/rock_02_big.x		# [31]
+MODEL_FILENAME = data/MODEL/map_object/rock_03_big.x		# [32]
+MODEL_FILENAME = data/MODEL/map_object/rock_04_big.x		# [33]
+MODEL_FILENAME = data/MODEL/map_object/rock_05_big.x		# [34]
+MODEL_FILENAME = data/MODEL/arow.x		# [35]
 
 #==============================================================================
 # 空情報
@@ -111,9 +104,16 @@ END_FIELDSET
 # モデルの配置
 #==============================================================================
 MODELSET
-	TYPE = 2
-	POS = 0.00 0.00 0.00
-	ROT = 0.00 0.00 0.00
+	TYPE = 30
+	POS = 3488.05 -100.00 -3004.59
+	ROT = 0.00 -0.94 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 30
+	POS = 2616.87 -100.00 -5745.75
+	ROT = 0.00 -0.94 0.00
 	SHADOW = 1
 END_MODELSET
 

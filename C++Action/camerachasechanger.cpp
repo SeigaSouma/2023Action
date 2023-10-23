@@ -351,7 +351,7 @@ CCameraChaseChanger::sChaseChangeInfo CCameraChaseChanger::GetChaseChangeInfo(in
 	sChaseChangeInfo InitInfo;
 	memset(&InitInfo, NULL, sizeof(InitInfo));
 
-	if (m_ChaseChangeInfo.size() <= 0)
+	if (m_ChaseChangeInfo.size() <= 0 || (int)m_ChaseChangeInfo.size() <= nIdx)
 	{// ƒTƒCƒY–³‚µ
 		return InitInfo;
 	}

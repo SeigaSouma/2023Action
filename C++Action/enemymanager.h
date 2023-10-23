@@ -20,7 +20,7 @@ class CEnemy;
 // 敵のマネージャクラス定義
 class CEnemyManager
 {
-protected:
+public:
 
 	// 構造体定義
 	struct EnemyData
@@ -51,8 +51,6 @@ protected:
 		int nNumKey;		// キーの数
 	};
 
-public:
-
 	// 列挙型定義
 	enum STATE
 	{
@@ -70,12 +68,15 @@ public:
 
 	static CEnemyManager *Create(const std::string pTextFile);
 	HRESULT ReadText(const std::string pTextFile);	// 外部ファイル読み込み処理
-	void SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern);	// 敵配置
+	CEnemy **SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern);	// 敵配置
+	CEnemy **SetEnemy(D3DXVECTOR3 pos, int nMapIndex, float fMapMoveValue, int nPattern);	// 敵配置
 	static int GetPatternNum(void);
 	static void Release(int nIdx);		// 破棄
 	STATE GetState(void) { return m_state; }	// 状態取得
-	int GetNumAll(void);	// 敵の総数取得
+	int GetNumAll(void);		// 敵の総数取得
+	Pattern GetPattern(int nPattern);	// パターン取得
 	CEnemy **GetEnemy(void);	// 敵取得
+	static const char *GetMotionFilename(int nType);
 protected:
 
 

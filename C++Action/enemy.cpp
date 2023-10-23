@@ -418,6 +418,12 @@ void CEnemy::Update(void)
 	// 当たり判定
 	Collision();
 
+	if (m_ActType == CEnemy::ACTTYPE_FIXED)
+	{
+		// 一定の動きで移動
+		FixedMove();
+	}
+
 	// 死亡の判定
 	if (IsDeath() == true)
 	{// 死亡フラグが立っていたら
@@ -772,7 +778,8 @@ void CEnemy::StateNone(void)
 	switch (m_ActType)
 	{
 	case CEnemy::ACTTYPE_FIXED:
-		FixedMove();
+		// 攻撃状態移行処理
+		ChangeToAttackState();
 		break;
 
 	case CEnemy::ACTTYPE_CHASE:
@@ -1777,6 +1784,12 @@ int CEnemy::GetState(void)
 void CEnemy::SetOriginRotation(D3DXVECTOR3 rot)
 {
 	m_rotOrigin = rot;
+}
+
+// スポーン地点設定
+void CEnemy::SetSpawnPosition(D3DXVECTOR3 pos)
+{
+	m_posOrigin = pos;
 }
 
 //==========================================================================

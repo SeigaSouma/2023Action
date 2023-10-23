@@ -142,7 +142,7 @@ void CEditControlPoint::Update(void)
 
 	// デバッグ情報
 	CManager::GetInstance()->GetDebugProc()->Print(
-		"------------------[ エディット情報 ]------------------\n"
+		"------------------[ マップ軌道エディタ ]------------------\n"
 		"<配置>         [ENTER]\n"
 		"<ファイル保存> [F9] 【data/TEXT/edit_info.txt】\n"
 		"<移動>         高速：[↑,↓,←,→]　低速：[W,A,S,D]\n"
@@ -332,7 +332,7 @@ void CEditControlPoint::Grab(void)
 	for (int i = 0; i < pMapManager->GetNumAll(); i++)
 	{
 		D3DXVECTOR3 TargetPoint = pMapManager->GetControlPoint(i);
-		if (bAll == true || SphereRange(m_pos, TargetPoint, 50.0f, 50.0f))
+		if (bAll == true || CircleRange(m_pos, TargetPoint, 50.0f, 50.0f))
 		{// 球に当たってたら
 
 			// 操作

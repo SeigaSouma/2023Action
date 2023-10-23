@@ -157,10 +157,26 @@ HRESULT CSlash::Init(void)
 	D3DXMatrixTranslation(&mtxTrans, pos.x, pos.y, pos.z);
 	D3DXMatrixMultiply(&mtxCollision, &mtxCollision, &mtxTrans);
 
+	float sy = sqrtf(mtxCollision._11 * mtxCollision._11 + mtxCollision._21 * mtxCollision._21);
+	if (sy > 1e-6) 
+	{
+		collisionRotation.x = atan2f(mtxCollision._32, mtxCollision._33);
+		collisionRotation.y = atan2f(-mtxCollision._31, sy);
+		collisionRotation.z = atan2f(mtxCollision._21, mtxCollision._11);
+	}
+	else 
+	{
+		collisionRotation.x = atan2f(-mtxCollision._23, mtxCollision._22);
+		collisionRotation.y = atan2f(-mtxCollision._31, sy);
+		collisionRotation.z = 0;
+	}
+
 	// ワールド行列から回転成分を計算
-	collisionRotation.x = atan2f(mtxCollision._32, mtxCollision._33);
+	/*collisionRotation.x = atan2f(mtxCollision._32, mtxCollision._33);
 	collisionRotation.y = atan2f(-mtxCollision._31, sqrtf(mtxCollision._32 * mtxCollision._32 + mtxCollision._33 * mtxCollision._33));
-	collisionRotation.z = atan2f(mtxCollision._21, mtxCollision._11);
+	collisionRotation.z = atan2f(mtxCollision._21, mtxCollision._11);*/
+
+	collisionRotation = rot;
 	RotNormalize(collisionRotation);
 
 	// 外側の幅
@@ -246,12 +262,14 @@ void  CSlash::Collision(void)
 
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
-	for (int nCntBullet = 0; nCntBullet < nNumAll; nCntBullet++)
+	int nUse = 0;
+	for (int nCntBullet = 0; nUse < nNumAll; nCntBullet++)
 	{
 		if (ppBullet[nCntBullet] == NULL)
 		{// NULLだったら
-			break;
+			continue;
 		}
+		nUse++;
 
 		// 弾の位置
 		D3DXVECTOR3 BulletPosition = ppBullet[nCntBullet]->GetPosition();
@@ -339,7 +357,7 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 	float fOutWidth = GetOutWidth();
 
 	D3DXVECTOR3 rectCenter = GetPosition();							// 矩形の中心座標
-	D3DXVECTOR3 rectSize = D3DXVECTOR3(fOutWidth, 10.0f, fOutWidth);	// 矩形のサイズ
+	D3DXVECTOR3 rectSize = D3DXVECTOR3(fOutWidth, 0.0f, fOutWidth);	// 矩形のサイズ
 	D3DXVECTOR3 sphereCenter = TargetPos;							// 球の中心座標
 	float sphereRadius = fTargetRadius;								// 球の半径
 
@@ -364,6 +382,28 @@ bool CSlash::IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius)
 		(closestX - transformedSphereCenter.x) * (closestX - transformedSphereCenter.x) +
 		(closestY - transformedSphereCenter.y) * (closestY - transformedSphereCenter.y) +
 		(closestZ - transformedSphereCenter.z) * (closestZ - transformedSphereCenter.z);
+
+
+	// 最も近い点と球の中心との距離を計算
+	distanceSquared = 
+		(transformedSphereCenter.x - closestX) * (transformedSphereCenter.x - closestX) +
+		(transformedSphereCenter.y - closestY) * (transformedSphereCenter.y - closestY) +
+		(transformedSphereCenter.z - closestZ) * (transformedSphereCenter.z - closestZ);
+
+	float sphereRadiusWithMargin = sphereRadius;  // 球の半径に追加のマージンを考慮する場合、適切な値に変更
+
+	// 球が新しい位置で矩形と交差している場合、当たり判定
+	if (distanceSquared <= (sphereRadiusWithMargin * sphereRadiusWithMargin)) {
+		return true;
+	}
+
+	if (m_pObj3D != NULL)
+	{
+		///*m_pObj3D->SetRotation(mylib_const::DEFAULT_VECTOR3);
+		//m_pObj3D->SetOriginRotation(collisionRotation);*/
+		//m_pObj3D->SetRotation(collisionRotation);
+		//m_pObj3D->SetOriginRotation(mylib_const::DEFAULT_VECTOR3);
+	}
 
 	// 球の判定
 	if (distanceSquared <= (sphereRadius * sphereRadius))
@@ -394,7 +434,7 @@ void CSlash::Draw(void)
 	// ライティングを無効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-	m_pObj3D->Draw();
+	//m_pObj3D->Draw();
 
 	// ライティングを有効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, TRUE);

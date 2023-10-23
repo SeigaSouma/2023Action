@@ -151,8 +151,8 @@ void CEnemyManager::Update(void)
 		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0);
 		/*SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 1);
 		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 2);
-		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 3);
-		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 4);*/
+		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 3);*/
+		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 4);
 	}
 
 	// テキストの描画
@@ -164,12 +164,14 @@ void CEnemyManager::Update(void)
 //==========================================================================
 // 敵配置
 //==========================================================================
-void CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern)
+CEnemy **CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern)
 {
 	int nNumSpawn = m_aPattern[nPattern].nNumEnemy;	// スポーンする数
 	int nCntNULL = 0;
 	int nCntStart = 0;
 	Pattern NowPattern = m_aPattern[nPattern];
+	CEnemy *pEnemy[mylib_const::MAX_PATTEN_ENEMY] = {};
+	memset(&pEnemy[0], NULL, sizeof(pEnemy));
 
 	for (int nCntEnemy = 0; nCntEnemy < nNumSpawn; nCntEnemy++)
 	{
@@ -197,6 +199,8 @@ void CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern)
 				break;
 			}
 
+			pEnemy[nCntEnemy] = m_pEnemy[nCntNULL];
+
 			// 向き設定
 			m_pEnemy[nCntNULL]->SetRotation(rot);
 			m_pEnemy[nCntNULL]->SetRotDest(rot.y);
@@ -206,7 +210,7 @@ void CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern)
 			CEnemyFixedMoveManager *pFixed = m_pEnemy[nCntNULL]->GetFixedManager();
 			if (pFixed == NULL)
 			{// 失敗していたら
-				return;
+				return &pEnemy[0];
 			}
 			pFixed->Set(NowPattern.nFixedType);
 			pFixed->StartSet(NowPattern.EnemyData[nCntEnemy].nStartKey, NowPattern.EnemyData[nCntEnemy].nStartFrame);
@@ -216,6 +220,70 @@ void CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern)
 			break;
 		}
 	}
+
+	return &pEnemy[0];
+}
+
+//==========================================================================
+// 敵配置(オーバーロード)
+//==========================================================================
+CEnemy **CEnemyManager::SetEnemy(D3DXVECTOR3 pos, int nMapIndex, float fMapMoveValue, int nPattern)
+{
+	int nNumSpawn = m_aPattern[nPattern].nNumEnemy;	// スポーンする数
+	int nCntNULL = 0;
+	int nCntStart = 0;
+	Pattern NowPattern = m_aPattern[nPattern];
+	CEnemy *pEnemy[mylib_const::MAX_PATTEN_ENEMY] = {};
+	memset(&pEnemy[0], NULL, sizeof(pEnemy));
+
+	for (int nCntEnemy = 0; nCntEnemy < nNumSpawn; nCntEnemy++)
+	{
+		for (nCntNULL = nCntStart; nCntNULL < mylib_const::MAX_OBJ; nCntNULL++, nCntStart++)
+		{
+			if (m_pEnemy[nCntNULL] != NULL)
+			{// 情報が入ってたら
+				continue;
+			}
+
+			int nType = NowPattern.EnemyData[nCntEnemy].nType;
+
+			// 敵の生成
+			m_pEnemy[nCntNULL] = CEnemy::Create(
+				nCntNULL,						// インデックス番号
+				sMotionFileName[nType].c_str(),	// ファイル名
+				pos,							// 位置
+				(CEnemy::TYPE)nType);			// 種類
+
+			if (m_pEnemy[nCntNULL] == NULL)
+			{// 失敗していたら
+
+				delete m_pEnemy[nCntNULL];
+				m_pEnemy[nCntNULL] = NULL;
+				break;
+			}
+
+			pEnemy[nCntEnemy] = m_pEnemy[nCntNULL];
+
+			// 初期情報設定
+			m_pEnemy[nCntNULL]->SetMapIndexOrigin(nMapIndex);
+			m_pEnemy[nCntNULL]->SetMapMoveValueOrigin(NowPattern.EnemyData[nCntEnemy].fStartMoveValue + fMapMoveValue);
+
+			// 敵の一定の動きマネージャポインタ取得
+			CEnemyFixedMoveManager *pFixed = m_pEnemy[nCntNULL]->GetFixedManager();
+			if (pFixed == NULL)
+			{// 失敗していたら
+				return &pEnemy[0];
+			}
+			pFixed->Set(NowPattern.nFixedType);
+			pFixed->StartSet(NowPattern.EnemyData[nCntEnemy].nStartKey, NowPattern.EnemyData[nCntEnemy].nStartFrame);
+
+			// 総数加算
+			m_nNumAll++;
+			break;
+		}
+	}
+
+	return &pEnemy[0];
 }
 
 //==========================================================================
@@ -224,6 +292,14 @@ void CEnemyManager::SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern)
 int CEnemyManager::GetPatternNum(void)
 {
 	return m_nPatternNum;
+}
+
+//==========================================================================
+// パターン取得
+//==========================================================================
+CEnemyManager::Pattern CEnemyManager::GetPattern(int nPattern)
+{
+	return m_aPattern[nPattern];
 }
 
 //==========================================================================
@@ -368,7 +444,7 @@ HRESULT CEnemyManager::ReadText(const std::string pTextFile)
 	}
 
 	// パターン数
-	m_nPatternNum = nCntPatten - 1;
+	m_nPatternNum = nCntPatten;
 
 	// ファイルを閉じる
 	fclose(pFile);
@@ -382,4 +458,12 @@ HRESULT CEnemyManager::ReadText(const std::string pTextFile)
 CEnemy **CEnemyManager::GetEnemy(void)
 {
 	return &m_pEnemy[0];
+}
+
+//==========================================================================
+// 敵のモーションファイル名取得
+//==========================================================================
+const char *CEnemyManager::GetMotionFilename(int nType)
+{
+	return &sMotionFileName[nType][0];
 }

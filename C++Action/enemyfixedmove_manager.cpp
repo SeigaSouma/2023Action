@@ -213,8 +213,8 @@ D3DXVECTOR3 CEnemyFixedMoveManager::UpdatePosition(CEnemy *pEnemy)
 	}
 	// ˆÊ’uXV
 	int nOriginIdx = pEnemy->GetMapIndexOrigin();
-	fMoveValue = pMapManager->GetThusFarMoveValue(nOriginIdx) + pEnemy->GetMapMoveValueOrigin() + fThusFarMoveX;
-	nIdx = 0;
+	fMoveValue = pEnemy->GetMapMoveValueOrigin() + fThusFarMoveX;
+	nIdx = nOriginIdx;
 	pos = pMapManager->UpdateNowPosition(nIdx, fPointRatio, fMoveValue, pos.y);
 	pos.y = spawnPos.y + fThusFarMoveY;
 

@@ -377,16 +377,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	}
 
 	//**********************************
-	// フェード
-	//**********************************
-	m_pFade = CFade::Create();
-
-	if (m_pFade == NULL)
-	{// 失敗していたら
-		return E_FAIL;
-	}
-
-	//**********************************
 	// 一定の行動マネージャ
 	//**********************************
 	m_pFixedMoveManager = CEnemyFixedMoveManager::Create();
@@ -396,6 +386,15 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	}
 	m_pFixedMoveManager->ReadText("data\\TEXT\\enemy_act_fixed.txt");
 
+	//**********************************
+	// フェード
+	//**********************************
+	m_pFade = CFade::Create();
+
+	if (m_pFade == NULL)
+	{// 失敗していたら
+		return E_FAIL;
+	}
 
 	return S_OK;
 }

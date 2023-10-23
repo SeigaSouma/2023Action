@@ -390,15 +390,6 @@ void CEnemyFly::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	// 位置取得
 	D3DXVECTOR3 rot = GetRotation();
 
-	// 弾の生成
-	CObject *pBullet = CBullet::Create(
-		CBullet::TYPE_ENEMY,
-		CBullet::MOVETYPE_NORMAL,
-		D3DXVECTOR3(pos.x, 50.0f, pos.z),
-		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
-		40.0f);
-
 	// マップマネージャの取得
 	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
 	if (pMapManager == NULL)
@@ -407,32 +398,15 @@ void CEnemyFly::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	}
 	ANGLE setAngle = pMapManager->GetTargetAngle(GetMapIndex(), pPlayer->GetMapIndex(), GetMapMoveValue(), pPlayer->GetMapMoveValue());
 
-	pBullet->SetMapIndex(GetMapIndex());
-	pBullet->SetMapMoveValue(GetMapMoveValue());
-	pBullet->SetMapPointRatio(GetMapPointRatio());
-	pBullet->SetMoveAngle(setAngle);
-
-
-	pBullet = CBullet::Create(
+	// 弾の生成
+	CObject *pBullet = CBullet::Create(
 		CBullet::TYPE_ENEMY,
 		CBullet::MOVETYPE_NORMAL,
-		D3DXVECTOR3(pos.x, 150.0f, pos.z),
+		D3DXVECTOR3(pos.x, pos.y, pos.z),
 		rot,
 		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
 		40.0f);
-	pBullet->SetMapIndex(GetMapIndex());
-	pBullet->SetMapMoveValue(GetMapMoveValue());
-	pBullet->SetMapPointRatio(GetMapPointRatio());
-	pBullet->SetMoveAngle(setAngle);
 
-
-	pBullet = CBullet::Create(
-		CBullet::TYPE_ENEMY,
-		CBullet::MOVETYPE_NORMAL,
-		D3DXVECTOR3(pos.x, 250.0f, pos.z),
-		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
-		40.0f);
 	pBullet->SetMapIndex(GetMapIndex());
 	pBullet->SetMapMoveValue(GetMapMoveValue());
 	pBullet->SetMapPointRatio(GetMapPointRatio());
