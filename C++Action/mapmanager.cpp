@@ -453,8 +453,9 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 			if (nIdx < -1)
 			{
 				nIdx = -1;
+				return TargetPoint1;
 			}
-			fMoveValue = GetPosLength(TargetPoint0, TargetPoint1);
+			fMoveValue = fMoveValue + GetPosLength(TargetPoint0, TargetPoint1);
 			fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
 			bLeftArrival = true;
 		}
@@ -588,6 +589,10 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 				fMoveValue = fMoveValue - fPosLength;
 				fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
 				bRightArrival = true;
+			}
+			else
+			{
+				return TargetPoint1;
 			}
 		}
 		else if (fRatio < 0.0f)

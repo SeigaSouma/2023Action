@@ -15,6 +15,7 @@
 //==========================================================================
 // 前方宣言
 //==========================================================================
+class CDebugPointNumber;
 
 //==========================================================================
 // クラス定義
@@ -31,6 +32,7 @@ public:
 		int nMapIdx;			// マップインデックス
 		float fMapMoveValue;	// マップの移動量
 		float fSpawnPosY;		// 出現の高さ
+		int nRush;				// ラッシュ用かどうか
 	};
 
 	CEnemyBase();
@@ -40,7 +42,7 @@ public:
 	void Uninit(void);
 	void Update(void);
 
-	void CreatePos(int nPattern, int nMapIdx, float fMapMoveValue, float PosY);	// 位置作成
+	void CreatePos(int nPattern, int nMapIdx, float fMapMoveValue, int nRush, float PosY);	// 位置作成
 	void DeletePos(int nIdx);					// 位置削除
 	HRESULT ReadText(void);	// 外部ファイル読み込み処理
 	void Save(void);			// 外部ファイル書き出し処理
@@ -55,6 +57,7 @@ private:
 
 	std::vector<sInfo> m_ChaseChangeInfo;		// 追従変更の情報
 	CObjectX *m_apObjX[mylib_const::MAX_CAMERAAXIS];	// オブジェクトX
+	CDebugPointNumber *m_pMultiNumber[mylib_const::MAX_CAMERAAXIS];
 
 	static int m_nNumAll;		// 総数
 };

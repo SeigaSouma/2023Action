@@ -51,6 +51,20 @@ public:
 		int nNumKey;		// キーの数
 	};
 
+	// ラッシュ情報
+	struct sRushInfo
+	{
+		int nBase;	// 拠点のインデックス番号
+		int nPatternType;	// 種類
+	};
+
+	// ラッシュのウェーブ情報
+	struct sRushWave
+	{
+		sRushInfo *pRushInfo;	// ラッシュ情報
+		int nWaveNumEnemy;	// ウェーブ毎の敵の数
+	};
+
 	// 列挙型定義
 	enum STATE
 	{
@@ -68,6 +82,7 @@ public:
 
 	static CEnemyManager *Create(const std::string pTextFile);
 	HRESULT ReadText(const std::string pTextFile);	// 外部ファイル読み込み処理
+	HRESULT ReadRushInfo(void);	// 外部ファイル読み込み処理
 	CEnemy **SetEnemy(D3DXVECTOR3 pos, D3DXVECTOR3 rot, int nPattern);	// 敵配置
 	CEnemy **SetEnemy(D3DXVECTOR3 pos, int nMapIndex, float fMapMoveValue, int nPattern);	// 敵配置
 	static int GetPatternNum(void);
@@ -82,8 +97,10 @@ protected:
 
 private:
 
-	static int m_nNumAll;		// 敵の総数
+	int m_nNumRushEnemy;	// ラッシュ中の敵の数
+	int m_nNowWave;			// 現在のウェーブ
 	static CEnemy *m_pEnemy[mylib_const::MAX_OBJ];						// 敵へのポインタ
+	static sRushWave *m_pRushWaveInfo;									// ラッシュのウェーブ情報
 	static Pattern m_aPattern[mylib_const::MAX_PATTEN_ENEMY];			// 配置の種類
 	static std::string sMotionFileName[mylib_const::MAX_PATTEN_ENEMY];	// モーションファイル名
 	static bool m_bHitStop;		// ヒットストップの判定
@@ -92,6 +109,8 @@ private:
 	static int m_nPatternNum;	// 出現パターン数
 	static int m_nNumChara;		// 敵の種類の総数
 	static bool m_bLoadPattern;	// パターン読み込み判定
+	static int m_nNumWave;		// ラッシュウェーブの総数
+	static int m_nNumAll;		// 敵の総数
 };
 
 

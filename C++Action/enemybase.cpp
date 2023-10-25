@@ -32,6 +32,7 @@ int CEnemyBase::m_nNumAll = 0;		// 総数
 CEnemyBase::CEnemyBase()
 {
 	// 値のクリア
+		memset(&m_pMultiNumber[0], NULL, sizeof(m_pMultiNumber));	// オブジェクトX
 	memset(&m_apObjX[0], NULL, sizeof(m_apObjX));	// オブジェクトX
 }
 
@@ -97,11 +98,17 @@ HRESULT CEnemyBase::Init(void)
 	// 生成する
 	for (int i = 0; i < m_nNumAll; i++)
 	{
-		pEnemyManager->SetEnemy(
-			D3DXVECTOR3(0.0f, m_ChaseChangeInfo[i].fSpawnPosY, 0.0f),
-			m_ChaseChangeInfo[i].nMapIdx,
-			m_ChaseChangeInfo[i].fMapMoveValue,
-			m_ChaseChangeInfo[i].nPattern);
+		// デバッグ用数字の生成
+		m_pMultiNumber[i] = CDebugPointNumber::Create(i);
+
+		//if (m_ChaseChangeInfo[i].nRush == 0)
+		//{// ラッシュ用じゃなかったら
+		//	pEnemyManager->SetEnemy(
+		//		D3DXVECTOR3(0.0f, m_ChaseChangeInfo[i].fSpawnPosY, 0.0f),
+		//		m_ChaseChangeInfo[i].nMapIdx,
+		//		m_ChaseChangeInfo[i].fMapMoveValue,
+		//		m_ChaseChangeInfo[i].nPattern);
+		//}
 	}
 
 	return S_OK;
@@ -110,7 +117,7 @@ HRESULT CEnemyBase::Init(void)
 //==========================================================================
 // 位置作成
 //==========================================================================
-void CEnemyBase::CreatePos(int nPattern, int nMapIdx, float fMapMoveValue, float PosY)
+void CEnemyBase::CreatePos(int nPattern, int nMapIdx, float fMapMoveValue, int nRush, float PosY)
 {
 	sInfo InitInfo;
 	memset(&InitInfo, NULL, sizeof(InitInfo));
@@ -121,6 +128,7 @@ void CEnemyBase::CreatePos(int nPattern, int nMapIdx, float fMapMoveValue, float
 	m_ChaseChangeInfo[m_nNumAll].nMapIdx = nMapIdx;
 	m_ChaseChangeInfo[m_nNumAll].fMapMoveValue = fMapMoveValue;
 	m_ChaseChangeInfo[m_nNumAll].fSpawnPosY = PosY;
+	m_ChaseChangeInfo[m_nNumAll].nRush = nRush;
 
 	// 目印生成
 	m_apObjX[m_nNumAll] = CObjectX::Create(MARKOBJ, mylib_const::DEFAULT_VECTOR3, mylib_const::DEFAULT_VECTOR3, false);	// オブジェクトX
@@ -182,6 +190,11 @@ void CEnemyBase::Update(void)
 		D3DXVECTOR3 pos = pMapManager->GetTargetPosition(m_ChaseChangeInfo[i].nMapIdx, m_ChaseChangeInfo[i].fMapMoveValue);
 
 		m_apObjX[i]->SetPosition(D3DXVECTOR3(pos.x, m_ChaseChangeInfo[i].fSpawnPosY, pos.z));
+
+		if (m_pMultiNumber[i] != NULL)
+		{
+			m_pMultiNumber[i]->SetPosition(D3DXVECTOR3(pos.x, m_ChaseChangeInfo[i].fSpawnPosY + 50.0f, pos.z));
+		}
 	}
 #endif
 }

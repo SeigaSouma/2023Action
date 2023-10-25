@@ -217,12 +217,12 @@ void CBullet::Update(void)
 	{
 		m_nCntEmission = (m_nCntEmission + 1) % 100;	// 発生物のカウンター
 
-		if (m_nCntEmission == 20 && m_pMeshSphereEffect != NULL)
+		if (m_nCntEmission == 10 && m_pMeshSphereEffect != NULL)
 		{
 			float fSize = GetRadius();
 			m_pMeshSphereEffect->SetSizeDest(fSize + 10.0f);
 		}
-		if (m_nCntEmission == 40 && m_pMeshSphereEffect != NULL)
+		if (m_nCntEmission == 15 && m_pMeshSphereEffect != NULL)
 		{
 			m_pMeshSphereEffect->Uninit();
 			m_pMeshSphereEffect = NULL;

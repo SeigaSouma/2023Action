@@ -19,6 +19,7 @@
 #include "camera.h"
 #include "sound.h"
 #include "enemyfixedmove_manager.h"
+#include "enemybase.h"
 
 //==========================================================================
 // マクロ定義
@@ -39,6 +40,8 @@ int CEnemyManager::m_nCntSpawn = 0;		// 出現カウント
 bool CEnemyManager::m_bLoadPattern = false;	// パターン読み込み判定
 bool CEnemyManager::m_bHitStop = false;	// ヒットストップの判定
 CEnemyManager::STATE CEnemyManager::m_state = CEnemyManager::STATE_NONE;		// 状態
+CEnemyManager::sRushWave *CEnemyManager::m_pRushWaveInfo = NULL;					// ラッシュのウェーブ情報
+int CEnemyManager::m_nNumWave = 0;		// ラッシュウェーブの総数
 
 //==========================================================================
 // コンストラクタ
@@ -47,6 +50,8 @@ CEnemyManager::CEnemyManager()
 {
 	// 値のクリア
 	m_state = STATE_NONE;	// 状態
+	m_nNumRushEnemy = 0;	// ラッシュ中の敵の数
+	m_nNowWave = 0;			// 現在のウェーブ
 
 	// 総数リセット
 	m_nNumAll = 0;
@@ -79,7 +84,6 @@ CEnemyManager *CEnemyManager::Create(const std::string pTextFile)
 
 			// 初期化処理
 			HRESULT hr = pModel->ReadText(pTextFile);
-
 			if (FAILED(hr))
 			{// 失敗していたら
 				return NULL;
@@ -124,6 +128,21 @@ void CEnemyManager::Uninit(void)
 			m_pEnemy[nCntEnemy] = NULL;
 		}
 	}
+
+	for (int nCntWave = 0; nCntWave < m_nNumWave; nCntWave++)
+	{
+		if (m_pRushWaveInfo[nCntWave].pRushInfo != NULL)
+		{// NULLじゃなかったら
+			delete[] m_pRushWaveInfo[nCntWave].pRushInfo;
+			m_pRushWaveInfo[nCntWave].pRushInfo = NULL;
+		}
+	}
+
+	if (m_pRushWaveInfo != NULL)
+	{
+		delete[] m_pRushWaveInfo;
+		m_pRushWaveInfo = NULL;
+	}
 }
 
 //==========================================================================
@@ -154,6 +173,27 @@ void CEnemyManager::Update(void)
 		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 3);*/
 		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 4);
 	}
+
+	//m_nNumRushEnemy = 0;	// ラッシュ中の敵の数
+	m_nNowWave = 0;			// 現在のウェーブ
+
+	static int n = 0;
+	if (n == 0)
+	{
+		m_nNowWave = 2;
+		for (int nCntEnemy = 0; nCntEnemy < m_pRushWaveInfo[m_nNowWave].nWaveNumEnemy; nCntEnemy++)
+		{
+			int nAxisNum = CGame::GetEnemyBase()->GetAxisNum();
+			int nBase = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nBase;
+
+			CEnemyBase::sInfo info = CGame::GetEnemyBase()->GetChaseChangeInfo(nBase);
+			int nType = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nPatternType;
+
+			// 敵配置
+			SetEnemy(CGame::GetEnemyBase()->GetAxis(nBase), info.nMapIdx, info.fMapMoveValue, nType);
+		}
+	}
+	n++;
 
 	// テキストの描画
 	CManager::GetInstance()->GetDebugProc()->Print(
@@ -266,6 +306,7 @@ CEnemy **CEnemyManager::SetEnemy(D3DXVECTOR3 pos, int nMapIndex, float fMapMoveV
 
 			// 初期情報設定
 			m_pEnemy[nCntNULL]->SetMapIndexOrigin(nMapIndex);
+			m_pEnemy[nCntNULL]->SetMapIndex(nMapIndex);
 			m_pEnemy[nCntNULL]->SetMapMoveValueOrigin(NowPattern.EnemyData[nCntEnemy].fStartMoveValue + fMapMoveValue);
 
 			// 敵の一定の動きマネージャポインタ取得
@@ -445,6 +486,127 @@ HRESULT CEnemyManager::ReadText(const std::string pTextFile)
 
 	// パターン数
 	m_nPatternNum = nCntPatten;
+
+	// ファイルを閉じる
+	fclose(pFile);
+
+	// ラッシュ情報読み込み
+	if (FAILED(ReadRushInfo()))
+	{
+		return E_FAIL;
+	}
+
+	return S_OK;
+}
+
+//==========================================================================
+// 外部ファイル読み込み処理
+//==========================================================================
+HRESULT CEnemyManager::ReadRushInfo(void)
+{
+	FILE *pFile = NULL;	// ファイルポインタを宣言
+
+	// ファイルを開く
+	pFile = fopen("data\\TEXT\\set_enemy_info.txt", "r");
+
+	if (pFile == NULL)
+	{//ファイルが開けた場合
+		return E_FAIL;
+	}
+
+	char aComment[MAX_COMMENT];	// コメント
+	int nType = 0;				// 配置する種類
+	int nCntWave = 0;			// パターンのカウント
+
+	while (1)
+	{// END_SCRIPTが来るまで繰り返す
+
+		// 文字列の読み込み
+		fscanf(pFile, "%s", &aComment[0]);
+
+		// キャラクター数の設定
+		if (strcmp(aComment, "NUM_WAVE") == 0)
+		{// NUM_WAVEがきたら
+
+			fscanf(pFile, "%s", &aComment[0]);	// =の分
+			fscanf(pFile, "%d", &m_nNumWave);	// ウェーブ数読み込み
+
+			if (m_pRushWaveInfo == NULL)
+			{// NULLだったら
+
+				// ウェーブ数分でメモリ確保
+				m_pRushWaveInfo = DEBUG_NEW sRushWave[m_nNumWave];
+				memset(&m_pRushWaveInfo[0], NULL, sizeof(sRushWave) * m_nNumWave);
+				//m_pRushWaveInfo = NULL;
+			}
+		}
+
+		// 各パターンの設定
+		if (strcmp(aComment, "WAVESET") == 0)
+		{// 配置情報の読み込みを開始
+
+			int nCntEnemy = 0;			// 敵の配置カウント
+
+			while (strcmp(aComment, "END_WAVESET") != 0)
+			{// END_WAVESETが来るまで繰り返し
+
+				fscanf(pFile, "%s", &aComment[0]);	//確認する
+
+				// キャラクター数の設定
+				if (strcmp(aComment, "NUM_ENEMY") == 0)
+				{// NUM_WAVEがきたら
+
+
+					fscanf(pFile, "%s", &aComment[0]);	// =の分
+					fscanf(pFile, "%d", &m_pRushWaveInfo[nCntWave].nWaveNumEnemy);	// 敵の数読み込み
+
+					if (m_pRushWaveInfo[nCntWave].pRushInfo == NULL)
+					{// NULLだったら
+
+						// 敵の数分でメモリ確保
+						m_pRushWaveInfo[nCntWave].pRushInfo = DEBUG_NEW sRushInfo[m_pRushWaveInfo[nCntWave].nWaveNumEnemy];
+						memset(&m_pRushWaveInfo[nCntWave].pRushInfo[0], NULL, sizeof(sRushInfo) * m_pRushWaveInfo[nCntWave].nWaveNumEnemy);
+					}
+				}
+
+				if (strcmp(aComment, "ENEMYSET") == 0)
+				{// ENEMYSETで敵情報の読み込み開始
+
+					while (strcmp(aComment, "END_ENEMYSET") != 0)
+					{// END_ENEMYSETが来るまで繰り返す
+
+						fscanf(pFile, "%s", &aComment[0]);	// 確認する
+
+						if (strcmp(aComment, "TYPE") == 0)
+						{// TYPEが来たらキャラファイル番号読み込み
+
+							fscanf(pFile, "%s", &aComment[0]);	// =の分
+							fscanf(pFile, "%d", &m_pRushWaveInfo[nCntWave].pRushInfo[nCntEnemy].nPatternType);	// キャラファイル番号
+						}
+
+						if (strcmp(aComment, "BASE") == 0)
+						{// BASEが来たら出現拠点読み込み
+
+							fscanf(pFile, "%s", &aComment[0]);	// =の分
+							fscanf(pFile, "%d", &m_pRushWaveInfo[nCntWave].pRushInfo[nCntEnemy].nBase);	// 出現拠点番号
+						}
+
+					}// END_ENEMYSETのかっこ
+
+					 // 敵の数加算
+					nCntEnemy++;
+				}
+			}// END_WAVESETのかっこ
+			
+			// ウェーブ数加算
+			nCntWave++;
+		}
+
+		if (strcmp(aComment, "END_SCRIPT") == 0)
+		{// 終了文字でループを抜ける
+			break;
+		}
+	}
 
 	// ファイルを閉じる
 	fclose(pFile);

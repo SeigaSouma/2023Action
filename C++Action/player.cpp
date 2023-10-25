@@ -1477,7 +1477,7 @@ void CPlayer::CollisionChaseChanger(void)
 		{
 			// ’Ç]‚ÌŽí—ÞÝ’è
 			pCamera->SetChaseType(CCamera::CHASETYPE_NONE);
-			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 100.0f, posMapIndex.z));
+			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 150.0f, posMapIndex.z));
 			pCamera->SetLenDest(pCamera->GetOriginDistance() + 500.0f);
 			return;
 		}
@@ -1538,6 +1538,7 @@ void CPlayer::CollisionChaseChanger(void)
 //==========================================================================
 bool CPlayer::Hit(const int nValue)
 {
+	return false;
 	// ‘Ì—ÍŽæ“¾
 	int nLife = GetLife();
 

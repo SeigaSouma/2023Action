@@ -47,6 +47,7 @@ CEditEnemyBase::CEditEnemyBase()
 	m_MoveAngle = CObject::ANGLE_UP;	// 移動方向
 	memset(&m_pEnemy[0], NULL, sizeof(m_pEnemy));	// 敵へのポインタ
 	m_apObjX = NULL;			// オブジェクトX
+	m_nRush = 0;				// ラッシュ用かどうか
 }
 
 //==========================================================================
@@ -219,7 +220,7 @@ void CEditEnemyBase::Update(void)
 			return;
 		}
 		// 生成
-		pEnemyBase->CreatePos(m_nEnemyType, m_nIdxMapPoint, m_fMoveValue, m_pos.y);
+		pEnemyBase->CreatePos(m_nEnemyType, m_nIdxMapPoint, m_fMoveValue, m_nRush, m_pos.y);
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_DELETE) == true)
@@ -247,10 +248,11 @@ void CEditEnemyBase::Update(void)
 		"<移動>         高速：[↑,↓,←,→]　低速：[W,A,S,D]\n"
 		"<上昇,下降>    [I,K]\n"
 		"<種類変更>     [1, 2][%d]\n"
+		"<影の使用状況> [3][%d]\n"
 		"<掴み移動>     [SPACE]\n"
 		"<削除>         [DELETE]\n"
 		"<位置>         [X：%f Y：%f Z：%f]\n"
-		"\n", m_nEnemyType, m_pos.x, m_pos.y, m_pos.z);
+		"\n", m_nEnemyType, m_nRush, m_pos.x, m_pos.y, m_pos.z);
 }
 
 //==========================================================================
@@ -341,6 +343,13 @@ void CEditEnemyBase::ChangeType(void)
 		// 色の種類更新
 		m_nEnemyType = (m_nEnemyType + 1) % nNumAll;
 		bChange = true;
+	}
+
+	if (pInputKeyboard->GetTrigger(DIK_3) == true)
+	{// 3が押された
+
+		// 影の使用状況切り替え
+		m_nRush = m_nRush ? 0 : 1;
 	}
 
 	if (bChange)

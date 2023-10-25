@@ -289,6 +289,7 @@ void  CSlash::Collision(void)
 			D3DXVECTOR3 SlashMove = mylib_const::DEFAULT_VECTOR3;
 
 			float fFabsMove = fabsf(BulletMove.x * 2.5f);
+			fFabsMove = 20.0f;
 
 			// à⁄ìÆó ê›íË
 			switch (GetMoveAngle())

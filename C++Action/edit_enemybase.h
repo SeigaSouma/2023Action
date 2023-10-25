@@ -49,6 +49,7 @@ private:
 	D3DXVECTOR3 m_pos;			// 位置
 	D3DXVECTOR3 m_rot;			// 位置
 	int m_nEnemyType;			// 敵の種類
+	int m_nRush;				// ラッシュ用かどうか
 	
 	CEnemy *m_pEnemy[mylib_const::MAX_PATTEN_ENEMY];	// 敵へのポインタ
 	CObjectX *m_apObjX;	// オブジェクトX
