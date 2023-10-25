@@ -32,6 +32,7 @@ public:
 	{
 		CHASETYPE_NORMAL = 0,	// 通常
 		CHASETYPE_MAP,			// マップに追従
+		CHASETYPE_NONE,			// 追従なし
 		CHASETYPE_MAX
 	};
 
@@ -76,10 +77,12 @@ private:
 	void MoveCameraFollow(void);
 	void Shake(void);
 	void UpdateState(void);
+	void UpdateSpotLightVec(void);
 
 	// 追従関数
 	void ChaseNormal(void);	// 通常の追従
 	void ChaseMap(void);	// マップに沿った追従
+	void ChaseNone(void);	// 追従なし
 
 
 	void ResetGame(void);	// リセット
@@ -122,6 +125,8 @@ private:
 	float m_fDistanceDecrementValue;// 距離の減少係数
 	STATE m_state;					// 状態
 	CHASETYPE m_ChaseType;			// 追従の種類
+	CHASETYPE m_OldChaseType;		// 前回の追従の種類
+	int m_nCntChaseType;			// 追従のカウンター
 };
 
 #endif

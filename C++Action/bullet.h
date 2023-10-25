@@ -83,6 +83,8 @@ private:
 	static int m_nNumAll;					// 弾の総数
 	static const char *m_apTextureFile[TYPE_MAX];	// テクスチャのファイル
 	int m_nTexIdx;				// テクスチャのインデックス番号
+	int m_nCntEmission;	// 発生物のカウンター
+	CMeshSphere *m_pMeshSphereEffect;	// メッシュスフィアのエフェクト
 
 	//using STATE_FUNC = void(CBullet::*)();
 	typedef void(CBullet::*STATE_FUNC)(void);

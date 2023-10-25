@@ -45,7 +45,7 @@ CMeshSphere::~CMeshSphere()
 //==========================================================================
 // 生成処理
 //==========================================================================
-CMeshSphere *CMeshSphere::Create(D3DXVECTOR3 pos, float fSize, const char *pFileName)
+CMeshSphere *CMeshSphere::Create(D3DXVECTOR3 pos, float fSize, const char *pFileName, int nPriority)
 {
 	// 生成用のオブジェクト
 	CMeshSphere *pObjMeshField = NULL;
@@ -54,7 +54,7 @@ CMeshSphere *CMeshSphere::Create(D3DXVECTOR3 pos, float fSize, const char *pFile
 	{// NULLだったら
 
 		// メモリの確保
-		pObjMeshField = DEBUG_NEW CMeshSphere();
+		pObjMeshField = DEBUG_NEW CMeshSphere(nPriority);
 
 		if (pObjMeshField != NULL)
 		{// メモリの確保が出来ていたら
@@ -85,7 +85,7 @@ CMeshSphere *CMeshSphere::Create(D3DXVECTOR3 pos, float fSize, const char *pFile
 //==========================================================================
 // 生成処理(オーバーロード)
 //==========================================================================
-CMeshSphere *CMeshSphere::Create(D3DXVECTOR3 pos, float fSize, int nTexIdx)
+CMeshSphere *CMeshSphere::Create(D3DXVECTOR3 pos, float fSize, int nTexIdx, int nPriority)
 {
 	// 生成用のオブジェクト
 	CMeshSphere *pObjMeshField = NULL;
@@ -94,7 +94,7 @@ CMeshSphere *CMeshSphere::Create(D3DXVECTOR3 pos, float fSize, int nTexIdx)
 	{// NULLだったら
 
 		// メモリの確保
-		pObjMeshField = DEBUG_NEW CMeshSphere();
+		pObjMeshField = DEBUG_NEW CMeshSphere(nPriority);
 
 		if (pObjMeshField != NULL)
 		{// メモリの確保が出来ていたら
@@ -175,8 +175,8 @@ void CMeshSphere::Update(void)
 	float fHeightLen = GetHeightLen();
 
 	// 慣性補正
-	InertiaCorrection(fWidthLen, m_fSizeDest, 0.2f);
-	InertiaCorrection(fHeightLen, m_fSizeDest, 0.2f);
+	InertiaCorrection(fWidthLen, m_fSizeDest, 0.15f);
+	InertiaCorrection(fHeightLen, m_fSizeDest, 0.15f);
 
 	// 長さ設定
 	SetWidthLen(fWidthLen);
@@ -223,3 +223,10 @@ void CMeshSphere::Draw(void)
 	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);
 }
 
+//==========================================================================
+// 目標のサイズ設定
+//==========================================================================
+void CMeshSphere::SetSizeDest(float fSize)
+{
+	m_fSizeDest = fSize;
+}

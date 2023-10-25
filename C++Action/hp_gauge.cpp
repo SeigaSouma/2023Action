@@ -258,7 +258,7 @@ void CHP_Gauge::GaugeDecrement(int nCntGauge)
 
 	// 差分で徐々に減らしていく
 	size.x +=
-		(m_HPGauge[nCntGauge].fWidthDest - size.x) * 0.025f;
+		(m_HPGauge[nCntGauge].fWidthDest - size.x) * 0.15f;
 
 	// サイズ設定
 	m_HPGauge[nCntGauge].pObjBillboard->SetSize(size);

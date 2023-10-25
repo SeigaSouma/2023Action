@@ -19,6 +19,7 @@
 #include "enemymanager.h"
 #include "enemy.h"
 #include "enemyfixedmove_manager.h"
+#include "player.h"
 
 //==========================================================================
 // マクロ定義
@@ -95,6 +96,7 @@ HRESULT CEditEnemyBase::Init(void)
 	m_pos = CManager::GetInstance()->GetCamera()->GetPositionR();
 	m_apObjX = CObjectX::Create(MARKOBJ, mylib_const::DEFAULT_VECTOR3, mylib_const::DEFAULT_VECTOR3, false);	// オブジェクトX
 	m_apObjX->SetType(CObject::TYPE_BALLAST);
+	m_nIdxMapPoint = CManager::GetInstance()->GetScene()->GetPlayer()->GetMapIndex();
 	return S_OK;
 }
 

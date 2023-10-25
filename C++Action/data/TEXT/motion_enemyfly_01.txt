@@ -24,7 +24,7 @@ CHARACTERSET
 	JUMP = 8.65						# ジャンプ量
 	RADIUS = 100.0					# 半径
 	HEIGHT = 80.0					# 高さ
-	LIFE = 1						# 体力
+	LIFE = 15						# 体力
 	NUM_PARTS = 6					# パーツ数
 
 	PARTSSET						# [0]体

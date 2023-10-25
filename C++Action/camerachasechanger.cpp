@@ -90,10 +90,6 @@ CCameraChaseChanger *CCameraChaseChanger::Create(const std::string pFileName)
 //==========================================================================
 HRESULT CCameraChaseChanger::Init(void)
 {
-	//// 総数リセット
-	//m_ppMapManager = DEBUG_NEW (CCameraChaseChanger*);
-	//*m_ppMapManager = NULL;
-
 	return S_OK;
 }
 
@@ -248,6 +244,17 @@ HRESULT CCameraChaseChanger::ReadText(const std::string pFileName)
 		if (m_ChaseChangeInfo.size() > 0)
 		{
 			fread(&m_ChaseChangeInfo[0], sizeof(sChaseChangeInfo), m_nNumAll, pFile);
+		}
+
+		// マップマネージャの取得
+		CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+		if (pMapManager == NULL)
+		{// NULLだったら
+			return S_OK;
+		}
+		for (int i = 0; i < m_nNumAll; i++)
+		{
+			m_ChaseChangeInfo[i].pos = pMapManager->GetTargetPosition(m_ChaseChangeInfo[i].nMapIdx, m_ChaseChangeInfo[i].fMapMoveValue);
 		}
 
 		// ファイルを閉じる

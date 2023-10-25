@@ -361,21 +361,21 @@ void CEdit::Control(CObjectX *pObjX)
 	RotNormalize(rot.y);
 
 
-	// ’…’n‚µ‚½‚©‚Ç‚¤‚©
-	bool bLand = false;
+	//// ’…’n‚µ‚½‚©‚Ç‚¤‚©
+	//bool bLand = false;
 
-	// ‚‚³Žæ“¾
-	float fHeight = CGame::GetElevation()->GetHeight(pos, bLand);
+	//// ‚‚³Žæ“¾
+	//float fHeight = CGame::GetElevation()->GetHeight(pos, bLand);
 
-	if (bLand == true)
-	{
-		// ‚‚³‘ã“ü
-		pos.y = fHeight;
-	}
-	else
-	{
-		pos.y = -100.0f;
-	}
+	//if (bLand == true)
+	//{
+	//	// ‚‚³‘ã“ü
+	//	pos.y = fHeight;
+	//}
+	//else
+	//{
+	//	pos.y = -100.0f;
+	//}
 
 	// Œü‚«Ý’è
 	pObjX->SetRotation(rot);

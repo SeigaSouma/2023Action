@@ -17,7 +17,7 @@ TEXTURE_FILENAME = data/TEXTURE/FIELD/walkroad_01.jpg		# [7]
 TEXTURE_FILENAME = data/TEXTURE/FIELD/tile_04.jpg		# [8]
 TEXTURE_FILENAME = data/TEXTURE/FIELD/tile_03.jpg		# [9]
 TEXTURE_FILENAME = data/TEXTURE/FIELD/water_02.jpg		# [10]
-TEXTURE_FILENAME = data/TEXTURE/sky_02.jpg		# [11]
+TEXTURE_FILENAME = data/TEXTURE/sky_04.jpg		# [11]
 TEXTURE_FILENAME = data/TEXTURE/forest_02.jpg		# [12]
 TEXTURE_FILENAME = data/TEXTURE/line.png		# [13]
 TEXTURE_FILENAME = data/TEXTURE/glass.jpg		# [14]
@@ -52,7 +52,7 @@ MODEL_FILENAME = data/MODEL/map_object/tree_01_big.x		# [18]
 MODEL_FILENAME = data/MODEL/map_object/tree_02_small.x		# [19]
 MODEL_FILENAME = data/MODEL/map_object/tree_02_normal.x		# [20]
 MODEL_FILENAME = data/MODEL/map_object/tree_02_big.x		# [21]
-MODEL_FILENAME = data/MODEL/map_object/tree_03.x		# [22]
+MODEL_FILENAME = data/MODEL/map_object/tree_03_big.x		# [22]
 MODEL_FILENAME = data/MODEL/map_object/treegroup_02.x		# [23]
 MODEL_FILENAME = data/MODEL/map_object/treegroup_01.x		# [24]
 MODEL_FILENAME = data/MODEL/map_object/rock_01.x		# [25]
@@ -61,10 +61,10 @@ MODEL_FILENAME = data/MODEL/map_object/rock_03.x		# [27]
 MODEL_FILENAME = data/MODEL/map_object/rock_04.x		# [28]
 MODEL_FILENAME = data/MODEL/map_object/rock_05.x		# [29]
 MODEL_FILENAME = data/MODEL/map_object/rock_01_huge.x		# [30]
-MODEL_FILENAME = data/MODEL/map_object/rock_02_big.x		# [31]
-MODEL_FILENAME = data/MODEL/map_object/rock_03_big.x		# [32]
-MODEL_FILENAME = data/MODEL/map_object/rock_04_big.x		# [33]
-MODEL_FILENAME = data/MODEL/map_object/rock_05_big.x		# [34]
+MODEL_FILENAME = data/MODEL/map_object/rock_02_huge.x		# [31]
+MODEL_FILENAME = data/MODEL/map_object/rock_03_huge.x		# [32]
+MODEL_FILENAME = data/MODEL/map_object/rock_04_huge.x		# [33]
+MODEL_FILENAME = data/MODEL/map_object/rock_05_huge.x		# [34]
 MODEL_FILENAME = data/MODEL/arow.x		# [35]
 
 #==============================================================================
@@ -96,7 +96,7 @@ FIELDSET
 	POS = 0 -50 -0
 	ROT = 0 0 0
 	BLOCK = 110 110
-	SIZE = 100 100
+	SIZE = 200 200
 END_FIELDSET
 
 
@@ -105,15 +105,78 @@ END_FIELDSET
 #==============================================================================
 MODELSET
 	TYPE = 30
-	POS = 3488.05 -100.00 -3004.59
+	POS = 3399.54 -100.00 -3102.33
 	ROT = 0.00 -0.94 0.00
 	SHADOW = 1
 END_MODELSET
 
 MODELSET
 	TYPE = 30
-	POS = 2616.87 -100.00 -5745.75
+	POS = 2723.10 -100.00 -5663.19
 	ROT = 0.00 -0.94 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 22
+	POS = 1508.96 -60.00 -3440.45
+	ROT = 0.00 2.20 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 32
+	POS = -220.23 -40.00 1002.17
+	ROT = 0.00 1.26 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 31
+	POS = -710.14 -40.00 296.03
+	ROT = 0.00 2.51 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 34
+	POS = 14.13 200.00 329.16
+	ROT = 0.00 2.20 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 32
+	POS = 85.96 -220.00 282.00
+	ROT = 0.00 3.14 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 33
+	POS = 544.42 -220.00 -780.20
+	ROT = 0.00 1.26 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 22
+	POS = 576.46 -250.00 -336.21
+	ROT = 0.00 -1.57 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 30
+	POS = -2569.49 0.00 -3553.85
+	ROT = 0.00 -1.57 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 34
+	POS = -443.29 -80.00 -694.98
+	ROT = 0.00 -0.63 0.00
 	SHADOW = 1
 END_MODELSET
 

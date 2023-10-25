@@ -29,8 +29,9 @@ public:
 	// 構造体定義
 	struct sChaseChangeInfo
 	{
-		int nMapIdx;		// マップインデックス
+		int nMapIdx;			// マップインデックス
 		float fMapMoveValue;	// マップの移動量
+		D3DXVECTOR3 pos;		// 位置
 
 		int nByTypeIdx;					// 種類別インデックス番号
 		CCamera::CHASETYPE chaseType;	// 追従の種類

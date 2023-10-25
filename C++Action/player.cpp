@@ -81,6 +81,7 @@ CPlayer::CPlayer(int nPriority) : CObjectChara(nPriority)
 	m_nIdxXFile = 0;				// Xファイルのインデックス番号
 	m_fAtkStickRot = 0.0f;			// 攻撃時のスティック向き
 	m_fBodyRot = 0.0f;				// 攻撃時の身体向き
+	m_fTruePosY = 0.0f;				// 本当の補正後の位置
 	m_bStick = false;				// スティック倒した判定
 	m_StickAngle = ANGLE_RIGHT;		// スティックの向き
 	m_OldStickAngle = ANGLE_RIGHT;	// 前回のスティックの向き
@@ -179,7 +180,7 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
-	//SetMapIndex(29);
+	SetMapIndex(37);
 
 	return S_OK;
 }
@@ -310,7 +311,7 @@ void CPlayer::Update(void)
 
 		if (m_pMotion->GetType() == MOTION_ATK || m_pMotion->GetType() == MOTION_ATK2)
 		{
-#if 1
+#if 0
 			// モーションの情報取得
 			CMotion::Info aInfo = m_pMotion->GetInfo(m_pMotion->GetType());
 
@@ -528,6 +529,9 @@ void CPlayer::Controll(void)
 		// 移動中にする
 		m_bMove = true;
 
+		// スティックの向き
+		float fStickRot = pInputGamepad->GetStickRotL(0);
+
 		if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
 		{//←キーが押された,左移動
 
@@ -574,6 +578,37 @@ void CPlayer::Controll(void)
 		{
 			// 移動中かどうか
 			m_bMove = false;
+		}
+
+
+		if (pInputGamepad->GetStickPositionRatioL(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioL(0).y <= -0.5f ||
+			pInputGamepad->GetStickPositionRatioL(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioL(0).x <= -0.5f)
+		{// 攻撃
+
+			if ((fStickRot >= 0.0f && fStickRot < D3DX_PI * 0.25f) ||
+				(fStickRot <= 0.0f && fStickRot > -D3DX_PI * 0.25f))
+			{// 上方向
+				MoveAngle = ANGLE_UP;
+				m_nAngle = 1;	// 向き
+			}
+			else if (fStickRot >= D3DX_PI * 0.25f && fStickRot < D3DX_PI * 0.75f)
+			{// 右方向
+				MoveAngle = ANGLE_RIGHT;
+				m_nAngle = 1;	// 向き
+			}
+			else if (
+				fStickRot >= -D3DX_PI * 0.75f &&
+				fStickRot < -D3DX_PI * 0.25f)
+			{// 左方向
+				MoveAngle = ANGLE_LEFT;
+				m_nAngle = -1;	// 向き
+			}
+			else if (
+				(fStickRot > D3DX_PI * 0.75f && fStickRot <= D3DX_PI) ||
+				(fStickRot < -D3DX_PI * 0.75f && fStickRot >= -D3DX_PI))
+			{// 下方向
+				MoveAngle = ANGLE_DOWN;
+			}
 		}
 
 		if (m_bJump == false &&
@@ -647,7 +682,7 @@ void CPlayer::Controll(void)
 
 
 	// 目標の角度を求める
-	fRotDest = atan2f((pos.x - sakiPos.x), (pos.z - sakiPos.z));
+	fRotDest = atan2f((newPosition.x - sakiPos.x), (newPosition.z - sakiPos.z));
 
 	if (MoveAngle == ANGLE_DOWN)
 	{
@@ -725,6 +760,7 @@ void CPlayer::Controll(void)
 		pos.x = newPosition.x;
 		pos.z = newPosition.z;
 		pos.y = sakiPos.y;
+		Collision(pos, move);
 
 		//if (m_bHitStage == true)
 		{// ステージで移動する場合
@@ -744,6 +780,28 @@ void CPlayer::Controll(void)
 
 		// 前回は乗ってなかったってことにする
 		//m_bLandOld = false;
+	}
+
+	// 情報取得
+	D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(37, 0.0f);
+
+	if (CircleRange(pos, posMapIndex, GetRadius(), 950.0f))
+	//if ()
+	{// 敵のラッシュ中
+
+
+		if (CircleRange(pos, posMapIndex, GetRadius(), 900.0f) == false)
+		{// 円から外れたら
+
+			D3DXVECTOR3 posOld = GetOldPosition();
+			pos.x = posOld.x;
+			pos.z = posOld.z;
+			pos = posOld;
+			move.x = 0.0f;
+			fMoveValue = GetOldMapMoveValue();
+		}
+
+
 	}
 
 	// 位置更新
@@ -1138,7 +1196,7 @@ void CPlayer::Atack(void)
 					200.0f,								// 幅
 					50.0f,								// 中心からの間隔
 					10,									// 寿命
-					20.0f,								// 幅の移動量
+					40.0f,								// 幅の移動量
 					CImpactWave::TYPE_PURPLE4,			// テクスチャの種類
 					false,								// 加算合成するかどうか
 					GetMoveAngle()
@@ -1408,6 +1466,24 @@ void CPlayer::CollisionChaseChanger(void)
 	int nMapIdx = GetMapIndex();
 	int nChangeNumAll = pCameraChaseChanger->GetNumAll();
 
+	if (nMapIdx >= 32)
+	{// 敵ラッシュの時
+
+		// 情報取得
+		D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(37, 0.0f);
+
+		// 円の判定
+		if (CircleRange(pos, posMapIndex, GetRadius(), 900.0f))
+		{
+			// 追従の種類設定
+			pCamera->SetChaseType(CCamera::CHASETYPE_NONE);
+			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 100.0f, posMapIndex.z));
+			pCamera->SetLenDest(pCamera->GetOriginDistance() + 500.0f);
+			return;
+		}
+
+	}
+
 	for (int i = 0; i < nChangeNumAll + 1; i++)
 	{
 		// 情報取得
@@ -1448,31 +1524,6 @@ void CPlayer::CollisionChaseChanger(void)
 		}
 
 		break;
-
-		//// 円の判定
-		//if (CircleRange(pos, ChaseChangerInfo.pos, GetRadius(), 50.0f))
-		//{
-		//	// カメラの追従種類取得
-		//	CameraChaseType = pCamera->GetChaseType();
-		//	pCamera->SetChaseType(ChaseChangerInfo.chaseType);
-
-		//	// 追従の種類設定
-		//	if (ChaseChangerInfo.chaseType == CCamera::CHASETYPE_NORMAL)
-		//	{
-		//		if (GetMoveAngle() == CObject::ANGLE_LEFT && CameraChaseType == CCamera::CHASETYPE_NORMAL)
-		//		{// 軸回転だったら && 左向き
-		//			pCamera->SetChaseType(CCamera::CHASETYPE_MAP);
-		//		}
-		//		else if(GetMoveAngle() == CObject::ANGLE_LEFT && CameraChaseType != CCamera::CHASETYPE_NORMAL)
-		//		{
-		//			int n = 0;
-		//		}
-
-		//		//D3DXVECTOR3 AxisPos = CManager::GetInstance()->GetScene()->GetCameraAxis()->GetAxis(ChaseChangerInfo.nByTypeIdx);
-		//		//pCamera->SetTargetPos(AxisPos);
-		//	}
-		//	break;
-		//}
 	}
 
 	// デバッグ表示

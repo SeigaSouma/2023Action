@@ -27,8 +27,9 @@ public:
 	void Update(void);
 	void Draw(void);
 
-	static CMeshSphere *Create(D3DXVECTOR3 pos, float fSize, const char *pFileName);	// 生成処理
-	static CMeshSphere *Create(D3DXVECTOR3 pos, float fSize, int nTexIdx);	// 生成処理
+	void SetSizeDest(float fSize);	// 目標のサイズ設定
+	static CMeshSphere *Create(D3DXVECTOR3 pos, float fSize, const char *pFileName, int nPriority = mylib_const::DEF2D_PRIORITY);	// 生成処理
+	static CMeshSphere *Create(D3DXVECTOR3 pos, float fSize, int nTexIdx, int nPriority = mylib_const::DEF2D_PRIORITY);	// 生成処理
 
 private:
 

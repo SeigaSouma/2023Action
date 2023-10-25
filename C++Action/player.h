@@ -121,6 +121,7 @@ private:
 	float m_fAtkStickRot;		// 攻撃時のスティック向き
 	int m_nAtkAngle;			// 攻撃時のY軸の向き
 	float m_fBodyRot;			// 攻撃時の身体向き
+	float m_fTruePosY;			// 本当の補正後の位置
 	bool m_bStick;				// スティック倒した判定
 	ANGLE m_StickAngle;			// スティックの向き
 	ANGLE m_OldStickAngle;		// 前回のスティックの向き

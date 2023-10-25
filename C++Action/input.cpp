@@ -592,8 +592,8 @@ float CInputGamepad::GetStickRotL(int nCntPlayer)
 {
 	// Šp“x‚ğ‹‚ß‚é
 	float fRot = atan2f(
-		(0.0f - -(float)m_aGamepadState[nCntPlayer].Gamepad.sThumbLX),
-		(0.0f - -(float)m_aGamepadState[nCntPlayer].Gamepad.sThumbLY));
+		((float)m_aGamepadState[nCntPlayer].Gamepad.sThumbLX - 0.0f),
+		((float)m_aGamepadState[nCntPlayer].Gamepad.sThumbLY - 0.0f));
 
 	return fRot;
 }

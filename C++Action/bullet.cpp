@@ -18,6 +18,7 @@
 #include "game.h"
 #include "bulletmanager.h"
 #include "player.h"
+#include "impactwave.h"
 
 //==========================================================================
 // マクロ定義
@@ -70,6 +71,8 @@ CBullet::CBullet(int nPriority) : CMeshSphere(nPriority), m_nLifeMax(1)
 	m_nCntState = 0;			// 状態遷移カウンター
 	m_nLife = 0;
 	m_nIdxBulletManager = 0;			// 弾マネージャのインデックス番号
+	m_nCntEmission = 0;	// 発生物のカウンター
+	m_pMeshSphereEffect = NULL;	// メッシュスフィアのエフェクト
 
 	// テクスチャデータの配列分繰り返す
 	m_nTexIdx = 0;		// テクスチャのインデックス番号
@@ -173,14 +176,19 @@ HRESULT CBullet::Init(void)
 //==========================================================================
 void CBullet::Uninit(void)
 {
-	// 終了処理
-	CMeshSphere::Uninit();
-
 	// 削除
 	if (CManager::GetInstance()->GetMode() == CScene::MODE_GAME && CGame::GetBulletManager() != NULL)
 	{// 弾マネージャの削除
 		CGame::GetBulletManager()->Delete(m_nIdxBulletManager);
 	}
+
+	if (m_pMeshSphereEffect != NULL)
+	{// メッシュスフィアのエフェクト
+		m_pMeshSphereEffect = NULL;
+	}
+
+								// 終了処理
+	CMeshSphere::Uninit();
 
 	// 総数減算
 	m_nNumAll--;
@@ -205,6 +213,69 @@ void CBullet::Update(void)
 		return;
 	}
 
+	if (m_type == TYPE_ENEMY)
+	{
+		m_nCntEmission = (m_nCntEmission + 1) % 100;	// 発生物のカウンター
+
+		if (m_nCntEmission == 20 && m_pMeshSphereEffect != NULL)
+		{
+			float fSize = GetRadius();
+			m_pMeshSphereEffect->SetSizeDest(fSize + 10.0f);
+		}
+		if (m_nCntEmission == 40 && m_pMeshSphereEffect != NULL)
+		{
+			m_pMeshSphereEffect->Uninit();
+			m_pMeshSphereEffect = NULL;
+		}
+
+		if (m_nCntEmission == 0)
+		{
+			if (m_pMeshSphereEffect != NULL)
+			{
+				m_pMeshSphereEffect->Uninit();
+				m_pMeshSphereEffect = NULL;
+			}
+
+			float fSize = GetRadius();
+
+			// メッシュスフィア生成
+			m_pMeshSphereEffect = CMeshSphere::Create(GetPosition(), GetRadius(), m_nTexIdx, 7);
+
+			// 情報設定
+			m_pMeshSphereEffect->SetColor(D3DXCOLOR(0.2f, 0.2f, 1.0f, 0.7f));
+			m_pMeshSphereEffect->SetWidthLen(fSize);
+			m_pMeshSphereEffect->SetHeightLen(fSize);
+			m_pMeshSphereEffect->SetSizeDest(fSize + 100.0f);
+		}
+	}
+	else if (m_type == TYPE_PLAYER)
+	{
+		/*if (m_pMeshSphereEffect != NULL)
+		{
+			m_pMeshSphereEffect->Uninit();
+			m_pMeshSphereEffect = NULL;
+		}*/
+
+		float fSize = GetRadius();
+
+		if (m_pMeshSphereEffect == NULL)
+		{
+			// メッシュスフィア生成
+			m_pMeshSphereEffect = CMeshSphere::Create(GetPosition(), GetRadius(), m_nTexIdx, 7);
+
+			// 情報設定
+			m_pMeshSphereEffect->SetColor(D3DXCOLOR(1.0f, 0.2f, 1.0f, 0.7f));
+			m_pMeshSphereEffect->SetWidthLen(fSize);
+			m_pMeshSphereEffect->SetHeightLen(fSize);
+			m_pMeshSphereEffect->SetSizeDest(fSize + 100.0f);
+		}
+	}
+
+	if (m_pMeshSphereEffect != NULL)
+	{
+		m_pMeshSphereEffect->SetPosition(GetPosition());
+	}
+
 	// 寿命減算
 	m_nLife--;
 
@@ -216,6 +287,11 @@ void CBullet::Update(void)
 		my_particle::Create(GetPosition(), my_particle::TYPE_OFFSETTING);
 
 		// 弾の削除
+		if (m_pMeshSphereEffect != NULL)
+		{
+			m_pMeshSphereEffect->Uninit();
+			m_pMeshSphereEffect = NULL;
+		}
 		Uninit();
 		return;
 	}
@@ -347,6 +423,12 @@ void CBullet::StateDamage(void)
 	{
 		m_nCntState = 0;
 		m_state = STATE_NONE;
+
+		if (m_pMeshSphereEffect != NULL)
+		{
+			m_pMeshSphereEffect->Uninit();
+			m_pMeshSphereEffect = NULL;
+		}
 	}
 }
 
@@ -377,6 +459,11 @@ void CBullet::CollisionPlayer(void)
 		// ヒット処理
 		pPlayer->Hit(1);
 
+		if (m_pMeshSphereEffect != NULL)
+		{
+			m_pMeshSphereEffect->Uninit();
+			m_pMeshSphereEffect = NULL;
+		}
 		// 終了処理
 		Uninit();
 	}
@@ -421,13 +508,19 @@ void CBullet::CollisionEnemy(void)
 		{// 当たっていたら
 
 			// ヒット処理
-			ppEnemy[nCntEnemy]->Hit(1);
+			ppEnemy[nCntEnemy]->Hit(mylib_const::DMG_BOUNCE);
 			bHit = true;
 		}
 	}
 
 	if (bHit == true)
 	{// 当たってたら
+
+		if (m_pMeshSphereEffect != NULL)
+		{
+			m_pMeshSphereEffect->Uninit();
+			m_pMeshSphereEffect = NULL;
+		}
 		Uninit();
 		return;
 	}

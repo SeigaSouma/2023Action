@@ -169,11 +169,10 @@ void CEnemyFly::ChangeToAttackState(void)
 
 	float fRadius = 500.0f;
 
-	if (CircleRange(pos, posPlayer, fRadius, pPlayer->GetRadius()) == true && m_sMotionFrag.bJump == false)
+	if (m_pMotion->GetType() != MOTION_ATK && CircleRange(pos, posPlayer, fRadius, pPlayer->GetRadius()) == true)
 	{// ˆê’è‹——£ŠÔ‚ÉƒvƒŒƒCƒ„[‚ª“ü‚Á‚½‚ç
 
 		// UŒ‚ó‘Ô‚É‚·‚é
-		m_state = STATE_ATTACK;
 		m_sMotionFrag.bATK = true;
 	}
 }

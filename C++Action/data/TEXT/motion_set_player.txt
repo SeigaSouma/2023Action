@@ -30,7 +30,7 @@ MODEL_FILENAME = data/MODEL/tyuuni/15_R_foot.x		# [12]右足
 MODEL_FILENAME = data/MODEL/tyuuni/10_L_UPleg.x		# [13]左太もも
 MODEL_FILENAME = data/MODEL/tyuuni/11_L_DWleg.x		# [14]左脛
 MODEL_FILENAME = data/MODEL/tyuuni/12_L_foot.x		# [15]左足
-MODEL_FILENAME = data/MODEL/weapon_01.x			# [16]大剣
+MODEL_FILENAME = data/MODEL/katana_01.x			# [16]大剣
 
 #------------------------------------------------------------------------------
 # キャラクター情報
@@ -40,13 +40,13 @@ CHARACTERSET
 	JUMP = 8.65						# ジャンプ量
 	RADIUS = 60.0					# 半径
 	HEIGHT = 80.0					# 高さ
-	LIFE = 20						# 体力
+	LIFE = 5						# 体力
 	NUM_PARTS = 17					# パーツ数
 
 	PARTSSET						# [0]腰
 		INDEX = 0
 		PARENT = -1					# (親)NULL
-		POS = 0.0 48.0 0.0
+		POS = 0.0 88.5 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -54,7 +54,7 @@ CHARACTERSET
 	PARTSSET						# [1]体
 		INDEX = 1
 		PARENT = 0					# (親)
-		POS = 0.0 4.5 0.0
+		POS = 0.0 7.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -62,7 +62,7 @@ CHARACTERSET
 	PARTSSET						# [2]頭
 		INDEX = 2
 		PARENT = 1					# (親)体
-		POS = 0.0 31.0 0.0
+		POS = 0.0 53.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -70,7 +70,7 @@ CHARACTERSET
 	PARTSSET						# [3]髪
 		INDEX = 3
 		PARENT = 2					# (親)体
-		POS = 0.0 7.5 0.0
+		POS = 0.0 14.5 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -78,7 +78,7 @@ CHARACTERSET
 	PARTSSET						# [4]左上腕
 		INDEX = 4
 		PARENT = 1					# (親)体
-		POS = -10.5 24.0 0.0
+		POS = -17.0 40.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -86,7 +86,7 @@ CHARACTERSET
 	PARTSSET						# [5]左前腕
 		INDEX = 5
 		PARENT = 4					# (親)左上腕
-		POS = -16.5 0.0 0.0
+		POS = -27.5 0.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -94,7 +94,7 @@ CHARACTERSET
 	PARTSSET						# [6]左手
 		INDEX = 6
 		PARENT = 5					# (親)左前腕
-		POS = -16.75 0.0 0.0
+		POS = -26.75 0.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -102,7 +102,7 @@ CHARACTERSET
 	PARTSSET						# [7]右上腕
 		INDEX = 7
 		PARENT = 1					# (親)体
-		POS = 10.5 24.0 0.0
+		POS = 17.0 40.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -110,7 +110,7 @@ CHARACTERSET
 	PARTSSET						# [8]右前腕
 		INDEX = 8
 		PARENT = 7					# (親)右上腕
-		POS = 16.5 0.0 0.0
+		POS = 27.5 0.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -118,7 +118,7 @@ CHARACTERSET
 	PARTSSET						# [9]右手
 		INDEX = 9
 		PARENT = 8					# (親)右前腕
-		POS = 16.75 0.0 0.0
+		POS = 26.75 0.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -126,7 +126,7 @@ CHARACTERSET
 	PARTSSET						# [10]左太もも
 		INDEX = 10
 		PARENT = 0					# (親)腰
-		POS = -6.0 -1.5 0.0
+		POS = -10.0 -4.5 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -134,7 +134,7 @@ CHARACTERSET
 	PARTSSET						# [11]左ふくらはぎ
 		INDEX = 11
 		PARENT = 10					# (親)左太もも
-		POS = 0.0 -21.5 0.0
+		POS = 0.0 -39.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -142,7 +142,7 @@ CHARACTERSET
 	PARTSSET						# [12]左足
 		INDEX = 12
 		PARENT = 11					# (親)左ふくらはぎ
-		POS = 0.0 -12.25 0.0
+		POS = 0.0 -22.75 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -150,7 +150,7 @@ CHARACTERSET
 	PARTSSET						# [13]右太もも
 		INDEX = 13
 		PARENT = 0					# (親)腰
-		POS = 6.0 -1.5 0.0
+		POS = 13.5 -4.5 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -158,7 +158,7 @@ CHARACTERSET
 	PARTSSET						# [14]右ふくらはぎ
 		INDEX = 14
 		PARENT = 13					# (親)右太もも
-		POS = 0.0 -21.5 0.0
+		POS = 0.0 -39.0 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
@@ -166,16 +166,16 @@ CHARACTERSET
 	PARTSSET						# [15]右足
 		INDEX = 15
 		PARENT = 14					# (親)左ふくらはぎ
-		POS = 0.0 -12.25 0.0
+		POS = 0.0 -22.75 0.0
 		ROT = 0.0 0.0 0.0
 		START = 1
 	END_PARTSSET
 	
-	PARTSSET						# [16]大剣
+	PARTSSET						# [16]武器
 		INDEX = 16
 		PARENT = 9					# (親)右手
-		POS = 5.0 0.0 0.0
-		ROT = 0.0 -1.57 1.57
+		POS = 13.0 0.0 0.0
+		ROT = 1.57 -3.14 0.0
 		START = 1
 	END_PARTSSET
 	

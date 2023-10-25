@@ -612,13 +612,8 @@ bool CEnemy::Hit(const int nValue)
 	int nLife = GetLife();
 
 
-	if (m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_SPAWN)
+	if (nValue == mylib_const::DMG_BOUNCE || (m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_SPAWN))
 	{// なにもない状態の時
-
-		CManager::GetInstance()->SetEnableHitStop(5);
-
-		// 振動
-		CManager::GetInstance()->GetCamera()->SetShake(5, 10.0f, 0.0f);
 
 		// 体力減らす
 		nLife -= nValue;
@@ -631,16 +626,33 @@ bool CEnemy::Hit(const int nValue)
 
 			// ダメージ音再生
 			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_DMG01);
+
+			if (m_pHPGauge == NULL)
+			{
+				// 体力ゲージ
+				m_pHPGauge = CHP_Gauge::Create(50.0f, GetLifeOrigin(), 3.0f);
+
+				if (m_pHPGauge == NULL)
+				{// NULLだったら
+					m_pHPGauge = NULL;
+				}
+			}
 		}
 
 		if (nLife <= 0)
 		{// 体力がなくなったら
 
+			// ヒットストップ
+			CManager::GetInstance()->SetEnableHitStop(5);
+
+			// 振動
+			CManager::GetInstance()->GetCamera()->SetShake(5, 10.0f, 0.0f);
+
 			// 死亡状態にする
 			m_state = STATE_DEAD;
 
 			// 遷移カウンター設定
-			m_nCntState = 0;
+			m_nCntState = 40;
 
 			// ノックバックの位置更新
 			m_posKnokBack = GetPosition();
@@ -649,7 +661,7 @@ bool CEnemy::Hit(const int nValue)
 			m_sMotionFrag.bKnockback = true;
 
 			// やられモーション
-			m_pMotion->Set(MOTION_KNOCKBACK);
+			//m_pMotion->Set(MOTION_KNOCKBACK);
 
 			// 死んだ
 			return true;
@@ -665,7 +677,26 @@ bool CEnemy::Hit(const int nValue)
 		m_state = STATE_DMG;
 
 		// 遷移カウンター設定
-		m_nCntState = 0;
+		if (nValue == mylib_const::DMG_SLASH)
+		{
+			m_nCntState = 5;
+
+			// ヒットストップ
+			//CManager::GetInstance()->SetEnableHitStop(2);
+
+			// 振動
+			CManager::GetInstance()->GetCamera()->SetShake(5, 8.0f, 0.0f);
+		}
+		else
+		{
+			m_nCntState = 20;
+
+			// ヒットストップ
+			CManager::GetInstance()->SetEnableHitStop(5);
+
+			// 振動
+			CManager::GetInstance()->GetCamera()->SetShake(10, 15.0f, 0.0f);
+		}
 
 		// ノックバックの位置更新
 		m_posKnokBack = GetPosition();
@@ -778,8 +809,6 @@ void CEnemy::StateNone(void)
 	switch (m_ActType)
 	{
 	case CEnemy::ACTTYPE_FIXED:
-		// 攻撃状態移行処理
-		ChangeToAttackState();
 		break;
 
 	case CEnemy::ACTTYPE_CHASE:
@@ -827,6 +856,9 @@ void CEnemy::FixedMove(void)
 
 	// 位置設定
 	SetPosition(pos);
+
+	// 攻撃状態移行処理
+	ChangeToAttackState();
 }
 
 //==========================================================================
@@ -896,12 +928,12 @@ void CEnemy::Damage(void)
 #endif
 
 	// 状態遷移カウンター減算
-	m_nCntState++;
+	m_nCntState--;
 
-	if (m_nCntState >= 30)
-	{// 遷移カウンターが20になったら
+	if (m_nCntState <= 0)
+	{// 遷移カウンターが0になったら
 
-		// ノックバック状態にする
+		// 過去の状態にする
 		m_state = m_Oldstate;
 	}
 
@@ -948,13 +980,13 @@ void CEnemy::Dead(void)
 	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 
 	// 状態遷移カウンター減算
-	m_nCntState++;
+	m_nCntState--;
 
 	// 色設定
 	m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, m_mMatcol.a);
 	m_mMatcol.a -= 1.0f / 80.0f;
 
-	if (m_nCntState >= 40)
+	if (m_nCntState <= 0)
 	{// 遷移カウンターが0になったら or 地面に接触
 
 		// パーティクル生成

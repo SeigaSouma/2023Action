@@ -13,6 +13,8 @@
 #include "calculation.h"
 #include "camera.h"
 #include "debugproc.h"
+#include "enemymanager.h"
+#include "enemy.h"
 
 //==========================================================================
 // マクロ定義
@@ -292,7 +294,7 @@ void  CSlash::Collision(void)
 			switch (GetMoveAngle())
 			{
 			case CObject::ANGLE_UP:
-				fRot = atan2f((pos.x - 0.0f), (pos.z - 0.0f));
+				fRot = D3DX_PI + GetOriginRotation().y;
 
 				ppBullet[nCntBullet]->SetMove(D3DXVECTOR3(
 					sinf(D3DX_PI + fRot) * fFabsMove,
@@ -328,7 +330,7 @@ void  CSlash::Collision(void)
 				}
 
 
-				SlashMove = D3DXVECTOR3(cosf(fRotX) * fabsf(BulletMove.x), sinf(D3DX_PI + fRotY) * fabsf(BulletMove.x), 0.0f);
+				SlashMove = D3DXVECTOR3(cosf(fRotX) * fFabsMove, sinf(D3DX_PI + fRotY) * fFabsMove, 0.0f);
 				ppBullet[nCntBullet]->SetMove(SlashMove);
 				break;
 			}
@@ -338,12 +340,51 @@ void  CSlash::Collision(void)
 			ppBullet[nCntBullet]->SetMoveAngle(GetMoveAngle());
 
 			// ヒットストップ
-			CManager::GetInstance()->SetEnableHitStop(6);
+			CManager::GetInstance()->SetEnableHitStop(8);
 
 			// 振動
-			CManager::GetInstance()->GetCamera()->SetShake(12, 25.0f, 0.0f);
+			CManager::GetInstance()->GetCamera()->SetShake(15, 25.0f, 0.0f);
 		}
 	}
+
+
+
+	// 敵マネージャ取得
+	CEnemyManager *pEnemyManager = CManager::GetInstance()->GetScene()->GetEnemyManager();
+	if (pEnemyManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	// 敵情報取得
+	CEnemy **ppEnemy = pEnemyManager->GetEnemy();
+	int nNumEnemy = pEnemyManager->GetNumAll();
+
+	// 情報取得
+	bool bHit = false;
+
+	nUse = 0;
+	for (int nCntEnemy = 0; nUse < nNumEnemy; nCntEnemy++)
+	{
+		if (ppEnemy[nCntEnemy] == NULL)
+		{// NULLだったら
+			continue;
+		}
+		nUse++;
+
+		// 敵の情報取得
+		D3DXVECTOR3 EnemyPosition = ppEnemy[nCntEnemy]->GetPosition();
+		float fEnemyRadius = ppEnemy[nCntEnemy]->GetRadius();
+
+		if (IsHit(EnemyPosition, fEnemyRadius) == true)
+		{// 当たっていたら
+
+			// ヒット処理
+			ppEnemy[nCntEnemy]->Hit(mylib_const::DMG_SLASH);
+			bHit = true;
+		}
+	}
+
 }
 
 //==========================================================================

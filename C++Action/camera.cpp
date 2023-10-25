@@ -18,6 +18,7 @@
 #include "instantfade.h"
 #include "mapmanager.h"
 #include "calculation.h"
+#include "light.h"
 
 //==========================================================================
 // マクロ定義
@@ -43,9 +44,10 @@
 //#define RESULT_LEN	(1000.0f)
 #define RANKINGROT_NONE		(D3DXVECTOR3(0.0f, -0.79f + D3DX_PI, -0.30f))
 #define ROTHOSEI	(0.01f)	// 向きの補正係数
-#define POSV_HOSEI	(0.12f)
-#define POSR_HOSEI	(0.08f)
+#define POSV_HOSEI	(0.12f * 0.8f)
+#define POSR_HOSEI	(0.08f * 0.8f)
 #define CHASEDISTANCE_DEST	(250.0f)
+#define ROTCHANGEHOSEI		(0.3f)
 
 //==========================================================================
 // コンストラクタ
@@ -92,6 +94,8 @@ CCamera::CCamera()
 	m_fDistanceCorrection = 0.0f;				// 距離の慣性補正係数
 	m_fDistanceDecrementValue = 0.0f;			// 距離の減少係数
 	m_ChaseType = CHASETYPE_NORMAL;				// 追従の種類
+	m_OldChaseType = CHASETYPE_NORMAL;			// 前回の追従の種類
+	m_nCntChaseType = 0;			// 追従のカウンター
 }
 
 //==========================================================================
@@ -140,6 +144,8 @@ HRESULT CCamera::Init(void)
 	m_fDistanceDecrementValue = 0.0f;			// 距離の減少係数
 	m_fHeightMaxDest = 0.0f;					// カメラの最大高さの目標
 	m_ChaseType = CHASETYPE_MAP;				// 追従の種類
+	m_OldChaseType = m_ChaseType;			// 前回の追従の種類
+	m_nCntChaseType = 0;			// 追従のカウンター
 
 	// 視点の代入処理
 	SetCameraV();
@@ -168,6 +174,18 @@ void CCamera::Update(void)
 		// 高さの差分リセット
 		m_fDiffHeightSave = 0.0f;
 
+		if ((m_OldChaseType != CHASETYPE_NONE && m_ChaseType == CHASETYPE_NONE) ||
+			(m_OldChaseType == CHASETYPE_NONE && m_ChaseType != CHASETYPE_NONE))
+		{// 前回が追従してて今回が追従してない
+			m_nCntChaseType = 150;
+		}
+
+		m_nCntChaseType--;
+		if (m_nCntChaseType <= 0)
+		{
+			m_nCntChaseType = -1;
+		}
+
 		// 視点・注視点移動
 		MoveCameraFollow();
 		MoveCameraInput();
@@ -177,6 +195,7 @@ void CCamera::Update(void)
 		MoveCameraDistance();
 		MoveCameraDistance();
 		UpdateByMode();
+		UpdateSpotLightVec();
 
 		if (m_state == CAMERASTATE_SHAKE)
 		{
@@ -193,6 +212,9 @@ void CCamera::Update(void)
 	}
 
 //#endif
+
+	// 前回の追従の種類
+	m_OldChaseType = m_ChaseType;
 
 	// テキストの描画
 	CManager::GetInstance()->GetDebugProc()->Print(
@@ -635,6 +657,7 @@ void CCamera::SetCameraVGame(void)
 			break;
 
 		default:
+			ChaseNone();
 			break;
 		}
 	}
@@ -748,6 +771,12 @@ void CCamera::SetCameraRGame(void)
 	else
 	{// 追従ON
 
+		if (m_ChaseType == CHASETYPE_NONE)
+		{
+			ChaseNone();
+			return;
+		}
+
 		// プレイヤーの情報取得
 		CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
 		if (pPlayer == NULL)
@@ -853,7 +882,14 @@ void CCamera::SetCameraRGame(void)
 		m_posRDest.y = fYcamera - m_fDiffHeight;
 
 		// 補正する
-		m_posR += (m_posRDest - m_posR) * POSR_HOSEI;
+		float fHosei = POSR_HOSEI;
+		if (m_nCntChaseType != -1)
+		{
+			float fBairitu = 1.0f - ((float)m_nCntChaseType / 150.0f);
+			fHosei *= fBairitu;
+		}
+
+		m_posR += (m_posRDest - m_posR) * fHosei;
 
 	}
 }
@@ -867,6 +903,25 @@ void CCamera::SetCameraRResult(void)
 	m_posR.x = m_posV.x + cosf(m_rot.z) * sinf(m_rot.y) * m_fDistance;
 	m_posR.z = m_posV.z + cosf(m_rot.z) * cosf(m_rot.y) * m_fDistance;
 	m_posR.y = m_posV.y + sinf(m_rot.z) * m_fDistance;
+}
+
+//==================================================================================
+// スポットライトのベクトル更新
+//==================================================================================
+void CCamera::UpdateSpotLightVec(void)
+{
+	// 方向ベクトル
+	D3DXVECTOR3 vec = mylib_const::DEFAULT_VECTOR3;
+
+	// 視点から注視点への向き
+	vec = m_posR - m_posV;
+
+	// 正規化
+	D3DXVec3Normalize(&vec, &vec);
+
+	// スポットライトの方向設定
+	CManager::GetInstance()->GetLight()->UpdateSpotLightDirection(vec);
+
 }
 
 //==================================================================================
@@ -894,7 +949,14 @@ void CCamera::ChaseNormal(void)
 	float fRotDiff = m_rotVDest.y - m_rot.y;
 	RotNormalize(fRotDiff);
 
-	m_rot.y += fRotDiff * ROTHOSEI;
+	float fHosei = ROTHOSEI;
+	if (m_nCntChaseType != -1)
+	{
+		float fBairitu = 1.0f - ((float)m_nCntChaseType / 150.0f);
+		fHosei *= fBairitu;
+	}
+
+	m_rot.y += fRotDiff * fHosei;
 	RotNormalize(m_rot.y);
 
 	// 視点の代入処理
@@ -958,7 +1020,13 @@ void CCamera::ChaseNormal(void)
 	}
 
 	// 補正する
-	m_posV += (m_posVDest - m_posV) * POSV_HOSEI;
+	fHosei = POSV_HOSEI;
+	if (m_nCntChaseType != -1)
+	{
+		float fBairitu = 1.0f - ((float)m_nCntChaseType / 150.0f);
+		fHosei *= fBairitu;
+	}
+	m_posV += (m_posVDest - m_posV) * fHosei;
 }
 
 //==================================================================================
@@ -1035,7 +1103,14 @@ void CCamera::ChaseMap(void)
 	float fRotDiff = m_rotVDest.y - m_rot.y;
 	RotNormalize(fRotDiff);
 
-	m_rot.y += fRotDiff * ROTHOSEI;
+	float fHosei = ROTHOSEI;
+	if (m_nCntChaseType != -1)
+	{
+		float fBairitu = 1.0f - ((float)m_nCntChaseType / 150.0f);
+		fHosei *= fBairitu;
+	}
+
+	m_rot.y += fRotDiff * fHosei;
 	RotNormalize(m_rot.y);
 
 	// 視点の代入処理
@@ -1101,9 +1176,97 @@ void CCamera::ChaseMap(void)
 		m_fDiffHeightSave += m_fHeightMax - m_posV.y;
 	}
 
+	fHosei = POSV_HOSEI;
+	if (m_nCntChaseType != -1)
+	{
+		float fBairitu = 1.0f - ((float)m_nCntChaseType / 150.0f);
+		fHosei *= fBairitu;
+	}
 	// 補正する
-	m_posV += (m_posVDest - m_posV) * POSV_HOSEI;
+	m_posV += (m_posVDest - m_posV) * fHosei;
 
+}
+
+//==================================================================================
+// 追従なし
+//==================================================================================
+void CCamera::ChaseNone(void)
+{
+
+
+	// マップマネージャの取得
+	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	// マップ情報取得
+	int nMapIdx = 37;
+	float fMapRatio = 0.0f;
+	float fMapMoveValue = 0.0f;
+
+	// 曲線作る為の4点
+	int nP0 = nMapIdx;
+	int nP1 = nMapIdx + 1;
+	int nP2 = nMapIdx + 2;
+
+	// 目標地点
+	D3DXVECTOR3 TargetPoint0 = pMapManager->GetControlPoint(nP0);
+	D3DXVECTOR3 TargetPoint1 = pMapManager->GetControlPoint(nP1);
+	D3DXVECTOR3 TargetPoint2 = pMapManager->GetControlPoint(nP2);
+
+	int nAngle = 1;
+
+	// 少し先の地点取得
+	float fMoveValue = fMapMoveValue + 50.0f * nAngle;
+	D3DXVECTOR3 DestPoint = pMapManager->GetTargetPosition(nMapIdx, fMoveValue);
+
+	// ベクトル
+	D3DXVECTOR3 vec = mylib_const::DEFAULT_VECTOR3;
+	D3DXVECTOR3 newvec = mylib_const::DEFAULT_VECTOR3;
+
+	// 2点間の距離取得
+	float fPosLength = GetPosLength(TargetPoint1, TargetPoint2);
+
+	// ベクトル
+	vec = TargetPoint2 - TargetPoint1;
+	D3DXVec3Normalize(&vec, &vec);
+
+	// 90度傾ける
+	newvec.x = vec.z;
+	newvec.z = -vec.x;
+
+	// 目標の視点の向き
+	m_rotVDest.y = atan2f((0.0f - newvec.x), (0.0f - newvec.z));
+
+	//現在と目標の差分を求める
+	float fRotDiff = m_rotVDest.y - m_rot.y;
+	RotNormalize(fRotDiff);
+
+	m_rot.y += fRotDiff * (ROTHOSEI * 0.1f);
+	RotNormalize(m_rot.y);
+
+
+
+
+
+
+	// 注視点の代入処理
+	m_posRDest.x = m_TargetPos.x;
+	m_posRDest.z = m_TargetPos.z;
+	m_posRDest.y = m_TargetPos.y + 100.0f;
+
+	// 補正する
+	m_posR += (m_posRDest - m_posR) * (POSR_HOSEI * 0.1f);
+
+	// 視点の代入処理
+	m_posVDest.x = m_posR.x + cosf(m_rot.z) * sinf(m_rot.y) * -m_fDistance;
+	m_posVDest.z = m_posR.z + cosf(m_rot.z) * cosf(m_rot.y) * -m_fDistance;
+	m_posVDest.y = m_posR.y + sinf(m_rot.z) * -m_fDistance;
+
+	// 補正する
+	m_posV += (m_posVDest - m_posV) * (POSV_HOSEI * 0.1f);
 }
 
 //==================================================================================
@@ -1355,6 +1518,8 @@ void CCamera::ResetGame(void)
 	m_fDistanceCorrection = 0;					// 距離の慣性補正係数
 	m_fDistanceDecrementValue = 0.0f;			// 距離の減少係数
 	m_fHeightMaxDest = 0.0f;					// カメラの最大高さの目標
+	m_ChaseType = CHASETYPE_MAP;				// 追従の種類
+	m_OldChaseType = m_ChaseType;			// 前回の追従の種類
 }
 
 //==========================================================================
@@ -1384,6 +1549,8 @@ void CCamera::ResetTitle(void)
 	m_fDistanceCorrection = 0;							// 距離の慣性補正係数
 	m_fDistanceDecrementValue = 0.0f;					// 距離の減少係数
 	m_fHeightMaxDest = 0.0f;							// カメラの最大高さの目標
+	m_ChaseType = CHASETYPE_MAP;				// 追従の種類
+	m_OldChaseType = m_ChaseType;			// 前回の追従の種類
 }
 
 //==========================================================================
@@ -1410,6 +1577,8 @@ void CCamera::ResetResult(void)
 	m_fDistanceCorrection = 0;							// 距離の慣性補正係数
 	m_fDistanceDecrementValue = 0.0f;					// 距離の減少係数
 	m_fHeightMaxDest = 0.0f;							// カメラの最大高さの目標
+	m_ChaseType = CHASETYPE_MAP;				// 追従の種類
+	m_OldChaseType = m_ChaseType;			// 前回の追従の種類
 
 	// 注視点の代入
 	m_posR = D3DXVECTOR3(-57.76f, 312.0f, 76.42f);	// 注視点(見たい場所)
@@ -1447,6 +1616,8 @@ void CCamera::ResetRanking(void)
 	m_fDistanceCorrection = 0;							// 距離の慣性補正係数
 	m_fDistanceDecrementValue = 0.0f;					// 距離の減少係数
 	m_fHeightMaxDest = 0.0f;							// カメラの最大高さの目標
+	m_ChaseType = CHASETYPE_MAP;				// 追従の種類
+	m_OldChaseType = m_ChaseType;			// 前回の追従の種類
 
 	m_rot = RANKINGROT_NONE;							// 向き
 	m_rotVDest = m_rot;									// 目標の視点の向き
