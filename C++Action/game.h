@@ -24,6 +24,7 @@ class CEditCameraAxis;
 class CEditCameraChaseChanger;
 class CEditEnemyBase;
 class CStage;
+class CGameManager;
 
 //==========================================================================
 // クラス定義
@@ -62,6 +63,7 @@ public:
 	static CEditEnemyBase *GetEditEnemyBase(void);
 	static CBulletManager *GetBulletManager(void);
 	static CStage *GetStage(void);
+	static CGameManager *GetGameManager(void);
 
 private:
 
@@ -78,6 +80,7 @@ private:
 	static CEditCameraChaseChanger *m_pEditCmaeraChaseChanger;	// カメラ追従変更者エディターのオブジェクト
 	static CEditEnemyBase *m_pEditEnemyBase;		// 敵の拠点エディター
 	static CStage *m_pStage;	// ステージのオブジェクト
+	static CGameManager *m_pGameManager;	// ゲームマネージャのオブジェクト
 	static EEditType m_EditType;		// エディットの種類
 };
 

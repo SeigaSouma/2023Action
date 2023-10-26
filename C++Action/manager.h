@@ -85,6 +85,7 @@ public:
 	CScene::MODE GetMode(void);							// 現在のモード取得
 	void SetEnableHitStop(int nCntHitStop);				// ヒットストップの設定
 	bool IsWireframe(void) { return m_bWireframe; }		// ワイヤーフレーム
+	bool IsHitStop(void) { return m_bHitStop; }		// ワイヤーフレーム
 	CScene::MODE GetOldMode(void) { return m_OldMode; }	// 前回のモード取得
 private:
 

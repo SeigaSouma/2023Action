@@ -41,6 +41,7 @@ public:
 		TYPE_LINE,			// 線エフェクト
 		TYPE_GRASS,			// 草エフェクト
 		TYPE_SWEAT,			// 汗エフェクト
+		TYPE_THUNDER,		// 雷エフェクト
 		TYPE_MAX
 	}TYPE;
 

@@ -101,14 +101,14 @@ HRESULT CEnemyBase::Init(void)
 		// デバッグ用数字の生成
 		m_pMultiNumber[i] = CDebugPointNumber::Create(i);
 
-		//if (m_ChaseChangeInfo[i].nRush == 0)
-		//{// ラッシュ用じゃなかったら
-		//	pEnemyManager->SetEnemy(
-		//		D3DXVECTOR3(0.0f, m_ChaseChangeInfo[i].fSpawnPosY, 0.0f),
-		//		m_ChaseChangeInfo[i].nMapIdx,
-		//		m_ChaseChangeInfo[i].fMapMoveValue,
-		//		m_ChaseChangeInfo[i].nPattern);
-		//}
+		if (m_ChaseChangeInfo[i].nRush == 0)
+		{// ラッシュ用じゃなかったら
+			pEnemyManager->SetEnemy(
+				D3DXVECTOR3(0.0f, m_ChaseChangeInfo[i].fSpawnPosY, 0.0f),
+				m_ChaseChangeInfo[i].nMapIdx,
+				m_ChaseChangeInfo[i].fMapMoveValue,
+				m_ChaseChangeInfo[i].nPattern);
+		}
 	}
 
 	return S_OK;

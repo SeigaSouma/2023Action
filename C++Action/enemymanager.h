@@ -97,7 +97,6 @@ protected:
 
 private:
 
-	int m_nNumRushEnemy;	// ラッシュ中の敵の数
 	int m_nNowWave;			// 現在のウェーブ
 	static CEnemy *m_pEnemy[mylib_const::MAX_OBJ];						// 敵へのポインタ
 	static sRushWave *m_pRushWaveInfo;									// ラッシュのウェーブ情報
@@ -111,6 +110,7 @@ private:
 	static bool m_bLoadPattern;	// パターン読み込み判定
 	static int m_nNumWave;		// ラッシュウェーブの総数
 	static int m_nNumAll;		// 敵の総数
+	static int m_nNumRushEnemy;	// ラッシュ中の敵の総数
 };
 
 

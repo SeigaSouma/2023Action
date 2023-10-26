@@ -1,10 +1,10 @@
 //=============================================================================
 // 
-//  弾処理 [explosion.cpp]
+//  斬撃ヒットエフェクト処理 [effect_slashhit.cpp]
 //  Author : 相馬靜雅
 // 
 //=============================================================================
-#include "explosion.h"
+#include "effect_slashhit.h"
 #include "manager.h"
 #include "texture.h"
 #include "renderer.h"
@@ -13,11 +13,10 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
-#define TEXTURE			"data\\TEXTURE\\explosion_01.png"
-#define WIDTH			(250.0f)							// 横幅
-#define HEIGHT			(250.0f)							// 縦幅
+#define TEXTURE			"data\\TEXTURE\\anim_SlashHit.png"
+#define SIZE			(400.0f)						// 横幅
 #define ANIM_SPEED		(1)								// 読み込み間隔
-#define MAX_PATTERN_U	(14)							// Uの分割数
+#define MAX_PATTERN_U	(18)							// Uの分割数
 #define MAX_PATTERN_V	(1)								// Vの分割数
 #define MAX_PATTERN		(MAX_PATTERN_U)					// アニメーションパターンの最大数
 #define MOVE_U			(1.0f / (float)MAX_PATTERN_U)	// U座標移動量
@@ -26,17 +25,17 @@
 //==========================================================================
 // 静的メンバ変数宣言
 //==========================================================================
-int CExplosion::m_nNumAll = 0;		// 弾の総数
+int CEffectSlashHit::m_nNumAll = 0;		// 弾の総数
+int CEffectSlashHit::m_nTexIdx = 0;		// テクスチャのインデックス番号
 
 //==========================================================================
 // コンストラクタ
 //==========================================================================
-CExplosion::CExplosion(int nPriority) : CObjectBillboard(nPriority)
+CEffectSlashHit::CEffectSlashHit(int nPriority) : CObjectBillboard(nPriority)
 {
 	// 値のクリア
 	m_nCntAnim = 0;			// アニメーションカウンター
 	m_nPatternAnim = 0;		// アニメーションパターンNo.
-	m_nTexIdx = 0;			// テクスチャのインデックス番号
 
 	// 総数加算
 	m_nNumAll++;
@@ -45,7 +44,7 @@ CExplosion::CExplosion(int nPriority) : CObjectBillboard(nPriority)
 //==========================================================================
 // デストラクタ
 //==========================================================================
-CExplosion::~CExplosion()
+CEffectSlashHit::~CEffectSlashHit()
 {
 	
 }
@@ -53,46 +52,16 @@ CExplosion::~CExplosion()
 //==========================================================================
 // 生成処理
 //==========================================================================
-CExplosion *CExplosion::Create(void)
+CEffectSlashHit *CEffectSlashHit::Create(const D3DXVECTOR3 pos)
 {
 	// 生成用のオブジェクト
-	CExplosion *pExplosion = NULL;
+	CEffectSlashHit *pExplosion = NULL;
 
 	if (pExplosion == NULL)
 	{// NULLだったら
 
 		// メモリの確保
-		pExplosion = DEBUG_NEW CExplosion;
-
-		if (pExplosion != NULL)
-		{// メモリの確保が出来ていたら
-
-			// 初期化処理
-			pExplosion->Init();
-
-			// 爆発音
-			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_EXPLOSION);
-		}
-
-		return pExplosion;
-	}
-
-	return NULL;
-}
-
-//==========================================================================
-// 生成処理(オーバーロード)
-//==========================================================================
-CExplosion *CExplosion::Create(const D3DXVECTOR3 pos)
-{
-	// 生成用のオブジェクト
-	CExplosion *pExplosion = NULL;
-
-	if (pExplosion == NULL)
-	{// NULLだったら
-
-		// メモリの確保
-		pExplosion = DEBUG_NEW CExplosion;
+		pExplosion = DEBUG_NEW CEffectSlashHit;
 
 		if (pExplosion != NULL)
 		{// メモリの確保が出来ていたら
@@ -116,18 +85,25 @@ CExplosion *CExplosion::Create(const D3DXVECTOR3 pos)
 //==========================================================================
 // 初期化処理
 //==========================================================================
-HRESULT CExplosion::Init(void)
+HRESULT CEffectSlashHit::Init(void)
 {
 	// 各種変数の初期化
 	SetSize(D3DXVECTOR2(0.0f, 0.0f));	// サイズ
 	m_nCntAnim = 0;			// アニメーションカウンター
 	m_nPatternAnim = 0;		// アニメーションパターンNo.
+	SetColor(D3DXCOLOR(0.5f, 0.5f, 1.0f, 1.0f));
 
 	// 種類の設定
 	SetType(TYPE_EXPLOSION);
 
+	// ヒットストップ中も動くオブジェクトとする
+	SetEnableHitstopMove();
+
 	// テクスチャの割り当て
-	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
+	if (m_nTexIdx == 0)
+	{
+		m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
+	}
 
 	// テクスチャの割り当て
 	BindTexture(m_nTexIdx);
@@ -141,7 +117,7 @@ HRESULT CExplosion::Init(void)
 //==========================================================================
 // 終了処理
 //==========================================================================
-void CExplosion::Uninit(void)
+void CEffectSlashHit::Uninit(void)
 {
 	// 終了処理
 	CObjectBillboard::Uninit();
@@ -153,23 +129,17 @@ void CExplosion::Uninit(void)
 //==========================================================================
 // 更新処理
 //==========================================================================
-void CExplosion::Update(void)
+void CEffectSlashHit::Update(void)
 {
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
-
-	// 移動量取得
-	D3DXVECTOR3 move = GetMove();
-
-	// 向き取得
-	D3DXVECTOR3 rot = GetRotation();
 
 	// サイズ
 	D3DXVECTOR2 size = GetSize();
 
 	// 拡大
-	size.x += (WIDTH - size.x) * 0.2f;
-	size.y += (WIDTH - size.y) * 0.2f;
+	size.x += (SIZE - size.x) * 0.1f;
+	size.y += (SIZE - size.y) * 0.1f;
 
 	// カウントを更新
 	m_nCntAnim = (m_nCntAnim + 1) % ANIM_SPEED;
@@ -192,14 +162,8 @@ void CExplosion::Update(void)
 	// 位置設定
 	SetPosition(pos);
 
-	// サイズ設定
+	// 位置設定
 	SetSize(size);
-
-	// 移動量設定
-	SetMove(move);
-
-	// 向き設定
-	SetRotation(rot);
 
 	// 頂点情報設定
 	SetVtx();
@@ -208,7 +172,7 @@ void CExplosion::Update(void)
 //==========================================================================
 // 描画処理
 //==========================================================================
-void CExplosion::Draw(void)
+void CEffectSlashHit::Draw(void)
 {
 	// デバイスの取得
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
@@ -221,8 +185,18 @@ void CExplosion::Draw(void)
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);
 
+	// αブレンディングを加算合成に設定
+	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+
 	// ビルボードの描画
 	CObjectBillboard::Draw();
+
+	// αブレンディングを元に戻す
+	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
 	// アルファテストを無効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
@@ -236,7 +210,7 @@ void CExplosion::Draw(void)
 //==========================================================================
 // 頂点情報設定処理
 //==========================================================================
-void CExplosion::SetVtx(void)
+void CEffectSlashHit::SetVtx(void)
 {
 	// 頂点設定
 	CObjectBillboard::SetVtx();
@@ -260,7 +234,7 @@ void CExplosion::SetVtx(void)
 //==========================================================================
 // 総数取得
 //==========================================================================
-int CExplosion::GetNumAll(void)
+int CEffectSlashHit::GetNumAll(void)
 {
 	return m_nNumAll;
 }

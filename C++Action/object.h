@@ -142,6 +142,7 @@ public:
 	bool IsDeath(void);						// 死亡の判定
 	void SetType(const TYPE type);
 	TYPE GetType(void) const;
+	void SetEnableHitstopMove(void) { m_bHitstopMove = true; }	// ヒットストップ中に動くフラグ有効
 	CObject *GetObject(void);
 	virtual CObject2D *GetObject2D(void);
 	virtual CObject3D *GetObject3D(void);
@@ -170,10 +171,11 @@ private:
 	bool m_bDeath;		// 死亡フラグ
 	CEffect3D *m_pEffect[mylib_const::MAX_OBJ];	// エフェクトのポインタ
 	int m_nNumEffectParent;	// エフェクトの親設定した数
+	bool m_bHitstopMove;		// ヒットストップ時に動くかのフラグ
 	int m_nIdxMapPoint;			// マップポイントのインデックス番号
 	float m_fPointRatio;		// 移動割合
 	float m_fMoveValue;			// 移動量
-	float m_fOldMoveValue;			// 過去の移動量
+	float m_fOldMoveValue;		// 過去の移動量
 
 };
 

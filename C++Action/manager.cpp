@@ -730,9 +730,6 @@ void CManager::Update(void)
 	if (m_bHitStop == true)
 	{// ヒットストップ中は更新停止
 
-		// カメラの更新処理
-		m_pCamera->Update();
-
 		// ヒットストップカウンター減算
 		m_nCntHitStop--;
 
@@ -740,7 +737,6 @@ void CManager::Update(void)
 		{// カウンターがなくなったら
 			m_bHitStop = false;
 		}
-		return;
 	}
 	else
 	{

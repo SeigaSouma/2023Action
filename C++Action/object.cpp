@@ -43,6 +43,7 @@ CObject::CObject(int nPriority)
 	m_bDeath = false;			// 死亡フラグ
 	memset(&m_pEffect[0], NULL, sizeof(m_pEffect));	// エフェクトのポインタ
 	m_nNumEffectParent = 0;		// エフェクトの親設定した数
+	m_bHitstopMove = false;		// ヒットストップ時に動くかのフラグ
 	m_nIdxMapPoint = 0;			// マップポイントのインデックス番号
 	m_fPointRatio = 0.0f;		// 移動割合
 	m_fMoveValue = 0.0f;		// 移動量
@@ -149,6 +150,9 @@ void CObject::UpdateAll(void)
 	CEdit *pEdit = CManager::GetInstance()->GetEdit();
 #endif
 
+	// ヒットストップ中か
+	bool bHitstop = CManager::GetInstance()->IsHitStop();
+
 	for (int nCntPriority = 0; nCntPriority < mylib_const::PRIORITY_NUM; nCntPriority++)
 	{
 		// 先頭を保存
@@ -161,20 +165,23 @@ void CObject::UpdateAll(void)
 			CObject *pObjNext = pObject->m_pNext;
 
 #if _DEBUG
-			if (pObject->m_bDeath == false && pEdit != NULL && (pObject->m_type == TYPE_EDIT || pObject->m_type == TYPE_XFILE || pObject->m_type == TYPE_ELEVATION))
+			if (pObject->m_bDeath == false && pEdit != NULL && (pObject->m_type == TYPE_EDIT || pObject->m_type == TYPE_XFILE || pObject->m_type == TYPE_ELEVATION) &&
+				(pObject->m_bHitstopMove == true || (pObject->m_bHitstopMove == false && bHitstop == false)))
 			{// エディット状態だったらエディットのみ更新
 
 				// 更新処理
 				pObject->Update();
 			}
-			else if (pObject->m_bDeath == false && pEdit == NULL && pObject->m_type != TYPE_NONE)
+			else if (pObject->m_bDeath == false && pEdit == NULL && pObject->m_type != TYPE_NONE &&
+				(pObject->m_bHitstopMove == true || (pObject->m_bHitstopMove == false && bHitstop == false)))
 			{// エディット状態じゃない && タイプがNONE以外
 
 				// 更新処理
 				pObject->Update();
 			}
 #else
-			if (pObject->m_bDeath == false && pObject->m_type != TYPE_NONE)
+			if (pObject->m_bDeath == false && pObject->m_type != TYPE_NONE &&
+				(pObject->m_bHitstopMove == true || (pObject->m_bHitstopMove == false && bHitstop == false)))
 			{// タイプがNONE以外
 
 				// 更新処理

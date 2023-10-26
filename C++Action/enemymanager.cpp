@@ -9,6 +9,7 @@
 #include "calculation.h"
 #include "manager.h"
 #include "game.h"
+#include "gamemanager.h"
 #include "renderer.h"
 #include "enemy.h"
 #include "particle.h"
@@ -42,6 +43,7 @@ bool CEnemyManager::m_bHitStop = false;	// ヒットストップの判定
 CEnemyManager::STATE CEnemyManager::m_state = CEnemyManager::STATE_NONE;		// 状態
 CEnemyManager::sRushWave *CEnemyManager::m_pRushWaveInfo = NULL;					// ラッシュのウェーブ情報
 int CEnemyManager::m_nNumWave = 0;		// ラッシュウェーブの総数
+int CEnemyManager::m_nNumRushEnemy = 0;	// ラッシュ中の敵の総数
 
 //==========================================================================
 // コンストラクタ
@@ -155,6 +157,13 @@ void CEnemyManager::Release(int nIdx)
 		m_pEnemy[nIdx] = NULL;
 	}
 
+	if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_RUSH)
+	{// 敵のラッシュ中
+
+		// ラッシュ中の敵の数加算
+		m_nNumRushEnemy--;
+	}
+
 	// 総数減算
 	m_nNumAll--;
 }
@@ -165,35 +174,49 @@ void CEnemyManager::Release(int nIdx)
 void CEnemyManager::Update(void)
 {
 
-	if (m_nNumAll <= 0)
-	{
-		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0);
-		/*SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 1);
-		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 2);
-		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 3);*/
-		SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 4);
-	}
+	//if (m_nNumAll <= 0)
+	//{
+	//	SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0);
+	//	/*SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 1);
+	//	SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 2);
+	//	SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 3);*/
+	//	SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 4);
+	//}
 
-	//m_nNumRushEnemy = 0;	// ラッシュ中の敵の数
-	m_nNowWave = 0;			// 現在のウェーブ
+	if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_RUSH)
+	{// 敵のラッシュ中
+		if (m_nNumRushEnemy <= 0)
+		{// 総数がゼロになったら
 
-	static int n = 0;
-	if (n == 0)
-	{
-		m_nNowWave = 2;
-		for (int nCntEnemy = 0; nCntEnemy < m_pRushWaveInfo[m_nNowWave].nWaveNumEnemy; nCntEnemy++)
-		{
-			int nAxisNum = CGame::GetEnemyBase()->GetAxisNum();
-			int nBase = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nBase;
+			if (m_nNumWave <= m_nNowWave)
+			{// ウェーブの総数を超えたら
+				// シーンの種類設定
+				CGame::GetGameManager()->SetType(CGameManager::SCENE_MAIN);
 
-			CEnemyBase::sInfo info = CGame::GetEnemyBase()->GetChaseChangeInfo(nBase);
-			int nType = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nPatternType;
+				// ラッシュの終了判定有効
+				CGame::GetGameManager()->SetEnableRush();
+				return;
+			}
 
-			// 敵配置
-			SetEnemy(CGame::GetEnemyBase()->GetAxis(nBase), info.nMapIdx, info.fMapMoveValue, nType);
+			for (int nCntEnemy = 0; nCntEnemy < m_pRushWaveInfo[m_nNowWave].nWaveNumEnemy; nCntEnemy++)
+			{
+				int nAxisNum = CGame::GetEnemyBase()->GetAxisNum();
+				int nBase = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nBase;
+
+				CEnemyBase::sInfo info = CGame::GetEnemyBase()->GetChaseChangeInfo(nBase);
+				int nType = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nPatternType;
+
+				// 敵配置
+				SetEnemy(CGame::GetEnemyBase()->GetAxis(nBase), info.nMapIdx, info.fMapMoveValue, nType);
+
+				// ラッシュ中の敵の数加算
+				m_nNumRushEnemy += m_aPattern[nType].nNumEnemy;
+			}
+
+			// ウェーブ加算
+			m_nNowWave++;
 		}
 	}
-	n++;
 
 	// テキストの描画
 	CManager::GetInstance()->GetDebugProc()->Print(

@@ -137,6 +137,36 @@ void CEnemyFly::Update(void)
 	D3DXVECTOR3 pos = GetPosition();
 	D3DXVECTOR3 rot = GetRotation();
 
+	// 目標の向き取得
+	float fRotDest = GetRotDest();
+
+	// プレイヤー情報
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+
+	// 親の位置取得
+	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
+
+	// 目標の角度を求める
+	fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
+
+	// 目標との差分
+	float fRotDiff = fRotDest - rot.y;
+
+	//角度の正規化
+	RotNormalize(fRotDiff);
+
+	//角度の補正をする
+	rot.y += fRotDiff * 0.025f;
+
+	// 角度の正規化
+	RotNormalize(rot.y);
+
+	// 向き設定
+	SetRotation(rot);
+
+	// 目標の向き設定
+	SetRotDest(fRotDest);
+
 }
 
 //==========================================================================
@@ -167,7 +197,7 @@ void CEnemyFly::ChangeToAttackState(void)
 	// 親の位置取得
 	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
 
-	float fRadius = 500.0f;
+	float fRadius = 700.0f;
 
 	if (m_pMotion->GetType() != MOTION_ATK && CircleRange(pos, posPlayer, fRadius, pPlayer->GetRadius()) == true)
 	{// 一定距離間にプレイヤーが入ったら
@@ -379,9 +409,12 @@ void CEnemyFly::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	// プレイヤーの位置
 	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
 
+	// プレイヤーと敵のベクトル
+	D3DXVECTOR3 vec = weponpos - posPlayer;
 
 	// 目標の角度を求める
-	float fRotDest = atan2f((weponpos.x - posPlayer.x), (weponpos.z - posPlayer.z));
+	float fRotDest = atan2f(vec.x, vec.z);
+	float fRotHeight = atan2f((weponpos.y - posPlayer.y - 100.0f), D3DXVec3Length(&vec));
 
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -403,8 +436,9 @@ void CEnemyFly::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		CBullet::MOVETYPE_NORMAL,
 		D3DXVECTOR3(pos.x, pos.y, pos.z),
 		rot,
-		D3DXVECTOR3(4.0f, 0.0f, 0.0f),
+		D3DXVECTOR3(fabsf(sinf(D3DX_PI * 0.5f + fRotHeight) * 5.0f), cosf(D3DX_PI * 0.5f + fRotHeight) * 5.0f, 0.0f),
 		40.0f);
+	//SlashMove = D3DXVECTOR3(cosf(fRotX) * fFabsMove, sinf(D3DX_PI + fRotY) * fFabsMove, 0.0f);
 
 	pBullet->SetMapIndex(GetMapIndex());
 	pBullet->SetMapMoveValue(GetMapMoveValue());

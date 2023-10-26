@@ -16,7 +16,7 @@ SCRIPT			# この行は絶対消さないこと！
 #------------------------------------------------------------------------------
 # ウェーブ数
 #------------------------------------------------------------------------------
-NUM_WAVE = 4
+NUM_WAVE = 3
 
 
 12→9
@@ -31,11 +31,16 @@ NUM_WAVE = 4
 # ウェーブ0
 WAVESET
 	
-	NUM_ENEMY = 2
+	NUM_ENEMY = 4
 	
 	ENEMYSET
 		TYPE = 2	# どの種類か
 		BASE = 9
+	END_ENEMYSET
+	
+	ENEMYSET
+		TYPE = 2	# どの種類か
+		BASE = 8
 	END_ENEMYSET
 	
 	#逆には逆のタイプ
@@ -44,18 +49,6 @@ WAVESET
 		BASE = 6
 	END_ENEMYSET
 	
-END_WAVESET
-
-WAVESET
-	
-	NUM_ENEMY = 2
-	
-	ENEMYSET
-		TYPE = 2	# どの種類か
-		BASE = 8
-	END_ENEMYSET
-	
-	#逆には逆のタイプ
 	ENEMYSET
 		TYPE = 14	# どの種類か
 		BASE = 5

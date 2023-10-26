@@ -23,7 +23,6 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
-#define TEXTURE			"data\\TEXTURE\\bullet_03.png"
 #define WIDTH			(30.0f)							// 横幅
 #define HEIGHT			(30.0f)							// 縦幅
 #define MOVE_SPEED		(15.0f)							// 移動速度
@@ -39,8 +38,8 @@
 //==========================================================================
 const char *CBullet::m_apTextureFile[TYPE_MAX] =	// テクスチャのファイル
 {
-	"data\\TEXTURE\\sunder_01.png",
-	"data\\TEXTURE\\sunder_01.png",
+	"data\\TEXTURE\\sunder_02.png",
+	"data\\TEXTURE\\sunder_02.png",
 };
 int CBullet::m_nNumAll = 0;		// 弾の総数
 
@@ -148,6 +147,7 @@ HRESULT CBullet::Init(void)
 	// 各種変数の初期化
 	m_nLifeMax = 60 * 5;
 	m_nLife = m_nLifeMax;	// 寿命
+	SetColor(D3DXCOLOR(0.3f, 0.3f, 1.0f, 1.0f));
 
 	// テクスチャの割り当て
 	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_type]);
@@ -217,6 +217,27 @@ void CBullet::Update(void)
 	{
 		m_nCntEmission = (m_nCntEmission + 1) % 100;	// 発生物のカウンター
 
+		if (m_nCntEmission % 3 == 0)
+		{
+			// 位置取得
+			D3DXVECTOR3 pos = GetPosition();
+
+			// 移動量取得
+			D3DXVECTOR3 move = GetMove();
+
+			CEffect3D *pEffect = CEffect3D::Create(
+				pos,
+				-move,
+				D3DXCOLOR(0.2f, 0.2f, 0.8f, 0.8f),
+				GetRadius() * 1.5f,
+				6,
+				CEffect3D::MOVEEFFECT_SUB,
+				CEffect3D::TYPE_THUNDER);
+
+			// セットアップ位置設定
+			pEffect->SetUp(D3DXVECTOR3(0.0f, 0.0f, 0.0f), CObject::GetObject(), SetEffectParent(pEffect));
+		}
+
 		if (m_nCntEmission == 10 && m_pMeshSphereEffect != NULL)
 		{
 			float fSize = GetRadius();
@@ -284,7 +305,6 @@ void CBullet::Update(void)
 
 		// 爆発の生成
 		CExplosion::Create(GetPosition());
-		my_particle::Create(GetPosition(), my_particle::TYPE_OFFSETTING);
 
 		// 弾の削除
 		if (m_pMeshSphereEffect != NULL)
@@ -549,17 +569,17 @@ void CBullet::Draw(void)
 	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);
 
 	// αブレンディングを加算合成に設定
-	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	/*pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);*/
 
 	// ビルボードの描画
 	CMeshSphere::Draw();
 
 	// αブレンディングを元に戻す
-	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+	/*pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);*/
 
 	// アルファテストを無効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);

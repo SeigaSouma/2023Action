@@ -15,6 +15,7 @@
 #include "debugproc.h"
 #include "enemymanager.h"
 #include "enemy.h"
+#include "effect_slashhit.h"
 
 //==========================================================================
 // マクロ定義
@@ -345,6 +346,9 @@ void  CSlash::Collision(void)
 
 			// 振動
 			CManager::GetInstance()->GetCamera()->SetShake(15, 25.0f, 0.0f);
+
+			// 斬撃のヒットエフェクト生成
+			CEffectSlashHit::Create(BulletPosition);
 		}
 	}
 

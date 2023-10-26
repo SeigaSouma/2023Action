@@ -26,6 +26,7 @@
 #include "edit_enemybase.h"
 #include "bulletmanager.h"
 #include "stage.h"
+#include "gamemanager.h"
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -38,7 +39,8 @@ CBulletManager *CGame::m_pBulletManager = NULL;		// 弾マネージャのオブジェクト
 CEditCameraAxis *CGame::m_pEditCameraAxis = NULL;		// カメラ軸エディターのオブジェクト
 CEditCameraChaseChanger *CGame::m_pEditCmaeraChaseChanger = NULL;	// カメラ追従変更者エディターのオブジェクト
 CEditEnemyBase *CGame::m_pEditEnemyBase = NULL;		// 敵の拠点エディター
-CStage *CGame::m_pStage = NULL;	// ステージのオブジェクト
+CStage *CGame::m_pStage = NULL;						// ステージのオブジェクト
+CGameManager *CGame::m_pGameManager = NULL;			// ゲームマネージャのオブジェクト
 CGame::EEditType CGame::m_EditType = EDITTYPE_OFF;		// エディットの種類
 
 //==========================================================================
@@ -68,6 +70,11 @@ HRESULT CGame::Init(void)
 	{// 失敗した場合
 		return E_FAIL;
 	}
+
+	//**********************************
+	// ゲームマネージャ
+	//**********************************
+	m_pGameManager = CGameManager::Create();
 
 	// BGM再生
 	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_GAME);
@@ -107,7 +114,14 @@ HRESULT CGame::Init(void)
 //==========================================================================
 void CGame::Uninit(void)
 {
-	
+	if (m_pGameManager != NULL)
+	{
+		// 終了処理
+		m_pGameManager->Uninit();
+		delete m_pGameManager;
+		m_pGameManager = NULL;
+	}
+
 	// スコアの破棄
 	if (m_pScore != NULL)
 	{// メモリの確保が出来ていたら
@@ -363,6 +377,14 @@ CBulletManager *CGame::GetBulletManager(void)
 CStage *CGame::GetStage(void)
 {
 	return m_pStage;
+}
+
+//==========================================================================
+// ゲームマネージャの取得
+//==========================================================================
+CGameManager *CGame::GetGameManager(void)
+{
+	return m_pGameManager;
 }
 
 //==========================================================================

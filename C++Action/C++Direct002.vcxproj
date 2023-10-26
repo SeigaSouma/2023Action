@@ -172,6 +172,7 @@
     <ClCompile Include="edit_camerachasechanger.cpp" />
     <ClCompile Include="edit_controlpoint.cpp" />
     <ClCompile Include="edit_enemybase.cpp" />
+    <ClCompile Include="effect_slashhit.cpp" />
     <ClCompile Include="elevation.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="enemybase.cpp" />
@@ -184,6 +185,7 @@
     <ClCompile Include="explosion.cpp" />
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="gamemanager.cpp" />
     <ClCompile Include="hp_gauge.cpp" />
     <ClCompile Include="impactwave.cpp" />
     <ClCompile Include="input.cpp" />
@@ -263,6 +265,7 @@
     <ClInclude Include="edit_camerachasechanger.h" />
     <ClInclude Include="edit_controlpoint.h" />
     <ClInclude Include="edit_enemybase.h" />
+    <ClInclude Include="effect_slashhit.h" />
     <ClInclude Include="elevation.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="enemybase.h" />
@@ -275,6 +278,7 @@
     <ClInclude Include="explosion.h" />
     <ClInclude Include="fade.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="gamemanager.h" />
     <ClInclude Include="hp_gauge.h" />
     <ClInclude Include="impactwave.h" />
     <ClInclude Include="input.h" />

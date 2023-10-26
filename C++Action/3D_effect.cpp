@@ -27,12 +27,13 @@ const char *CEffect3D::m_apTextureFile[] =					// ファイル読み込み
 	"data\\TEXTURE\\effect\\smoke_05.tga",	   // 煙エフェクト
 	"data\\TEXTURE\\effect\\smoke_05.tga",	   // 黒煙
 	"data\\TEXTURE\\effect\\effect000.png",	   // 黒エフェクト
-	"data\\TEXTURE\\effect\\effect001.png",	   // 十字エフェクト
-	"data\\TEXTURE\\effect\\sand_01.png",	   // 十字エフェクト
-	"data\\TEXTURE\\effect\\sand_02.png",	   // 十字エフェクト
-	"data\\TEXTURE\\effect\\line_02.png",	   // 線エフェクト
-	"data\\TEXTURE\\grassblades_01.png",	   // 草エフェクト
-	"data\\TEXTURE\\effect\\sweat_01.png",	   // 汗エフェクト
+	"data\\TEXTURE\\effect\\effect001.png",		// 十字エフェクト
+	"data\\TEXTURE\\effect\\sand_01.png",		// 十字エフェクト
+	"data\\TEXTURE\\effect\\sand_02.png",		// 十字エフェクト
+	"data\\TEXTURE\\effect\\line_02.png",		// 線エフェクト
+	"data\\TEXTURE\\grassblades_01.png",		// 草エフェクト
+	"data\\TEXTURE\\effect\\sweat_01.png",		// 汗エフェクト
+	"data\\TEXTURE\\effect\\thunder_01.tga",	// 雷エフェクト
 };
 int CEffect3D::m_nNumAll = 0;	// 総数
 int CEffect3D::m_nTexIdx[TYPE_MAX] = {};				// テクスチャのインデックス番号
@@ -257,6 +258,10 @@ HRESULT CEffect3D::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3D
 		break;
 
 	case TYPE_SWEAT:
+		m_bAddAlpha = false;
+		break;
+
+	case TYPE_THUNDER:
 		m_bAddAlpha = false;
 		break;
 

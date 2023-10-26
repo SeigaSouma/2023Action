@@ -36,6 +36,7 @@
 #include "cameraaxis.h"
 #include "stage.h"
 #include "objectX.h"
+#include "gamemanager.h"
 
 // 派生先
 #include "tutorialplayer.h"
@@ -180,7 +181,7 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
-	SetMapIndex(37);
+	//SetMapIndex(34);
 
 	return S_OK;
 }
@@ -785,10 +786,8 @@ void CPlayer::Controll(void)
 	// 情報取得
 	D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(37, 0.0f);
 
-	if (CircleRange(pos, posMapIndex, GetRadius(), 950.0f))
-	//if ()
+	if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_RUSH)
 	{// 敵のラッシュ中
-
 
 		if (CircleRange(pos, posMapIndex, GetRadius(), 900.0f) == false)
 		{// 円から外れたら
@@ -800,8 +799,6 @@ void CPlayer::Controll(void)
 			move.x = 0.0f;
 			fMoveValue = GetOldMapMoveValue();
 		}
-
-
 	}
 
 	// 位置更新
@@ -1466,7 +1463,7 @@ void CPlayer::CollisionChaseChanger(void)
 	int nMapIdx = GetMapIndex();
 	int nChangeNumAll = pCameraChaseChanger->GetNumAll();
 
-	if (nMapIdx >= 32)
+	if (nMapIdx >= 32 && CGame::GetGameManager()->IsRushEnd() == false)
 	{// 敵ラッシュの時
 
 		// 情報取得
@@ -1476,12 +1473,12 @@ void CPlayer::CollisionChaseChanger(void)
 		if (CircleRange(pos, posMapIndex, GetRadius(), 900.0f))
 		{
 			// 追従の種類設定
+			CGame::GetGameManager()->SetType(CGameManager::SCENE_RUSH);
 			pCamera->SetChaseType(CCamera::CHASETYPE_NONE);
 			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 150.0f, posMapIndex.z));
 			pCamera->SetLenDest(pCamera->GetOriginDistance() + 500.0f);
 			return;
 		}
-
 	}
 
 	for (int i = 0; i < nChangeNumAll + 1; i++)
