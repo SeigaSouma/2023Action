@@ -61,6 +61,12 @@
     <Filter Include="ヘッダー ファイル\mode\ranking">
       <UniqueIdentifier>{f7da0a51-5bf3-4e9c-9db0-da4a5ae824a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\mode\game">
+      <UniqueIdentifier>{0ff959e5-a429-4312-ac67-818230a8512e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\mode\game">
+      <UniqueIdentifier>{7620e3df-31f5-434b-aa9a-8c0705dbb834}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="2D_effect.cpp">
@@ -170,9 +176,6 @@
     </ClCompile>
     <ClCompile Include="fade.cpp">
       <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="game.cpp">
-      <Filter>ソース ファイル\mode</Filter>
     </ClCompile>
     <ClCompile Include="meshcylinder.cpp">
       <Filter>ソース ファイル\mesh</Filter>
@@ -285,9 +288,6 @@
     <ClCompile Include="enemy_fly.cpp">
       <Filter>ソース ファイル\enemy</Filter>
     </ClCompile>
-    <ClCompile Include="enemyfixedmove_manager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="cameraaxis.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -306,17 +306,26 @@
     <ClCompile Include="enemy_boss.cpp">
       <Filter>ソース ファイル\enemy</Filter>
     </ClCompile>
-    <ClCompile Include="enemybase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="edit_enemybase.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="gamemanager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="effect_slashhit.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="effect_thunderring.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>ソース ファイル\mode\game</Filter>
+    </ClCompile>
+    <ClCompile Include="gamemanager.cpp">
+      <Filter>ソース ファイル\mode\game</Filter>
+    </ClCompile>
+    <ClCompile Include="enemybase.cpp">
+      <Filter>ソース ファイル\enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="enemyfixedmove_manager.cpp">
+      <Filter>ソース ファイル\enemy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -434,9 +443,6 @@
     <ClInclude Include="fade.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="game.h">
-      <Filter>ヘッダー ファイル\mode</Filter>
-    </ClInclude>
     <ClInclude Include="meshcylinder.h">
       <Filter>ヘッダー ファイル\mesh</Filter>
     </ClInclude>
@@ -551,9 +557,6 @@
     <ClInclude Include="enemy_fly.h">
       <Filter>ヘッダー ファイル\enemy</Filter>
     </ClInclude>
-    <ClInclude Include="enemyfixedmove_manager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="cameraaxis.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -569,20 +572,29 @@
     <ClInclude Include="stage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="enemy_boss.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="enemybase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="edit_enemybase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="gamemanager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="effect_slashhit.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="effect_thunderring.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="enemy_boss.h">
+      <Filter>ヘッダー ファイル\enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="enemybase.h">
+      <Filter>ヘッダー ファイル\enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="enemyfixedmove_manager.h">
+      <Filter>ヘッダー ファイル\enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>ヘッダー ファイル\mode\game</Filter>
+    </ClInclude>
+    <ClInclude Include="gamemanager.h">
+      <Filter>ヘッダー ファイル\mode\game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,10 +1,10 @@
 //=============================================================================
 // 
-//  斬撃ヒットエフェクト処理 [effect_slashhit.cpp]
+//  雷のリングエフェクト処理 [effect_thunderring.cpp]
 //  Author : 相馬靜雅
 // 
 //=============================================================================
-#include "effect_slashhit.h"
+#include "effect_thunderring.h"
 #include "manager.h"
 #include "texture.h"
 #include "renderer.h"
@@ -13,10 +13,10 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
-#define TEXTURE			"data\\TEXTURE\\anim_SlashHit.png"
-#define SIZE			(600.0f)						// 横幅
+#define TEXTURE			"data\\TEXTURE\\anim_thunderring.png"
+#define SIZE			(400.0f)						// 横幅
 #define ANIM_SPEED		(1)								// 読み込み間隔
-#define MAX_PATTERN_U	(18)							// Uの分割数
+#define MAX_PATTERN_U	(20)							// Uの分割数
 #define MAX_PATTERN_V	(1)								// Vの分割数
 #define MAX_PATTERN		(MAX_PATTERN_U)					// アニメーションパターンの最大数
 #define MOVE_U			(1.0f / (float)MAX_PATTERN_U)	// U座標移動量
@@ -25,17 +25,19 @@
 //==========================================================================
 // 静的メンバ変数宣言
 //==========================================================================
-int CEffectSlashHit::m_nNumAll = 0;		// 弾の総数
-int CEffectSlashHit::m_nTexIdx = 0;		// テクスチャのインデックス番号
+int CThunderRing::m_nNumAll = 0;		// 弾の総数
+int CThunderRing::m_nTexIdx = 0;		// テクスチャのインデックス番号
 
 //==========================================================================
 // コンストラクタ
 //==========================================================================
-CEffectSlashHit::CEffectSlashHit(int nPriority) : CObjectBillboard(nPriority)
+CThunderRing::CThunderRing(int nPriority) : CObjectBillboard(nPriority)
 {
 	// 値のクリア
 	m_nCntAnim = 0;			// アニメーションカウンター
 	m_nPatternAnim = 0;		// アニメーションパターンNo.
+	m_bAutoDeath = false;	// 自動削除のフラグ
+	m_bFinish = false;		// アニメーションが終わった判定
 
 	// 総数加算
 	m_nNumAll++;
@@ -44,7 +46,7 @@ CEffectSlashHit::CEffectSlashHit(int nPriority) : CObjectBillboard(nPriority)
 //==========================================================================
 // デストラクタ
 //==========================================================================
-CEffectSlashHit::~CEffectSlashHit()
+CThunderRing::~CThunderRing()
 {
 	
 }
@@ -52,22 +54,25 @@ CEffectSlashHit::~CEffectSlashHit()
 //==========================================================================
 // 生成処理
 //==========================================================================
-CEffectSlashHit *CEffectSlashHit::Create(const D3DXVECTOR3 pos)
+CThunderRing *CThunderRing::Create(const D3DXVECTOR3 pos, const D3DXVECTOR2 size)
 {
 	// 生成用のオブジェクト
-	CEffectSlashHit *pExplosion = NULL;
+	CThunderRing *pExplosion = NULL;
 
 	if (pExplosion == NULL)
 	{// NULLだったら
 
 		// メモリの確保
-		pExplosion = DEBUG_NEW CEffectSlashHit;
+		pExplosion = DEBUG_NEW CThunderRing;
 
 		if (pExplosion != NULL)
 		{// メモリの確保が出来ていたら
 
 			// 位置割り当て
 			pExplosion->SetPosition(pos);
+
+			// サイズ設定
+			pExplosion->SetSize(size);
 
 			// 初期化処理
 			pExplosion->Init();
@@ -85,19 +90,16 @@ CEffectSlashHit *CEffectSlashHit::Create(const D3DXVECTOR3 pos)
 //==========================================================================
 // 初期化処理
 //==========================================================================
-HRESULT CEffectSlashHit::Init(void)
+HRESULT CThunderRing::Init(void)
 {
 	// 各種変数の初期化
-	SetSize(D3DXVECTOR2(0.0f, 0.0f));	// サイズ
 	m_nCntAnim = 0;			// アニメーションカウンター
 	m_nPatternAnim = 0;		// アニメーションパターンNo.
+	m_bAutoDeath = true;	// 自動削除にする
 	SetColor(D3DXCOLOR(0.5f, 0.5f, 1.0f, 1.0f));
 
 	// 種類の設定
 	SetType(TYPE_EXPLOSION);
-
-	// ヒットストップ中も動くオブジェクトとする
-	SetEnableHitstopMove();
 
 	// テクスチャの割り当て
 	if (m_nTexIdx == 0)
@@ -117,7 +119,7 @@ HRESULT CEffectSlashHit::Init(void)
 //==========================================================================
 // 終了処理
 //==========================================================================
-void CEffectSlashHit::Uninit(void)
+void CThunderRing::Uninit(void)
 {
 	// 終了処理
 	CObjectBillboard::Uninit();
@@ -129,18 +131,8 @@ void CEffectSlashHit::Uninit(void)
 //==========================================================================
 // 更新処理
 //==========================================================================
-void CEffectSlashHit::Update(void)
+void CThunderRing::Update(void)
 {
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
-
-	// サイズ
-	D3DXVECTOR2 size = GetSize();
-
-	// 拡大
-	size.x += (SIZE - size.x) * 0.1f;
-	size.y += (SIZE - size.y) * 0.1f;
-
 	// カウントを更新
 	m_nCntAnim = (m_nCntAnim + 1) % ANIM_SPEED;
 
@@ -153,17 +145,17 @@ void CEffectSlashHit::Update(void)
 		if (m_nPatternAnim == 0)
 		{// パターンが一周した時
 
-			// オブジェクト破棄
-			Uninit();
-			return;
+			// 終了状態
+			m_bFinish = true;
+
+			if (m_bAutoDeath == true)
+			{
+				// オブジェクト破棄
+				Uninit();
+				return;
+			}
 		}
 	}
-
-	// 位置設定
-	SetPosition(pos);
-
-	// 位置設定
-	SetSize(size);
 
 	// 頂点情報設定
 	SetVtx();
@@ -172,7 +164,7 @@ void CEffectSlashHit::Update(void)
 //==========================================================================
 // 描画処理
 //==========================================================================
-void CEffectSlashHit::Draw(void)
+void CThunderRing::Draw(void)
 {
 	// デバイスの取得
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
@@ -210,7 +202,7 @@ void CEffectSlashHit::Draw(void)
 //==========================================================================
 // 頂点情報設定処理
 //==========================================================================
-void CEffectSlashHit::SetVtx(void)
+void CThunderRing::SetVtx(void)
 {
 	// 頂点設定
 	CObjectBillboard::SetVtx();
@@ -234,7 +226,7 @@ void CEffectSlashHit::SetVtx(void)
 //==========================================================================
 // 総数取得
 //==========================================================================
-int CEffectSlashHit::GetNumAll(void)
+int CThunderRing::GetNumAll(void)
 {
 	return m_nNumAll;
 }

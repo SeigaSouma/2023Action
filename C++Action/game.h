@@ -54,7 +54,7 @@ public:
 	void Update(void);
 	void Draw(void);
 
-	void Reset(void);
+	static void Reset(void);
 	static EEditType GetEditType(void) { return m_EditType; }
 	static CScore *GetScore(void);
 	static CTimer *GetTimer(void);

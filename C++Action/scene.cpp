@@ -176,7 +176,7 @@ HRESULT CScene::Init(void)
 	//**********************************
 	// マップの生成
 	//**********************************
-	if (FAILED(map::Create()))
+	if (FAILED(map::Create("data\\TEXT\\edit_info.txt")))
 	{// 失敗した場合
 		return E_FAIL;
 	}
@@ -291,6 +291,93 @@ void CScene::Update(void)
 void CScene::Draw(void)
 {
 	
+}
+
+//==========================================================================
+// シーンのリセット
+//==========================================================================
+void CScene::ResetScene(void)
+{
+	// マップマネージャ
+	if (m_pMapManager != NULL)
+	{
+		m_pMapManager->Uninit();
+		delete m_pMapManager;
+		m_pMapManager = NULL;
+	}
+
+	// カメラの軸
+	if (m_pCameraAxis != NULL)
+	{
+		m_pCameraAxis->Uninit();
+		delete m_pCameraAxis;
+		m_pCameraAxis = NULL;
+	}
+
+	// カメラ追従変更者
+	if (m_pCameraChaseChanger != NULL)
+	{
+		m_pCameraChaseChanger->Uninit();
+		delete m_pCameraChaseChanger;
+		m_pCameraChaseChanger = NULL;
+	}
+
+	// 敵の拠点
+	if (m_pEnemyBase != NULL)
+	{
+		m_pEnemyBase->Uninit();
+		delete m_pEnemyBase;
+		m_pEnemyBase = NULL;
+	}
+
+	// マップ
+	map::Release();
+
+
+	//**********************************
+	// マップマネージャ
+	//**********************************
+	m_pMapManager = CMapManager::Create("data\\BIN\\maptarget.bin");
+
+	if (m_pMapManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	//**********************************
+	// カメラの軸
+	//**********************************
+	m_pCameraAxis = CCameraAxis::Create("data\\BIN\\cameraaxis.bin");
+	if (m_pCameraAxis == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	//**********************************
+	// カメラ追従変更者
+	//**********************************
+	m_pCameraChaseChanger = CCameraChaseChanger::Create("data\\BIN\\camerachanger.bin");
+	if (m_pCameraChaseChanger == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	//**********************************
+	// 敵の拠点
+	//**********************************
+	m_pEnemyBase = CEnemyBase::Create();
+	if (m_pEnemyBase == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	//**********************************
+	// マップの生成
+	//**********************************
+	if (FAILED(map::Create("data\\TEXT\\edit_info.txt")))
+	{// 失敗した場合
+		return;
+	}
 }
 
 //==========================================================================

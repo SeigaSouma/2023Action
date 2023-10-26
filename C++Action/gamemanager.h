@@ -26,9 +26,11 @@ public:
 	// シーンの種類
 	enum SceneType
 	{
-		SCENE_MAIN = 0,		// メイン
-		SCENE_RUSH,			// ラッシュ
-		SCENE_BOSS,			// ボス
+		SCENE_MAIN = 0,			// メイン
+		SCENE_RUSH,				// ラッシュ
+		SCENE_BOSS,				// ボス
+		SCENE_TRANSITIONWAIT,	// 遷移待機
+		SCENE_TRANSITION,		// 遷移
 		SCENE_MAX
 	};
 

@@ -37,6 +37,7 @@
 #include "stage.h"
 #include "objectX.h"
 #include "gamemanager.h"
+#include "instantfade.h"
 
 // 派生先
 #include "tutorialplayer.h"
@@ -181,7 +182,7 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
-	//SetMapIndex(34);
+	SetMapIndex(39);
 
 	return S_OK;
 }
@@ -701,7 +702,7 @@ void CPlayer::Controll(void)
 		{
 			fRotDest = atan2f((pos.x - pCamera->GetTargetPosition().x), (pos.z - pCamera->GetTargetPosition().z));
 		}
-		else if (CameraChaseType == CCamera::CHASETYPE_MAP)
+		else
 		{
 			fRotDest = fRotDest - D3DX_PI * 0.5f;
 		}
@@ -783,11 +784,11 @@ void CPlayer::Controll(void)
 		//m_bLandOld = false;
 	}
 
-	// 情報取得
-	D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(37, 0.0f);
-
 	if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_RUSH)
 	{// 敵のラッシュ中
+
+		// 情報取得
+		D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(37, 0.0f);
 
 		if (CircleRange(pos, posMapIndex, GetRadius(), 900.0f) == false)
 		{// 円から外れたら
@@ -1184,6 +1185,20 @@ void CPlayer::Atack(void)
 				}
 
 				// 斬撃生成
+				//CSlash::Create
+				//(
+				//	D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),	// 位置
+				//	D3DXVECTOR3(0.0f, 0.0f, 0.0f),		// 向き
+				//	D3DXVECTOR3(m_fAtkStickRot, D3DX_PI + fRotY, 0.0f),		// 向き
+				//	D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f),	// 色
+				//	200.0f,								// 幅
+				//	50.0f,								// 中心からの間隔
+				//	10,									// 寿命
+				//	40.0f,								// 幅の移動量
+				//	CImpactWave::TYPE_PURPLE4,			// テクスチャの種類
+				//	true,								// 加算合成するかどうか
+				//	GetMoveAngle()
+				//);
 				CSlash::Create
 				(
 					D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),	// 位置
@@ -1195,24 +1210,9 @@ void CPlayer::Atack(void)
 					10,									// 寿命
 					40.0f,								// 幅の移動量
 					CImpactWave::TYPE_PURPLE4,			// テクスチャの種類
-					false,								// 加算合成するかどうか
+					true,								// 加算合成するかどうか
 					GetMoveAngle()
 				);
-
-				//CSlash::Create
-				//(
-				//	D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),	// 位置
-				//	D3DXVECTOR3(0.0f, D3DX_PI + rot.y * nA, 0.0f),		// 向き
-				//	D3DXVECTOR3(m_fAtkStickRot, 0.0f, 0.0f),		// 向き
-				//	D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f),	// 色
-				//	200.0f,								// 幅
-				//	50.0f,								// 中心からの間隔
-				//	10,									// 寿命
-				//	20.0f,								// 幅の移動量
-				//	CImpactWave::TYPE_GIZAWHITE,			// テクスチャの種類
-				//	false,								// 加算合成するかどうか
-				//	GetMoveAngle()
-				//);
 
 				// 歩行音再生
 				CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_IMPACT01);
@@ -1477,6 +1477,37 @@ void CPlayer::CollisionChaseChanger(void)
 			pCamera->SetChaseType(CCamera::CHASETYPE_NONE);
 			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 150.0f, posMapIndex.z));
 			pCamera->SetLenDest(pCamera->GetOriginDistance() + 500.0f);
+			return;
+		}
+	}
+
+	if (nMapIdx >= 39 && CGame::GetGameManager()->GetType() != CGameManager::SCENE_TRANSITION)
+	{// 最後の洞穴の近く
+
+		// 情報取得
+		D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(40, 0.0f);
+
+		// 円の判定
+		if (CircleRange(pos, posMapIndex, GetRadius(), 400.0f))
+		{
+			// 追従の種類設定
+			CGame::GetGameManager()->SetType(CGameManager::SCENE_TRANSITIONWAIT);
+			pCamera->SetChaseType(CCamera::CHASETYPE_NONE);
+			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 150.0f, posMapIndex.z));
+			pCamera->SetLenDest(pCamera->GetOriginDistance() - 200.0f);
+
+			if (CircleRange(pos, posMapIndex, GetRadius(), 300.0f))
+			{// 更に中央
+
+				// ゲームパッド情報取得
+				CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
+
+				if (pInputGamepad->GetStickPositionRatioL(0).y >= 0.5f)
+				{// 奥に進む
+					CGame::GetGameManager()->SetType(CGameManager::SCENE_TRANSITION);
+					CManager::GetInstance()->GetInstantFade()->SetFade();
+				}
+			}
 			return;
 		}
 	}

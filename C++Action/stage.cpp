@@ -36,7 +36,7 @@ CStage::~CStage()
 //==========================================================================
 // 生成処理
 //==========================================================================
-CStage *CStage::Create(void)
+CStage *CStage::Create(const char *pTextFile)
 {
 	// 生成用のオブジェクト
 	CStage *pObjectX = NULL;
@@ -58,7 +58,7 @@ CStage *CStage::Create(void)
 			}
 
 			// 外部テキスト読み込み処理
-			hr = pObjectX->ReadText();
+			hr = pObjectX->ReadText(pTextFile);
 			if (FAILED(hr))
 			{// 失敗していたら
 				return NULL;
@@ -80,7 +80,6 @@ HRESULT CStage::Init(void)
 	// 総数
 	m_nNumAll = 0;
 
-	ReadXFile();
 	return S_OK;
 }
 
@@ -94,6 +93,22 @@ void CStage::Uninit(void)
 	{
 		if (m_pObjX[nCntObj] != NULL)
 		{// NULLじゃなかったら
+			m_pObjX[nCntObj] = NULL;
+		}
+	}
+}
+
+//==========================================================================
+// 解放処理
+//==========================================================================
+void CStage::Release(void)
+{
+	// 終了処理
+	for (int nCntObj = 0; nCntObj < mylib_const::MAX_STAGE; nCntObj++)
+	{
+		if (m_pObjX[nCntObj] != NULL)
+		{// NULLじゃなかったら
+			m_pObjX[nCntObj]->Uninit();
 			m_pObjX[nCntObj] = NULL;
 		}
 	}
@@ -222,7 +237,7 @@ HRESULT CStage::SaveText(void)
 //==========================================================================
 // モデル読み込み処理
 //==========================================================================
-HRESULT CStage::ReadXFile(void)
+HRESULT CStage::ReadXFile(const char *pTextFile)
 {
 	// リセット
 	int nNumFileAll = 0;
@@ -235,7 +250,7 @@ HRESULT CStage::ReadXFile(void)
 	FILE *pFile = NULL;
 
 	//ファイルを開く
-	pFile = fopen("data\\TEXT\\stage_info.txt", "r");
+	pFile = fopen(pTextFile, "r");
 
 	if (pFile == NULL)
 	{//ファイルが開けた場合
@@ -299,15 +314,22 @@ HRESULT CStage::ReadXFile(void)
 //==========================================================================
 // 外部テキスト読み込み処理
 //==========================================================================
-HRESULT CStage::ReadText(void)
+HRESULT CStage::ReadText(const char *pTextFile)
 {
+
+	// ファイルから読み込み
+	if (FAILED(ReadXFile(pTextFile)))
+	{// 失敗した場合
+		return E_FAIL;
+	}
+
 	char aComment[MAX_COMMENT] = {};	//コメント用
 
 	// ファイルポインタ
 	FILE *pFile = NULL;
 
 	//ファイルを開く
-	pFile = fopen("data\\TEXT\\stage_info.txt", "r");
+	pFile = fopen(pTextFile, "r");
 
 	if (pFile == NULL)
 	{//ファイルが開けた場合

@@ -30,9 +30,12 @@ public:
 
 private:
 
+	void UpdateTex(void);
 	void Collision(void);	// 当たり判定
 	bool IsHit(D3DXVECTOR3 TargetPos, float fTargetRadius);	// 角度付きの判定
 
+	int m_nCntAnim;			// アニメーションカウンター
+	int m_nPatternAnim;		// アニメーションパターンNo.
 	int m_nTexIdx;	// テクスチャのインデックス番号
 	D3DXCOLOR m_colOrigin;	// 元の色
 	float m_fSizeDest;		// 目標のサイズ

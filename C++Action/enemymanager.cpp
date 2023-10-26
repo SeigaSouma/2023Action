@@ -131,12 +131,15 @@ void CEnemyManager::Uninit(void)
 		}
 	}
 
-	for (int nCntWave = 0; nCntWave < m_nNumWave; nCntWave++)
+	if (m_pRushWaveInfo != NULL)
 	{
-		if (m_pRushWaveInfo[nCntWave].pRushInfo != NULL)
-		{// NULLじゃなかったら
-			delete[] m_pRushWaveInfo[nCntWave].pRushInfo;
-			m_pRushWaveInfo[nCntWave].pRushInfo = NULL;
+		for (int nCntWave = 0; nCntWave < m_nNumWave; nCntWave++)
+		{
+			if (m_pRushWaveInfo[nCntWave].pRushInfo != NULL)
+			{// NULLじゃなかったら
+				delete[] m_pRushWaveInfo[nCntWave].pRushInfo;
+				m_pRushWaveInfo[nCntWave].pRushInfo = NULL;
+			}
 		}
 	}
 
@@ -157,7 +160,7 @@ void CEnemyManager::Release(int nIdx)
 		m_pEnemy[nIdx] = NULL;
 	}
 
-	if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_RUSH)
+	if (CManager::GetInstance()->GetMode() == CScene::MODE_GAME && CGame::GetGameManager()->GetType() == CGameManager::SCENE_RUSH)
 	{// 敵のラッシュ中
 
 		// ラッシュ中の敵の数加算

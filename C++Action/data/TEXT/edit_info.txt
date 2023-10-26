@@ -85,18 +85,10 @@ END_SKYSET
 #==============================================================================
 FIELDSET
 	TEXTYPE = 10
-	POS = 3500 -100 600
-	ROT = 0 0 0
-	BLOCK = 12 12
-	SIZE = 2000 2000
-END_FIELDSET
-
-FIELDSET
-	TEXTYPE = 10
 	POS = 0 -50 -0
 	ROT = 0 0 0
 	BLOCK = 110 110
-	SIZE = 200 200
+	SIZE = 400 400
 END_FIELDSET
 
 

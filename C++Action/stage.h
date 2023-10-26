@@ -22,21 +22,21 @@ public:
 	CStage();
 	~CStage();
 
-	// オーバーライドされた関数
 	HRESULT Init(void);
 	void Uninit(void);
+	void Release(void);
 	void Update(void);
 	void Draw(void);
 
 	CObjectX *GetObj(int nIdx);
 	int GetNumAll(void);		// 総数取得
-	static CStage *Create(void);
+	static CStage *Create(const char *pTextFile);
 
 private:
 
 	// メンバ関数
-	HRESULT ReadXFile(void);	// もでる読み込み処理
-	HRESULT ReadText(void);		// 外部ファイル読み込み処理
+	HRESULT ReadXFile(const char *pTextFile);	// もでる読み込み処理
+	HRESULT ReadText(const char *pTextFile);		// 外部ファイル読み込み処理
 	HRESULT SaveText(void);		// 外部ファイル書き込み処理
 
 	// メンバ変数

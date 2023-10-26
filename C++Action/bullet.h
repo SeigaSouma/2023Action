@@ -11,6 +11,8 @@
 #include "main.h"
 #include "meshsphere.h"
 
+class CThunderRing;
+
 //==========================================================================
 // クラス定義
 //==========================================================================
@@ -85,6 +87,7 @@ private:
 	int m_nTexIdx;				// テクスチャのインデックス番号
 	int m_nCntEmission;	// 発生物のカウンター
 	CMeshSphere *m_pMeshSphereEffect;	// メッシュスフィアのエフェクト
+	CThunderRing *m_pEffectThunderRing;	// 雷のリングのエフェクト
 
 	//using STATE_FUNC = void(CBullet::*)();
 	typedef void(CBullet::*STATE_FUNC)(void);

@@ -5,9 +5,11 @@
 // 
 //=============================================================================
 #include "gamemanager.h"
+#include "game.h"
 #include "debugproc.h"
 #include "manager.h"
 #include "renderer.h"
+#include "instantfade.h"
 
 //==========================================================================
 // マクロ定義
@@ -88,7 +90,22 @@ void CGameManager::Uninit(void)
 //==========================================================================
 void CGameManager::Update(void)
 {
+	if (m_SceneType == SCENE_TRANSITION)
+	{// 遷移中
 
+		// 遷移なしフェードの状態取得
+		CInstantFade::STATE fadestate = CManager::GetInstance()->GetInstantFade()->GetState();
+
+		if (fadestate == CInstantFade::STATE_FADECOMPLETION)
+		{// 完了した瞬間
+
+			// リセット処理
+			CGame::Reset();
+
+			// シーンのリセット
+			CManager::GetInstance()->GetScene()->ResetScene();
+		}
+	}
 	
 }
 

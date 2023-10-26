@@ -20,9 +20,13 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
-#define TEXTURE		"data\\TEXTURE\\field002.png"
-#define POS_IMPACTWAVE	(5000.0f)
-#define POS_IMPACTWAVE_Y	(3000.0f)
+#define TEXTURE			"data\\TEXTURE\\anim_slash.png"
+#define ANIM_SPEED		(1)								// 読み込み間隔
+#define MAX_PATTERN_U	(28)							// Uの分割数
+#define MAX_PATTERN_V	(1)								// Vの分割数
+#define MAX_PATTERN		(MAX_PATTERN_U)					// アニメーションパターンの最大数
+#define MOVE_U			(1.0f / (float)MAX_PATTERN_U)	// U座標移動量
+#define MOVE_V			(1.0f / (float)MAX_PATTERN_V)	// V座標移動量
 #define WIDTH	(32)
 
 //==========================================================================
@@ -34,6 +38,8 @@
 //==========================================================================
 CSlash::CSlash(int nPriority) : CImpactWave(nPriority)
 {
+	m_nCntAnim = 0;			// アニメーションカウンター
+	m_nPatternAnim = 0;		// アニメーションパターンNo.
 	m_nTexIdx = 0;										// テクスチャのインデックス番号
 	m_colOrigin = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// 元の色
 	m_fSizeDest = 0.0f;		// 目標のサイズ
@@ -79,13 +85,13 @@ CSlash *CSlash::Create(D3DXVECTOR3 pos, D3DXVECTOR3 Parentrot, D3DXVECTOR3 rot, 
 			pObjMeshCylinder->SetLife(nLife);				// 寿命
 			pObjMeshCylinder->SetMaxLife(nLife);			// 最大寿命
 			pObjMeshCylinder->SetMoveSize(fAddSizeValue);	// 広がる速度
-			pObjMeshCylinder->SetTexDivision(4);			// テクスチャ分割数設定
+			pObjMeshCylinder->SetTexDivision(1);			// テクスチャ分割数設定
 			pObjMeshCylinder->SetIsAddBlend(bAddBlend);		// 加算合成するか
 			pObjMeshCylinder->m_fSizeDest = fWidth + fCenterDistance + (fAddSizeValue * nLife);
 			pObjMeshCylinder->SetMoveAngle(angle);			// 向き
 
 			// テクスチャの割り当て
-			pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(GetFileName(nTexType));
+			pObjMeshCylinder->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 
 			// テクスチャの割り当て
 			pObjMeshCylinder->BindTexture(pObjMeshCylinder->m_nTexIdx);
@@ -234,11 +240,20 @@ void CSlash::Update(void)
 	// 外側の幅
 	SetOutWidth(fOutWidth);
 
-	// 更新処理
-	CImpactWave::Update();
+	// 色取得
+	D3DXCOLOR col = GetColor();
+
+	// 不透明度更新
+	col.a = m_colOrigin.a * (1.0f - (float)m_nPatternAnim / (float)(MAX_PATTERN_U + 1));
+
+	// 色設定
+	SetColor(col);
 
 	// 外側の幅
 	SetOutWidth(fOutWidth);
+
+	// 頂点更新
+	CImpactWave::SetVtx();
 
 	if (m_pObj3D != NULL)
 	{
@@ -248,6 +263,9 @@ void CSlash::Update(void)
 
 	// 当たり判定
 	Collision();
+
+	// テクスチャ座標更新
+	UpdateTex();
 }
 
 //==========================================================================
@@ -379,10 +397,29 @@ void  CSlash::Collision(void)
 
 		// 敵の情報取得
 		D3DXVECTOR3 EnemyPosition = ppEnemy[nCntEnemy]->GetPosition();
+		D3DXVECTOR3 EnemyRotation = ppEnemy[nCntEnemy]->GetRotation();
 		float fEnemyRadius = ppEnemy[nCntEnemy]->GetRadius();
+		CEnemy::STATE EnemyState = (CEnemy::STATE)ppEnemy[nCntEnemy]->GetState();
 
 		if (IsHit(EnemyPosition, fEnemyRadius) == true)
 		{// 当たっていたら
+
+			if (EnemyState != CEnemy::STATE_DMG && EnemyState != CEnemy::STATE_DEAD)
+			{
+				CImpactWave *pImpactWave = CImpactWave::Create
+				(
+					D3DXVECTOR3(EnemyPosition.x, EnemyPosition.y + 50.0f, EnemyPosition.z),	// 位置
+					D3DXVECTOR3((float)(Random(-31, 31) * 0.1f), EnemyRotation.y, 0.0f),			// 向き
+					D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.4f),			// 色
+					60.0f,										// 幅
+					0.0f,										// 高さ
+					10,											// 寿命
+					15.0f,										// 幅の移動量
+					CImpactWave::TYPE_PURPLE4,				// テクスチャタイプ
+					true										// 加算合成するか
+				);
+				pImpactWave->SetEnableHitstopMove();
+			}
 
 			// ヒット処理
 			ppEnemy[nCntEnemy]->Hit(mylib_const::DMG_SLASH);
@@ -532,4 +569,72 @@ void CSlash::Draw(void)
 	// カリングのデフォルト
 	pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 
+}
+
+//==========================================================================
+// テクスチャ座標更新
+//==========================================================================
+void CSlash::UpdateTex(void)
+{
+	D3DXVECTOR2 *pVtxTex = GetVtxTex();	// テクスチャ座標取得
+
+	if (pVtxTex== NULL)
+	{
+		return;
+	}
+
+	// テクスチャ分割数
+	int nTexDivision = GetTexDivision();
+
+	// 分割数取得
+	int nHeightBlock = GetHeightBlock();
+	int nWidthBlock = GetWidthBlock();
+
+
+
+	// カウントを更新
+	m_nCntAnim = (m_nCntAnim + 1) % ANIM_SPEED;
+
+	// パターン更新
+	if ((m_nCntAnim % ANIM_SPEED) == 0)
+	{
+		// パターンNo.を更新
+		m_nPatternAnim = (m_nPatternAnim + 1) % MAX_PATTERN;
+
+		if (m_nPatternAnim == 0)
+		{// パターンが一周した時
+
+			// オブジェクト破棄
+			Uninit();
+			return;
+		}
+	}
+
+
+
+	// 頂点情報の設定
+	for (int nCntHeight = 0; nCntHeight < nHeightBlock + 1; nCntHeight++)
+	{// 縦の頂点数分繰り返す
+
+		for (int nCntWidth = 0; nCntWidth < nWidthBlock + 1; nCntWidth++)
+		{// 横の頂点数分繰り返す
+
+			float fTex = m_nPatternAnim * MOVE_U;
+			float fTexDest = (m_nPatternAnim + 1) * MOVE_U;
+
+			if (nCntHeight == 1)
+			{
+				fTex = (m_nPatternAnim + 1) * MOVE_U;
+			}
+
+			// スタート + 
+			float f = fTex + nCntWidth * (MOVE_U / (float)nWidthBlock);
+
+			pVtxTex[nCntWidth + (nCntHeight * (nWidthBlock + 1))] = D3DXVECTOR2
+			(
+				f,
+				nCntHeight * (1.0f / (float)(nHeightBlock))
+			);
+		}
+	}
 }

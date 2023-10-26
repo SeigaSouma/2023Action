@@ -40,6 +40,7 @@ const char *CImpactWave::m_apFilename[] =	//ファイル読み込み
 	"data\\TEXTURE\\GRADATION\\giza_02.png",
 	"data\\TEXTURE\\GRADATION\\giza_03.png",
 	"data\\TEXTURE\\GRADATION\\giza_06.png",
+	"data\\TEXTURE\\GRADATION\\giza_05.png",
 };
 
 //==========================================================================
@@ -141,6 +142,42 @@ HRESULT CImpactWave::Init(void)
 	if (FAILED(hr))
 	{// 失敗していたら
 		return E_FAIL;
+	}
+
+	D3DXVECTOR3 *pVtxPos = GetVtxPos();	// 頂点座標取得
+	D3DXVECTOR2 *pVtxTex = GetVtxTex();	// テクスチャ座標取得
+
+	// 分割数取得
+	int nHeightBlock = GetHeightBlock();
+	int nWidthBlock = GetWidthBlock();
+
+	// 頂点情報の設定
+	for (int nCntHeight = 0; nCntHeight < nHeightBlock + 1; nCntHeight++)
+	{// 縦の頂点数分繰り返す
+
+		for (int nCntWidth = 0; nCntWidth < nWidthBlock + 1; nCntWidth++)
+		{// 横の頂点数分繰り返す
+
+			float fLength = (m_fOutWidth - nCntHeight * m_fInWidth);
+			if (fLength <= 0.0f)
+			{
+				fLength = 0.0f;
+			}
+
+			// 頂点座標の設定
+			pVtxPos[nCntWidth + (nCntHeight * (nWidthBlock + 1))] = D3DXVECTOR3
+			(
+				sinf(nCntWidth % nWidthBlock * m_fRotWidth) * fLength,
+				nCntHeight * m_fHeight,
+				cosf(nCntWidth % nWidthBlock * m_fRotWidth) * fLength
+			);
+
+			pVtxTex[nCntWidth + (nCntHeight * (nWidthBlock + 1))] = D3DXVECTOR2
+			(
+				nCntWidth * (1.0f / (float)(nWidthBlock / m_nTexDivision)),
+				nCntHeight * (1.0f / (float)(nHeightBlock))
+			);
+		}
 	}
 
 	return S_OK;
@@ -265,12 +302,6 @@ void CImpactWave::SetVtx(void)
 				sinf(nCntWidth % nWidthBlock * m_fRotWidth) * fLength,
 				nCntHeight * m_fHeight,
 				cosf(nCntWidth % nWidthBlock * m_fRotWidth) * fLength
-			);
-
-			pVtxTex[nCntWidth + (nCntHeight * (nWidthBlock + 1))] = D3DXVECTOR2
-			(
-				nCntWidth * (1.0f / (float)(nWidthBlock / m_nTexDivision)),
-				nCntHeight * (1.0f / (float)(nHeightBlock))
 			);
 		}
 	}

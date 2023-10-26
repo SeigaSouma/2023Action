@@ -33,6 +33,8 @@ namespace mapdate
 
 	int nNumModelAll = 0;	// モデルの総数
 	int nNumTexAll = 0;		// テクスチャの総数
+	int nNumObjXAll = 0;		// オブジェクトXの総数
+	CObjectX *pObjX[mylib_const::MAX_OBJ];		// オブジェクトX
 }
 
 //==========================================================================
@@ -45,13 +47,16 @@ mapdate::SMap g_Map;
 //==========================================================================
 // 生成処理
 //==========================================================================
-HRESULT map::Create(void)
+HRESULT map::Create(const char *pTextFile)
 {
 	// 総数
 	mapdate::nNumModelAll = 0;
+	mapdate::nNumObjXAll = 0;
+
+	memset(&mapdate::pObjX[0], NULL, sizeof(mapdate::pObjX));
 
 	// 外部テキスト読み込み処理
-	HRESULT hr = ReadText();
+	HRESULT hr = ReadText(pTextFile);
 
 	if (FAILED(hr))
 	{// 失敗していたら
@@ -59,6 +64,21 @@ HRESULT map::Create(void)
 	}
 
 	return S_OK;
+}
+
+//==========================================================================
+// 解放処理
+//==========================================================================
+void map::Release(void)
+{
+	for (int nCntObj = 0; nCntObj < mylib_const::MAX_OBJ; nCntObj++)
+	{
+		if (mapdate::pObjX[nCntObj] != NULL)
+		{
+			mapdate::pObjX[nCntObj]->Uninit();
+			mapdate::pObjX[nCntObj] = NULL;
+		}
+	}
 }
 
 //==========================================================================
@@ -530,14 +550,11 @@ HRESULT map::ReadXFile(void)
 //==========================================================================
 // 外部テキスト読み込み処理
 //==========================================================================
-HRESULT map::ReadText(void)
+HRESULT map::ReadText(const char *pTextFile)
 {
 	char aComment[MAX_COMMENT] = {};	//コメント用
 	int nFileNum = 0;					// ファイルの数
 	int nCntTexture = 0;				// テクスチャ読み込みカウント
-
-	// オブジェクトXのオブジェクト
-	CObjectX *pObjectX = NULL;
 
 	// メッシュオブジェクトのオブジェクト
 	CObject3DMesh *pObjMesh = NULL;
@@ -557,7 +574,7 @@ HRESULT map::ReadText(void)
 		break;
 
 	case CScene::MODE_GAME:
-		pFile = fopen("data\\TEXT\\edit_info.txt", "r");
+		pFile = fopen(pTextFile, "r");
 		break;
 
 	case CScene::MODE_RESULT:
@@ -769,21 +786,22 @@ HRESULT map::ReadText(void)
 			{// 影を使用する場合
 
 				// タイプの物を生成
-				pObjectX = pObjectX->Create(&ModelFile[g_Map.nType][0], g_Map.pos, g_Map.rot, true);
+				mapdate::pObjX[mapdate::nNumObjXAll] = CObjectX::Create(&ModelFile[g_Map.nType][0], g_Map.pos, g_Map.rot, true);
 			}
 			else
 			{
 				// タイプの物を生成
-				pObjectX = pObjectX->Create(&ModelFile[g_Map.nType][0], g_Map.pos, g_Map.rot, false);
+				mapdate::pObjX[mapdate::nNumObjXAll] = CObjectX::Create(&ModelFile[g_Map.nType][0], g_Map.pos, g_Map.rot, false);
 			}
 
-			if (pObjectX == NULL)
+			if (mapdate::pObjX[mapdate::nNumObjXAll] == NULL)
 			{// 失敗していたら
 				return E_FAIL;
 			}
 
 			// 種類設定
-			pObjectX->SetType(CObject::TYPE_XFILE);
+			mapdate::pObjX[mapdate::nNumObjXAll]->SetType(CObject::TYPE_XFILE);
+			mapdate::nNumObjXAll++;
 		}
 
 		if (strcmp(&aComment[0], "END_SCRIPT") == 0)

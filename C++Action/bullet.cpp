@@ -19,6 +19,7 @@
 #include "bulletmanager.h"
 #include "player.h"
 #include "impactwave.h"
+#include "effect_thunderring.h"
 
 //==========================================================================
 // マクロ定義
@@ -38,8 +39,8 @@
 //==========================================================================
 const char *CBullet::m_apTextureFile[TYPE_MAX] =	// テクスチャのファイル
 {
-	"data\\TEXTURE\\sunder_02.png",
-	"data\\TEXTURE\\sunder_02.png",
+	"data\\TEXTURE\\sunder_03.png",
+	"data\\TEXTURE\\sunder_03.png",
 };
 int CBullet::m_nNumAll = 0;		// 弾の総数
 
@@ -71,7 +72,8 @@ CBullet::CBullet(int nPriority) : CMeshSphere(nPriority), m_nLifeMax(1)
 	m_nLife = 0;
 	m_nIdxBulletManager = 0;			// 弾マネージャのインデックス番号
 	m_nCntEmission = 0;	// 発生物のカウンター
-	m_pMeshSphereEffect = NULL;	// メッシュスフィアのエフェクト
+	m_pMeshSphereEffect = NULL;		// メッシュスフィアのエフェクト
+	m_pEffectThunderRing = NULL;	// 雷のリングのエフェクト
 
 	// テクスチャデータの配列分繰り返す
 	m_nTexIdx = 0;		// テクスチャのインデックス番号
@@ -187,7 +189,12 @@ void CBullet::Uninit(void)
 		m_pMeshSphereEffect = NULL;
 	}
 
-								// 終了処理
+	if (m_pEffectThunderRing != NULL)
+	{// 雷のリングのエフェクト
+		m_pEffectThunderRing = NULL;
+	}
+
+	// 終了処理
 	CMeshSphere::Uninit();
 
 	// 総数減算
@@ -217,26 +224,26 @@ void CBullet::Update(void)
 	{
 		m_nCntEmission = (m_nCntEmission + 1) % 100;	// 発生物のカウンター
 
-		if (m_nCntEmission % 3 == 0)
-		{
-			// 位置取得
-			D3DXVECTOR3 pos = GetPosition();
+		//if (m_nCntEmission % 3 == 0)
+		//{
+		//	// 位置取得
+		//	D3DXVECTOR3 pos = GetPosition();
 
-			// 移動量取得
-			D3DXVECTOR3 move = GetMove();
+		//	// 移動量取得
+		//	D3DXVECTOR3 move = GetMove();
 
-			CEffect3D *pEffect = CEffect3D::Create(
-				pos,
-				-move,
-				D3DXCOLOR(0.2f, 0.2f, 0.8f, 0.8f),
-				GetRadius() * 1.5f,
-				6,
-				CEffect3D::MOVEEFFECT_SUB,
-				CEffect3D::TYPE_THUNDER);
+		//	CEffect3D *pEffect = CEffect3D::Create(
+		//		pos,
+		//		-move,
+		//		D3DXCOLOR(0.2f, 0.2f, 0.8f, 0.8f),
+		//		GetRadius() * 1.5f,
+		//		6,
+		//		CEffect3D::MOVEEFFECT_SUB,
+		//		CEffect3D::TYPE_THUNDER);
 
-			// セットアップ位置設定
-			pEffect->SetUp(D3DXVECTOR3(0.0f, 0.0f, 0.0f), CObject::GetObject(), SetEffectParent(pEffect));
-		}
+		//	// セットアップ位置設定
+		//	pEffect->SetUp(D3DXVECTOR3(0.0f, 0.0f, 0.0f), CObject::GetObject(), SetEffectParent(pEffect));
+		//}
 
 		if (m_nCntEmission == 10 && m_pMeshSphereEffect != NULL)
 		{
@@ -267,16 +274,23 @@ void CBullet::Update(void)
 			m_pMeshSphereEffect->SetWidthLen(fSize);
 			m_pMeshSphereEffect->SetHeightLen(fSize);
 			m_pMeshSphereEffect->SetSizeDest(fSize + 100.0f);
+
+			if (m_pEffectThunderRing != NULL)
+			{// 雷のリングのエフェクト
+				m_pEffectThunderRing->Uninit();
+				m_pEffectThunderRing = NULL;
+			}
+
+			// 雷のリング生成
+			m_pEffectThunderRing = CThunderRing::Create(GetPosition(), D3DXVECTOR2(300.0f, 300.0f));
+
+			// 自動で消えないようにする
+			m_pEffectThunderRing->SetDesableAutoDeath();
 		}
 	}
 	else if (m_type == TYPE_PLAYER)
 	{
-		/*if (m_pMeshSphereEffect != NULL)
-		{
-			m_pMeshSphereEffect->Uninit();
-			m_pMeshSphereEffect = NULL;
-		}*/
-
+		// 半径
 		float fSize = GetRadius();
 
 		if (m_pMeshSphereEffect == NULL)
@@ -290,11 +304,37 @@ void CBullet::Update(void)
 			m_pMeshSphereEffect->SetHeightLen(fSize);
 			m_pMeshSphereEffect->SetSizeDest(fSize + 100.0f);
 		}
+
+		if (m_pEffectThunderRing == NULL)
+		{
+			// 雷のリング生成
+			m_pEffectThunderRing = CThunderRing::Create(GetPosition(), D3DXVECTOR2(400.0f, 400.0f));
+
+			// 色設定
+			m_pEffectThunderRing->SetColor(D3DXCOLOR(1.0f, 0.3f, 1.0f, 1.0f));
+
+			// 自動で消えないようにする
+			m_pEffectThunderRing->SetDesableAutoDeath();
+		}
 	}
 
 	if (m_pMeshSphereEffect != NULL)
 	{
 		m_pMeshSphereEffect->SetPosition(GetPosition());
+	}
+
+	if (m_pEffectThunderRing != NULL)
+	{// 雷のリングのエフェクト
+
+		if (m_pEffectThunderRing->IsFinish() == true)
+		{
+			m_pEffectThunderRing->Uninit();
+			m_pEffectThunderRing = NULL;
+		}
+		else
+		{
+			m_pEffectThunderRing->SetPosition(GetPosition());
+		}
 	}
 
 	// 寿命減算
@@ -311,6 +351,12 @@ void CBullet::Update(void)
 		{
 			m_pMeshSphereEffect->Uninit();
 			m_pMeshSphereEffect = NULL;
+		}
+
+		if (m_pEffectThunderRing != NULL)
+		{// 雷のリングのエフェクト
+			m_pEffectThunderRing->Uninit();
+			m_pEffectThunderRing = NULL;
 		}
 		Uninit();
 		return;
@@ -449,6 +495,12 @@ void CBullet::StateDamage(void)
 			m_pMeshSphereEffect->Uninit();
 			m_pMeshSphereEffect = NULL;
 		}
+
+		if (m_pEffectThunderRing != NULL)
+		{// 雷のリングのエフェクト
+			m_pEffectThunderRing->Uninit();
+			m_pEffectThunderRing = NULL;
+		}
 	}
 }
 
@@ -483,6 +535,12 @@ void CBullet::CollisionPlayer(void)
 		{
 			m_pMeshSphereEffect->Uninit();
 			m_pMeshSphereEffect = NULL;
+		}
+
+		if (m_pEffectThunderRing != NULL)
+		{// 雷のリングのエフェクト
+			m_pEffectThunderRing->Uninit();
+			m_pEffectThunderRing = NULL;
 		}
 		// 終了処理
 		Uninit();
@@ -541,6 +599,12 @@ void CBullet::CollisionEnemy(void)
 			m_pMeshSphereEffect->Uninit();
 			m_pMeshSphereEffect = NULL;
 		}
+
+		if (m_pEffectThunderRing != NULL)
+		{// 雷のリングのエフェクト
+			m_pEffectThunderRing->Uninit();
+			m_pEffectThunderRing = NULL;
+		}
 		Uninit();
 		return;
 	}
@@ -568,18 +632,8 @@ void CBullet::Draw(void)
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
 	pDevice->SetRenderState(D3DRS_ALPHAREF, 0);
 
-	// αブレンディングを加算合成に設定
-	/*pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);*/
-
 	// ビルボードの描画
 	CMeshSphere::Draw();
-
-	// αブレンディングを元に戻す
-	/*pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);*/
 
 	// アルファテストを無効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);

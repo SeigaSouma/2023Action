@@ -50,6 +50,7 @@ public:
 	virtual void Update(void);
 	virtual void Draw(void);
 
+	void ResetScene(void);	// シーンのリセット
 	static CScene *Create(MODE mode);
 	static CXLoad *GetXLoad(void);				// Xファイルのデータ取得
 	static CElevation *GetElevation(void);	// オブジェクト3Dの取得

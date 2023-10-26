@@ -173,6 +173,7 @@
     <ClCompile Include="edit_controlpoint.cpp" />
     <ClCompile Include="edit_enemybase.cpp" />
     <ClCompile Include="effect_slashhit.cpp" />
+    <ClCompile Include="effect_thunderring.cpp" />
     <ClCompile Include="elevation.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="enemybase.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="edit_controlpoint.h" />
     <ClInclude Include="edit_enemybase.h" />
     <ClInclude Include="effect_slashhit.h" />
+    <ClInclude Include="effect_thunderring.h" />
     <ClInclude Include="elevation.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="enemybase.h" />

@@ -94,7 +94,7 @@ HRESULT CGame::Init(void)
 	m_pBulletManager = CBulletManager::Create();
 
 	// ステージ
-	m_pStage = CStage::Create();
+	m_pStage = CStage::Create("data\\TEXT\\stage_info.txt");
 
 
 	// スコアの生成処理
@@ -205,6 +205,13 @@ void CGame::Uninit(void)
 //==========================================================================
 void CGame::Update(void)
 {
+	// ゲームマネージャ
+	if (m_pGameManager != NULL)
+	{
+		// 更新処理
+		m_pGameManager->Update();
+	}
+
 	CManager::GetInstance()->GetDebugProc()->Print(
 		"現在のモード：【ゲーム】\n"
 		"切り替え：【 F 】\n\n");
@@ -392,7 +399,18 @@ CGameManager *CGame::GetGameManager(void)
 //==========================================================================
 void CGame::Reset(void)
 {
+	// ステージの破棄
+	if (m_pStage != NULL)
+	{// メモリの確保が出来ていたら
 
+		// 終了処理
+		m_pStage->Release();
+		delete m_pStage;
+		m_pStage = NULL;
+	}
+
+	// ステージ
+	m_pStage = CStage::Create("data\\TEXT\\bossstage_info.txt");
 }
 
 //==========================================================================
