@@ -182,14 +182,6 @@ HRESULT CEnemy::Init(void)
 	// 種類の設定
 	SetType(TYPE_ENEMY);
 
-	// 体力取得
-	int nLife = GetLife();
-
-	//if (m_pHPGauge == NULL)
-	//{// NULLだったら
-	//	m_pHPGauge = NULL;
-	//}
-
 	// 向き設定
 	SetRotation(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 
@@ -422,6 +414,7 @@ void CEnemy::Update(void)
 
 	// 当たり判定
 	Collision();
+	CollisionPlayer();
 
 	if (m_ActType == CEnemy::ACTTYPE_FIXED)
 	{
@@ -500,7 +493,7 @@ void CEnemy::Collision(void)
 	D3DXVECTOR3 rot = GetRotation();
 
 	// 重力処理
-	if (m_type != TYPE_FLY)
+	if (m_type != TYPE_FLY && m_type != TYPE_PAPION)
 	{
 		move.y -= mylib_const::GRAVITY;
 	}
@@ -581,6 +574,57 @@ void CEnemy::Collision(void)
 
 	// 移動量設定
 	SetMove(move);
+}
+
+//==========================================================================
+// プレイヤーとの当たり判定
+//==========================================================================
+void CEnemy::CollisionPlayer(void)
+{
+	// プレイヤーの取得
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	if (pPlayer == NULL)
+	{
+		return;
+	}
+
+	// 自分の情報取得
+	D3DXVECTOR3 pos = GetPosition();
+	float fRadius = GetRadius();
+
+	// プレイヤー情報取得
+	D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
+	float PlayerRadius = pPlayer->GetRadius();
+	CPlayer::STATE PlayerState = (CPlayer::STATE)pPlayer->GetState();
+
+	// 球の判定
+	if (SphereRange(pos, PlayerPos, fRadius, PlayerRadius) &&
+		PlayerState != CPlayer::STATE_DEAD &&
+		PlayerState != CPlayer::STATE_DMG &&
+		PlayerState != CPlayer::STATE_KNOCKBACK &&
+		PlayerState != CPlayer::STATE_INVINCIBLE)
+	{
+		// マップマネージャの取得
+		CMapManager *pMapManager = CGame::GetMapManager();
+		if (pMapManager == NULL)
+		{// NULLだったら
+			return;
+		}
+
+		// ヒット処理
+		pPlayer->Hit(1);
+		ANGLE setAngle = pMapManager->GetTargetAngle(GetMapIndex(), pPlayer->GetMapIndex(), GetMapMoveValue(), pPlayer->GetMapMoveValue());
+
+		int nAngle = 1;
+		if (setAngle == ANGLE_LEFT)
+		{
+			nAngle = -1;
+		}
+
+		// 吹っ飛び移動量設定
+		pPlayer->SetMove(D3DXVECTOR3(8.0f * nAngle, 0.0f, 0.0f));
+	}
+
 }
 
 //==========================================================================

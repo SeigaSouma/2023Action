@@ -20,7 +20,7 @@
 class CMotion;
 class CShadow;
 class CTargetPoint;
-class CHP_Gauge;
+class CHP_GaugePlayer;
 
 //==========================================================================
 // クラス定義
@@ -131,7 +131,7 @@ private:
 	ANGLE m_OldStickAngle;		// 前回のスティックの向き
 	CShadow *m_pShadow;			// 影の情報
 	CTargetPoint *m_pTargetP;	// 目標の地点
-	CHP_Gauge *m_pHPGauge;		// HPゲージの情報
+	CHP_GaugePlayer *m_pHPGauge;	// HPゲージの情報
 };
 
 

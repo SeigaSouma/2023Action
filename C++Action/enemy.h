@@ -74,9 +74,9 @@ public:
 	int GetMapIndexOrigin(void);				// 元のマップインデックス番号の取得
 	void SetMapMoveValueOrigin(float fValue);	// 元のマップポイント間の移動量設定
 	float GetMapMoveValueOrigin(void);			// 元のマップポイント間の移動量設定
-
 	void SetSpawnPosition(D3DXVECTOR3 pos);	// スポーン地点設定
 	D3DXVECTOR3 GetSpawnPosition(void);	// スポーン地点取得
+
 	HRESULT RoadText(const char *pFileName);
 	virtual void Kill(void);
 	void SetParent(CEnemy *pParent);		// 親のポインタ設定
@@ -184,6 +184,7 @@ private:
 	virtual void UpdateStateByType(void);	// 種類別状態更新処理
 	virtual void UpdateByType(void);		// 種類別更新処理
 	void Collision(void);					// 当たり判定
+	virtual void CollisionPlayer(void);		// プレイヤーとの当たり判定
 	virtual void MotionSet(void) = 0;		// モーションの設定
 	void RegistrChild(CEnemy *pChild);
 	void ResetChild(CEnemy *pChild);

@@ -38,6 +38,7 @@
 #include "objectX.h"
 #include "gamemanager.h"
 #include "instantfade.h"
+#include "hp_gauge_player.h"
 
 // 派生先
 #include "tutorialplayer.h"
@@ -171,11 +172,11 @@ HRESULT CPlayer::Init(void)
 	// モーションの設定
 	m_pMotion->SetModel(pObjChar->GetModel(), pObjChar->GetNumModel(), CObjectChara::GetObjectChara());
 
-	// 体力ゲージ
-	//m_pHPGauge = CHP_Gauge::Create(120.0f, m_nLife);
-
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
+
+	// 体力ゲージ
+	m_pHPGauge = CHP_GaugePlayer::Create(D3DXVECTOR3(250.0f, 600.0f, 0.0f), GetLifeOrigin());
 
 	// 影の生成
 	m_pShadow = CShadow::Create(pos, 50.0f);
@@ -203,7 +204,6 @@ void CPlayer::Uninit(void)
 	// HPゲージを消す
 	if (m_pHPGauge != NULL)
 	{
-		//m_pHPGauge->Uninit();
 		m_pHPGauge = NULL;
 	}
 
@@ -251,7 +251,7 @@ void CPlayer::Kill(void)
 	// HPゲージを消す
 	if (m_pHPGauge != NULL)
 	{
-		m_pHPGauge->Uninit();
+		m_pHPGauge->Kill();
 		m_pHPGauge = NULL;
 	}
 
@@ -476,7 +476,7 @@ void CPlayer::Update(void)
 	// HPゲージの位置更新
 	if (m_pHPGauge != NULL)
 	{
-		m_pHPGauge->UpdatePosition(GetPosition(), GetLife());
+		m_pHPGauge->SetLife(GetLife());
 	}
 
 	// デバッグ表示
@@ -484,7 +484,8 @@ void CPlayer::Update(void)
 		"------------------[プレイヤーの操作]------------------\n"
 		"位置：【X：%f, Y：%f, Z：%f】 【W / A / S / D】\n"
 		"向き：【X：%f, Y：%f, Z：%f】 【Z / C】\n"
-		"移動量：【X：%f, Y：%f, Z：%f】\n", pos.x, pos.y, pos.z, rot.x, rot.y, rot.y, move.x, move.y, move.z);
+		"移動量：【X：%f, Y：%f, Z：%f】\n"
+		"体力：【%d】", pos.x, pos.y, pos.z, rot.x, rot.y, rot.y, move.x, move.y, move.z, GetLife());
 }
 
 //==========================================================================
@@ -1669,6 +1670,7 @@ void CPlayer::Damage(void)
 
 	// 位置更新
 	pos.y = (-0.4f * (float)(m_nCntState * m_nCntState) + m_KnokBackMove.y * (float)m_nCntState) + m_posKnokBack.y;
+	pos.x += move.x;
 	/*pos.x += move.x;
 	pos.z += move.z;*/
 
@@ -1766,6 +1768,7 @@ void CPlayer::KnockBack(void)
 
 	// 位置更新
 	pos.y = (-0.4f * (float)(m_nCntState * m_nCntState) + m_KnokBackMove.y * (float)m_nCntState) + m_posKnokBack.y;
+	pos.x += move.x;
 	/*pos.x += move.x;
 	pos.z += move.z;*/
 
@@ -1828,7 +1831,7 @@ void CPlayer::KnockBack(void)
 void CPlayer::Draw(void)
 {
 #if _DEBUG
-	CObjectChara::Draw();
+	CObjectChara::Draw(m_mMatcol);
 #else
 	CObjectChara::Draw();
 #endif

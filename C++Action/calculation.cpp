@@ -229,8 +229,9 @@ float GetPosLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2)
 //==================================================================================
 bool CircleRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2)
 {
-	float fLength = (pos1.x - pos2.x) * (pos1.x - pos2.x)
-		+ (pos1.z - pos2.z) * (pos1.z - pos2.z);
+	float fLength = 
+		(pos1.x - pos2.x) * (pos1.x - pos2.x) +
+		(pos1.z - pos2.z) * (pos1.z - pos2.z);
 
 	if (fLength <= (fRadius1 + fRadius2) * (fRadius1 + fRadius2))
 	{// ‰~‚Ì’†‚É“ü‚Á‚½‚ç
@@ -247,8 +248,10 @@ bool CircleRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadi
 //==================================================================================
 bool SphereRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2)
 {
-	float fLength = (pos1.x - pos2.x) * (pos1.x - pos2.x)
-		+ (pos1.y - pos2.y) * (pos1.y - pos2.y) + (pos1.z - pos2.z) * (pos1.z - pos2.z);
+	float fLength = 
+		(pos1.x - pos2.x) * (pos1.x - pos2.x) +
+		(pos1.y - pos2.y) * (pos1.y - pos2.y) +
+		(pos1.z - pos2.z) * (pos1.z - pos2.z);
 
 	if (fLength <= (fRadius1 + fRadius2) * (fRadius1 + fRadius2))
 	{// ‰~‚Ì’†‚É“ü‚Á‚½‚ç
