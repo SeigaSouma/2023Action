@@ -56,6 +56,15 @@ CSlash::~CSlash()
 }
 
 //==========================================================================
+// テクスチャ読み込み
+//==========================================================================
+void CSlash::LoadTexture(void)
+{
+	// テクスチャの読み込み
+	CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
+}
+
+//==========================================================================
 // 生成処理
 //==========================================================================
 CSlash *CSlash::Create(D3DXVECTOR3 pos, D3DXVECTOR3 Parentrot, D3DXVECTOR3 rot, D3DXCOLOR col, float fWidth, float fCenterDistance, int nLife, float fAddSizeValue, int nTexType, bool bAddBlend, ANGLE angle)
@@ -298,7 +307,7 @@ void  CSlash::Collision(void)
 		D3DXVECTOR3 BulletMove = ppBullet[nCntBullet]->GetMove();
 
 		// 弾との判定
-		float fBulletRadius = ppBullet[nCntBullet]->GetRadius();
+		float fBulletRadius = ppBullet[nCntBullet]->GetWidthLen();
 
 		if (ppBullet[nCntBullet]->GetState() == CBullet::STATE_NONE &&
 			ppBullet[nCntBullet]->GetType() == CBullet::TYPE_ENEMY &&

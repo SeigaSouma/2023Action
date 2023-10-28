@@ -26,6 +26,7 @@ public:
 	void Update(void);
 	void Draw(void);
 
+	static void LoadTexture(void);	// テクスチャ読み込み
 	static CSlash *Create(D3DXVECTOR3 pos, D3DXVECTOR3 Parentrot, D3DXVECTOR3 rot, D3DXCOLOR col, float fWidth, float fCenterDistance, int nLife, float fAddSizeValue, int nTexType, bool bAddBlend, ANGLE angle);
 
 private:

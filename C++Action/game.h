@@ -16,7 +16,6 @@
 //==========================================================================
 class CPlayer;
 class CScore;
-class CTimer;
 class CPowerGauge;
 class CEditControlPoint;
 class CBulletManager;
@@ -65,7 +64,6 @@ public:
 	static void Reset(void);
 	static EEditType GetEditType(void) { return m_EditType; }
 	static CScore *GetScore(void);
-	static CTimer *GetTimer(void);
 	static CPowerGauge *GetPowerGauge(void);
 	static CEditControlPoint *GetEditControlPoint(void);
 	static CEditEnemyBase *GetEditEnemyBase(void);
@@ -87,7 +85,6 @@ private:
 
 	// メンバ変数
 	static CScore *m_pScore;					// スコアのオブジェクト
-	static CTimer *m_pTimer;					// タイマーのオブジェクト
 	static CPowerGauge *m_pPowerGauge;			// パワーゲージのオブジェクト
 	static CEditControlPoint *m_pEditControlPoint;	// 制御点エディターのオブジェクト
 	static CBulletManager *m_pBulletManager;		// 弾マネージャのオブジェクト

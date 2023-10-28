@@ -41,6 +41,7 @@ const char *CImpactWave::m_apFilename[] =	//ÉtÉ@ÉCÉãì«Ç›çûÇ›
 	"data\\TEXTURE\\GRADATION\\giza_03.png",
 	"data\\TEXTURE\\GRADATION\\giza_06.png",
 	"data\\TEXTURE\\GRADATION\\giza_05.png",
+	"data\\TEXTURE\\GRADATION\\wave_01.png",
 };
 
 //==========================================================================

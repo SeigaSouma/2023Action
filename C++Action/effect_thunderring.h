@@ -19,7 +19,7 @@ class CThunderRing : public CObjectBillboard
 {
 public:
 
-	CThunderRing(int nPriority = 7);
+	CThunderRing(int nPriority = 8);
 	~CThunderRing();
 
 	// オーバーライドされた関数
@@ -33,6 +33,7 @@ public:
 	bool IsFinish(void) { return m_bFinish; }					// 終了の判定
 	static int GetNumAll(void);
 	static CThunderRing *Create(const D3DXVECTOR3 pos, const D3DXVECTOR2 size);	// 生成処理
+	static void LoadTexture(void);	// テクスチャ読み込み
 private:
 
 	// メンバ変数

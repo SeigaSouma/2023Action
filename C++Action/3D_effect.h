@@ -50,6 +50,7 @@ public:
 
 	static CEffect3D *Create(void);
 	static CEffect3D *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3DXCOLOR col, const float fRadius, const int nLife, const int moveType, const TYPE type, const float fAddSizeValue = 0.0f);
+	static void LoadTexture(void);	// テクスチャ読み込み
 
 	//  オーバーライドされた関数
 	HRESULT Init(void);

@@ -16,7 +16,6 @@
 #include "player.h"
 #include "enemy.h"
 #include "score.h"
-#include "timer.h"
 #include "map.h"
 #include "elevation.h"
 #include "sound.h"
@@ -40,7 +39,6 @@
 // 静的メンバ変数宣言
 //==========================================================================
 CScore *CGame::m_pScore = NULL;					// スコアのオブジェクト
-CTimer *CGame::m_pTimer = NULL;					// タイマーのオブジェクト
 CPowerGauge *CGame::m_pPowerGauge = NULL;		// パワーゲージのオブジェクト
 CEditControlPoint *CGame::m_pEditControlPoint = NULL;	// 制御点エディターのオブジェクト
 CBulletManager *CGame::m_pBulletManager = NULL;		// 弾マネージャのオブジェクト
@@ -161,9 +159,6 @@ HRESULT CGame::Init(void)
 	// スコアの生成処理
 	m_pScore = CScore::Create(D3DXVECTOR3(1000.0f, 50.0f, 0.0f));
 
-	// タイマーの生成処理
-	m_pTimer = CTimer::Create(D3DXVECTOR3(200.0f, 50.0f, 0.0f));
-
 	// ヒットスコア
 	m_pHitScore = CHitScore::Create(D3DXVECTOR3(1300.0f, 600.0f, 0.0f));
 
@@ -196,18 +191,6 @@ void CGame::Uninit(void)
 		// メモリの開放
 		delete m_pScore;
 		m_pScore = NULL;
-	}
-
-	// タイマーの破棄
-	if (m_pTimer != NULL)
-	{// メモリの確保が出来ていたら
-
-		// 終了処理
-		m_pTimer->Uninit();
-
-		// メモリの開放
-		delete m_pTimer;
-		m_pTimer = NULL;
 	}
 
 	// ヒットスコアの破棄
@@ -341,9 +324,6 @@ void CGame::Update(void)
 		m_pEditCameraAxis == NULL &&
 		GetEnemyManager()->GetState() != CEnemyManager::STATE_COMBOANIM)
 	{
-		// タイマーの更新処理
-		m_pTimer->Update();
-
 		// スコアの更新処理
 		m_pScore->Update();
 
@@ -477,14 +457,6 @@ void CGame::Draw(void)
 CScore *CGame::GetScore(void)
 {
 	return m_pScore;
-}
-
-//==========================================================================
-// タイマーの取得
-//==========================================================================
-CTimer *CGame::GetTimer(void)
-{
-	return m_pTimer;
 }
 
 //==========================================================================

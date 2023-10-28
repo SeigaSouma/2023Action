@@ -7,10 +7,13 @@
 #include "texture.h"
 #include "manager.h"
 #include "renderer.h"
-#include "objectX.h"
 
 // 読み込むテクスチャのヘッダー
 #include "map.h"
+#include "3D_effect.h"
+#include "slash.h"
+#include "effect_slashhit.h"
+#include "effect_thunderring.h"
 
 //==========================================================================
 // マクロ定義
@@ -58,6 +61,18 @@ HRESULT CTexture::LoadAll(void)
 	{// 失敗した場合
 		return E_FAIL;
 	}
+
+	// 3Dエフェクト
+	CEffect3D::LoadTexture();
+
+	// 斬撃
+	CSlash::LoadTexture();
+
+	// 斬撃ヒット
+	CEffectSlashHit::LoadTexture();
+
+	// 雷のリング
+	CThunderRing::LoadTexture();
 
 	return S_OK;
 }

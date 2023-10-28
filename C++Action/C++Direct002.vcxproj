@@ -160,6 +160,7 @@
     <ClCompile Include="ballast.cpp" />
     <ClCompile Include="bg.cpp" />
     <ClCompile Include="bullet.cpp" />
+    <ClCompile Include="bulletexplosion.cpp" />
     <ClCompile Include="bulletmanager.cpp" />
     <ClCompile Include="calculation.cpp" />
     <ClCompile Include="camera.cpp" />
@@ -254,6 +255,7 @@
     <ClInclude Include="bg.h" />
     <ClInclude Include="block.h" />
     <ClInclude Include="bullet.h" />
+    <ClInclude Include="bulletexplosion.h" />
     <ClInclude Include="bulletmanager.h" />
     <ClInclude Include="calculation.h" />
     <ClInclude Include="camera.h" />

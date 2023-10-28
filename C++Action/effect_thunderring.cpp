@@ -52,6 +52,15 @@ CThunderRing::~CThunderRing()
 }
 
 //==========================================================================
+// テクスチャ読み込み
+//==========================================================================
+void CThunderRing::LoadTexture(void)
+{
+	// テクスチャの読み込み
+	CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
+}
+
+//==========================================================================
 // 生成処理
 //==========================================================================
 CThunderRing *CThunderRing::Create(const D3DXVECTOR3 pos, const D3DXVECTOR2 size)
@@ -172,6 +181,10 @@ void CThunderRing::Draw(void)
 	// ライティングを無効にする
 	pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
 
+	//// Zテストを無効にする
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+	//pDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);	//常に描画する
+
 	// アルファテストを有効にする
 	pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 	pDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATER);
@@ -184,6 +197,10 @@ void CThunderRing::Draw(void)
 
 	// ビルボードの描画
 	CObjectBillboard::Draw();
+
+	//// Zテストを有効にする
+	//pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+	//pDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 
 	// αブレンディングを元に戻す
 	pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);

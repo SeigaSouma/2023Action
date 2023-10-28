@@ -39,6 +39,7 @@ namespace mylib_const
 	const int MAX_DIGIT = 8;			// 数字の最大桁数
 	const int DMG_BOUNCE = 15;			// 跳ね返しの威力
 	const int DMG_SLASH = 1;			// 斬撃の威力
+	const int BULLETAPPEARANCE_NUM = 2;	// 見た目の弾の数
 	const D3DXCOLOR DEFAULT_COLOR = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);	// フィールドの色
 	const D3DXCOLOR FIELDCOLOR_01 = D3DXCOLOR(0.6f, 0.4f, 0.1f, 1.0f);	// フィールドの色
 	const D3DXVECTOR3 DEFAULT_VECTOR3 = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// Vector3のデフォルト値

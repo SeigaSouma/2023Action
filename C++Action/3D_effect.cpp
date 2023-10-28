@@ -73,6 +73,19 @@ CEffect3D::~CEffect3D()
 }
 
 //==========================================================================
+// テクスチャ読み込み
+//==========================================================================
+void CEffect3D::LoadTexture(void)
+{
+	// テクスチャの読み込み
+	for (int nCntTex = 0; nCntTex < sizeof(m_apTextureFile) / sizeof(*m_apTextureFile); nCntTex++)
+	{// テクスチャデータの配列分繰り返す
+
+		m_nTexIdx[nCntTex] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[nCntTex]);
+	}
+}
+
+//==========================================================================
 // 生成処理
 //==========================================================================
 CEffect3D *CEffect3D::Create(void)
@@ -85,13 +98,6 @@ CEffect3D *CEffect3D::Create(void)
 
 		// メモリの確保
 		pEffect = DEBUG_NEW CEffect3D;
-
-		//if (pEffect->GetID() < 0)
-		//{// メモリ確保に失敗していたら
-
-		//	delete pEffect;
-		//	return NULL;
-		//}
 
 		if (pEffect != NULL)
 		{// メモリの確保が出来ていたら
@@ -119,13 +125,6 @@ CEffect3D *CEffect3D::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, cons
 
 		// メモリの確保
 		pEffect = DEBUG_NEW CEffect3D;
-
-		//if (pEffect->GetID() < 0)
-		//{// メモリ確保に失敗していたら
-
-		//	delete pEffect;
-		//	return NULL;
-		//}
 
 		if (pEffect != NULL)
 		{// メモリの確保が出来ていたら

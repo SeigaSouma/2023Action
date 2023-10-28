@@ -435,8 +435,6 @@ void CEnemy::Update(void)
 		return;
 	}
 
-	
-
 	// ƒ‚[ƒVƒ‡ƒ“‚Ìİ’èˆ—
 	MotionSet();
 

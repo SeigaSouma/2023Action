@@ -12,6 +12,7 @@
 #include "meshsphere.h"
 
 class CThunderRing;
+class CObjectBillboard;
 
 //==========================================================================
 // クラス定義
@@ -55,7 +56,6 @@ public:
 	virtual void Draw(void);
 	void SetVtx(void);
 
-	float GetRadius(void);	// 半径取得
 	void SetType(TYPE type);	// 種類設定
 	TYPE GetType(void);			// 種類取得
 	void SetState(STATE state, int nCntState);	// 状態設定
@@ -81,12 +81,12 @@ private:
 	int m_nIdxBulletManager;			// 弾マネージャのインデックス番号
 	int m_nLife;							// 寿命
 	int m_nLifeMax;					// 寿命の最大値
-	float m_fRadius;				// 半径
 	static int m_nNumAll;					// 弾の総数
 	static const char *m_apTextureFile[TYPE_MAX];	// テクスチャのファイル
 	int m_nTexIdx;				// テクスチャのインデックス番号
 	int m_nCntEmission;	// 発生物のカウンター
 	CMeshSphere *m_pMeshSphereEffect;	// メッシュスフィアのエフェクト
+	CObjectBillboard *m_pBulletAppearance[mylib_const::BULLETAPPEARANCE_NUM];	// 見た目だけの弾
 	CThunderRing *m_pEffectThunderRing;	// 雷のリングのエフェクト
 
 	//using STATE_FUNC = void(CBullet::*)();
