@@ -34,7 +34,9 @@ namespace mapdate
 	int nNumModelAll = 0;	// モデルの総数
 	int nNumTexAll = 0;		// テクスチャの総数
 	int nNumObjXAll = 0;		// オブジェクトXの総数
+	int nNumObj3DMeshAll = 0;		// オブジェクト3Dメッシュの総数
 	CObjectX *pObjX[mylib_const::MAX_OBJ];		// オブジェクトX
+	CObject3DMesh *pObj3DMesh[mylib_const::MAX_OBJ];		// オブジェクト3Dメッシュ
 }
 
 //==========================================================================
@@ -52,8 +54,10 @@ HRESULT map::Create(const char *pTextFile)
 	// 総数
 	mapdate::nNumModelAll = 0;
 	mapdate::nNumObjXAll = 0;
+	mapdate::nNumObj3DMeshAll = 0;
 
 	memset(&mapdate::pObjX[0], NULL, sizeof(mapdate::pObjX));
+	memset(&mapdate::pObj3DMesh[0], NULL, sizeof(mapdate::pObj3DMesh));	// オブジェクト3Dメッシュ
 
 	// 外部テキスト読み込み処理
 	HRESULT hr = ReadText(pTextFile);
@@ -77,6 +81,12 @@ void map::Release(void)
 		{
 			mapdate::pObjX[nCntObj]->Uninit();
 			mapdate::pObjX[nCntObj] = NULL;
+		}
+
+		if (mapdate::pObj3DMesh[nCntObj] != NULL)
+		{
+			mapdate::pObj3DMesh[nCntObj]->Uninit();
+			mapdate::pObj3DMesh[nCntObj] = NULL;
 		}
 	}
 }
@@ -556,9 +566,6 @@ HRESULT map::ReadText(const char *pTextFile)
 	int nFileNum = 0;					// ファイルの数
 	int nCntTexture = 0;				// テクスチャ読み込みカウント
 
-	// メッシュオブジェクトのオブジェクト
-	CObject3DMesh *pObjMesh = NULL;
-
 	// ファイルポインタ
 	FILE *pFile = NULL;
 
@@ -661,16 +668,19 @@ HRESULT map::ReadText(const char *pTextFile)
 			 //**********************************
 			 // 生成処理
 			 //**********************************
-			pObjMesh = CMeshField::Create(
+			mapdate::pObj3DMesh[mapdate::nNumObj3DMeshAll] = CMeshField::Create(
 				g_Map.pos, g_Map.rot,
 				g_Map.fWidthLen, g_Map.fHeightLen,
 				g_Map.nWidth, g_Map.nHeight,
 				(CMeshField::TYPE)g_Map.nType, &TextureFile[g_Map.nType][0]);
 
-			if (pObjMesh == NULL)
+			if (mapdate::pObj3DMesh[mapdate::nNumObj3DMeshAll] == NULL)
 			{// NULLだったら
 				return E_FAIL;
 			}
+
+			// オブジェクトメッシュの総数加算
+			mapdate::nNumObj3DMeshAll++;
 		}
 
 #endif
@@ -695,12 +705,15 @@ HRESULT map::ReadText(const char *pTextFile)
 			 //**********************************
 			 // 生成処理
 			 //**********************************
-			pObjMesh = CMeshCylinder::Create(&TextureFile[g_Map.nType][0]);
+			mapdate::pObj3DMesh[mapdate::nNumObj3DMeshAll] = CMeshCylinder::Create(&TextureFile[g_Map.nType][0]);
 
-			if (pObjMesh == NULL)
+			if (mapdate::pObj3DMesh[mapdate::nNumObj3DMeshAll] == NULL)
 			{// NULLだったら
 				return E_FAIL;
 			}
+
+			// オブジェクトメッシュの総数加算
+			mapdate::nNumObj3DMeshAll++;
 		}
 
 		// メッシュドームの設定
@@ -731,12 +744,15 @@ HRESULT map::ReadText(const char *pTextFile)
 			//**********************************
 			// 生成処理
 			//**********************************
-			pObjMesh = CMeshDome::Create(g_Map.fMove, &TextureFile[g_Map.nType][0]);
+			mapdate::pObj3DMesh[mapdate::nNumObj3DMeshAll] = CMeshDome::Create(g_Map.fMove, &TextureFile[g_Map.nType][0]);
 
-			if (pObjMesh == NULL)
+			if (mapdate::pObj3DMesh[mapdate::nNumObj3DMeshAll] == NULL)
 			{// NULLだったら
 				return E_FAIL;
 			}
+
+			// オブジェクトメッシュの総数加算
+			mapdate::nNumObj3DMeshAll++;
 		}
 
 		// モデルの設定

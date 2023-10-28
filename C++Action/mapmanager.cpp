@@ -20,8 +20,6 @@
 //==========================================================================
 // 静的メンバ変数宣言
 //==========================================================================
-CMapManager *CMapManager::m_pTop = NULL;	// 先頭のポインタ
-CMapManager *CMapManager::m_pCur = NULL;	// 最後尾のポインタ
 int CMapManager::m_nNumAll = 0;		// 総数
 
 //==========================================================================
@@ -30,9 +28,8 @@ int CMapManager::m_nNumAll = 0;		// 総数
 CMapManager::CMapManager()
 {
 	// 値のクリア
-	m_pPrev = NULL;		// 前のオブジェクトへのポインタ
-	m_pNext = NULL;		// 次のオブジェクトへのポインタ
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 位置
+	m_bCrawl = false;				// 巡回するか
 	memset(&m_pMultiNumber[0], NULL, sizeof(m_pMultiNumber));
 }
 
@@ -181,6 +178,21 @@ void CMapManager::Uninit(void)
 	//	delete m_ppMapManager;
 	//	m_ppMapManager = NULL;
 	//}
+}
+
+//==========================================================================
+// 解放処理
+//==========================================================================
+void CMapManager::Release(void)
+{
+	for (int i = 0; i < m_nNumAll; i++)
+	{
+		if (m_pMultiNumber[i] != NULL)
+		{
+			m_pMultiNumber[i]->Uninit();
+			m_pMultiNumber[i] = NULL;
+		}
+	}
 }
 
 //==========================================================================
@@ -339,10 +351,21 @@ D3DXVECTOR3 CMapManager::GetTargetPosition(int nIdx, float fMoveValue)
 
 	// 曲線作る為の4点
 	int nP0, nP1, nP2, nP3;
-	nP0 = nIdx;
-	nP1 = nIdx + 1;
-	nP2 = nIdx + 2;
-	nP3 = nIdx + 3;
+
+	if (m_bCrawl == false)
+	{// 巡回しない場合
+		nP0 = nIdx;
+		nP1 = nIdx + 1;
+		nP2 = nIdx + 2;
+		nP3 = nIdx + 3;
+	}
+	else
+	{
+		nP0 = nIdx;
+		nP1 = (nIdx + 1) % GetControlPointNum();
+		nP2 = (nIdx + 2) % GetControlPointNum();
+		nP3 = (nIdx + 3) % GetControlPointNum();
+	}
 
 	// 目標地点
 	D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
@@ -358,32 +381,77 @@ D3DXVECTOR3 CMapManager::GetTargetPosition(int nIdx, float fMoveValue)
 
 	if (fRatio >= 1.0f && nIdx < GetControlPointNum() - 1)
 	{
-		// マップの位置加算
-		nIdx++;
-		if (nP1 < GetControlPointNum() - 1)
-		{
+		if (m_bCrawl == false)
+		{// 巡回しない場合
+
+			// マップの位置加算
+			nIdx++;
+			if (nP1 < GetControlPointNum() - 1)
+			{
+				fMoveValue = fMoveValue - fPosLength;
+				fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
+			}
+		}
+		else
+		{// 巡回する場合
+
+			// マップの位置更新
+			nIdx = (nIdx + 1) % GetControlPointNum();
 			fMoveValue = fMoveValue - fPosLength;
 			fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
 		}
 	}
 	else if (fRatio < 0.0f)
 	{
-		// マップの位置減算
-		nIdx--;
-		if (nIdx < -1)
-		{
-			nIdx = -1;
-		}
+		if (m_bCrawl == false)
+		{// 巡回しない場合
 
-		fMoveValue = GetPosLength(TargetPoint0, TargetPoint1) - (-fMoveValue);
-		fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
+			// マップの位置減算
+			nIdx--;
+			if (nIdx < -1)
+			{
+				nIdx = -1;
+			}
+
+			fMoveValue = GetPosLength(TargetPoint0, TargetPoint1) - (-fMoveValue);
+			fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
+		}
+		else
+		{// 巡回する場合
+
+			// マップの位置更新
+			nIdx = (nIdx + (GetControlPointNum() - 1)) % GetControlPointNum();
+
+			nP0 = nIdx;
+			nP1 = (nIdx + 1) % GetControlPointNum();
+			nP2 = (nIdx + 2) % GetControlPointNum();
+			nP3 = (nIdx + 3) % GetControlPointNum();
+
+			// 目標地点
+			D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
+			D3DXVECTOR3 TargetPoint1 = GetControlPoint(nP1);
+			D3DXVECTOR3 TargetPoint2 = GetControlPoint(nP2);
+			D3DXVECTOR3 TargetPoint3 = GetControlPoint(nP3);
+			fMoveValue = GetPosLength(TargetPoint1, TargetPoint2) - (-fMoveValue);
+			fRatio = fMoveValue / GetPosLength(TargetPoint1, TargetPoint2);
+		}
 	}
 
 	// 補正の4点更新
-	nP0 = nIdx;
-	nP1 = nIdx + 1;
-	nP2 = nIdx + 2;
-	nP3 = nIdx + 3;
+	if (m_bCrawl == false)
+	{// 巡回しない場合
+		nP0 = nIdx;
+		nP1 = nIdx + 1;
+		nP2 = nIdx + 2;
+		nP3 = nIdx + 3;
+	}
+	else
+	{
+		nP0 = nIdx;
+		nP1 = (nIdx + 1) % GetControlPointNum();
+		nP2 = (nIdx + 2) % GetControlPointNum();
+		nP3 = (nIdx + 3) % GetControlPointNum();
+	}
 
 	// 4点の位置も更新
 	TargetPoint0 = GetControlPoint(nP0);
@@ -406,10 +474,20 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 
 	// 曲線作る為の4点
 	int nP0, nP1, nP2, nP3;
-	nP0 = nIdx;
-	nP1 = nIdx + 1;
-	nP2 = nIdx + 2;
-	nP3 = nIdx + 3;
+	if (m_bCrawl == false)
+	{// 巡回しない場合
+		nP0 = nIdx;
+		nP1 = nIdx + 1;
+		nP2 = nIdx + 2;
+		nP3 = nIdx + 3;
+	}
+	else
+	{
+		nP0 = nIdx;
+		nP1 = (nIdx + 1) % GetControlPointNum();
+		nP2 = (nIdx + 2) % GetControlPointNum();
+		nP3 = (nIdx + 3) % GetControlPointNum();
+	}
 
 	// 目標地点
 	D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
@@ -425,7 +503,7 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 	{
 		fRatio = fMoveValue / fPosLength;
 	}
-	else if (nIdx >= GetControlPointNum() - 1/* && move.x < 0*/)
+	else if (m_bCrawl == false && nIdx >= GetControlPointNum() - 1)
 	{// 最後
 		fRatio = 1.0f;
 	}
@@ -434,29 +512,65 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 	while (1)
 	{
 		bLeftArrival = false, bRightArrival = false;
-		if (fRatio >= 1.0f && nIdx < GetControlPointNum() - 1)
+		if (fRatio >= 1.0f)
 		{
-			// マップの位置加算
-			nIdx++;
-			if (nP1 < GetControlPointNum() - 1)
-			{
-				fMoveValue = fMoveValue - fPosLength;
+			if (m_bCrawl == false && nIdx < GetControlPointNum() - 1)
+			{// 巡回しない場合
+
+				// マップの位置加算
+				nIdx++;
+				if (nP1 < GetControlPointNum() - 1)
+				{
+					fMoveValue = fMoveValue - fPosLength;
+					fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
+					bRightArrival = true;
+				}
+			}
+			else if(m_bCrawl == true)
+			{// 巡回する場合
+
+				// マップの位置更新
+				nIdx = (nIdx + 1) % GetControlPointNum();
+				fMoveValue = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
 				fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
 				bRightArrival = true;
 			}
 		}
 		else if (fRatio < 0.0f)
 		{
-			// マップの位置減算
-			nIdx--;
+			if (m_bCrawl == false)
+			{// 巡回しない場合
 
-			if (nIdx < -1)
-			{
-				nIdx = -1;
-				return TargetPoint1;
+				// マップの位置減算
+				nIdx--;
+
+				if (nIdx < -1)
+				{
+					nIdx = -1;
+					return TargetPoint1;
+				}
+				fMoveValue = fMoveValue + GetPosLength(TargetPoint0, TargetPoint1);
+				fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
 			}
-			fMoveValue = fMoveValue + GetPosLength(TargetPoint0, TargetPoint1);
-			fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
+			else
+			{// 巡回する場合
+
+				// マップの位置更新
+				nIdx = (nIdx + (GetControlPointNum() - 1)) % GetControlPointNum();
+
+				nP0 = nIdx;
+				nP1 = (nIdx + 1) % GetControlPointNum();
+				nP2 = (nIdx + 2) % GetControlPointNum();
+				nP3 = (nIdx + 3) % GetControlPointNum();
+
+				// 目標地点
+				D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
+				D3DXVECTOR3 TargetPoint1 = GetControlPoint(nP1);
+				D3DXVECTOR3 TargetPoint2 = GetControlPoint(nP2);
+				D3DXVECTOR3 TargetPoint3 = GetControlPoint(nP3);
+				fMoveValue = GetPosLength(TargetPoint1, TargetPoint2) - (-fMoveValue);
+				fRatio = fMoveValue / GetPosLength(TargetPoint1, TargetPoint2);
+			}
 			bLeftArrival = true;
 		}
 
@@ -466,10 +580,20 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 		}
 		else
 		{
-			nP0 = nIdx;
-			nP1 = nIdx + 1;
-			nP2 = nIdx + 2;
-			nP3 = nIdx + 3;
+			if (m_bCrawl == false)
+			{// 巡回しない場合
+				nP0 = nIdx;
+				nP1 = nIdx + 1;
+				nP2 = nIdx + 2;
+				nP3 = nIdx + 3;
+			}
+			else
+			{
+				nP0 = nIdx;
+				nP1 = (nIdx + 1) % GetControlPointNum();
+				nP2 = (nIdx + 2) % GetControlPointNum();
+				nP3 = (nIdx + 3) % GetControlPointNum();
+			}
 
 			// 目標地点
 			TargetPoint0 = GetControlPoint(nP0);
@@ -483,10 +607,20 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 	{// 左右どっちか到着
 
 		// 補正の4点更新
-		nP0 = nIdx;
-		nP1 = nIdx + 1;
-		nP2 = nIdx + 2;
-		nP3 = nIdx + 3;
+		if (m_bCrawl == false)
+		{// 巡回しない場合
+			nP0 = nIdx;
+			nP1 = nIdx + 1;
+			nP2 = nIdx + 2;
+			nP3 = nIdx + 3;
+		}
+		else
+		{
+			nP0 = nIdx;
+			nP1 = (nIdx + 1) % GetControlPointNum();
+			nP2 = (nIdx + 2) % GetControlPointNum();
+			nP3 = (nIdx + 3) % GetControlPointNum();
+		}
 
 		// 4点の位置も更新
 		TargetPoint0 = GetControlPoint(nP0);
@@ -511,16 +645,20 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 		}
 	}
 
-	if (nIdx <= -1 && fRatio < 1.0f && fRatio > 0.0f)
-	{
-		fRatio = 1.0f;
-		int nIdx1 = nP0 + 1, nIdx2 = nP1 + 1;
-		fMoveValue = fPosLength;
-	}
-	else if (nIdx >= GetControlPointNum() - 1)
-	{
-		fRatio = 0.0f;
-		fMoveValue = 0.0f;
+	if (m_bCrawl == false)
+	{// 巡回しない場合
+
+		if (nIdx <= -1 && fRatio < 1.0f && fRatio > 0.0f)
+		{
+			fRatio = 1.0f;
+			int nIdx1 = nP0 + 1, nIdx2 = nP1 + 1;
+			fMoveValue = fPosLength;
+		}
+		else if (nIdx >= GetControlPointNum() - 1)
+		{
+			fRatio = 0.0f;
+			fMoveValue = 0.0f;
+		}
 	}
 
 	// 曲線の位置
@@ -552,10 +690,20 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 
 	// 曲線作る為の4点
 	int nP0, nP1, nP2, nP3;
-	nP0 = nIdx;
-	nP1 = nIdx + 1;
-	nP2 = nIdx + 2;
-	nP3 = nIdx + 3;
+	if (m_bCrawl == false)
+	{// 巡回しない場合
+		nP0 = nIdx;
+		nP1 = nIdx + 1;
+		nP2 = nIdx + 2;
+		nP3 = nIdx + 3;
+	}
+	else
+	{
+		nP0 = nIdx;
+		nP1 = (nIdx + 1) % GetControlPointNum();
+		nP2 = (nIdx + 2) % GetControlPointNum();
+		nP3 = (nIdx + 3) % GetControlPointNum();
+	}
 
 	// 目標地点
 	D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
@@ -580,32 +728,65 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 	while (1)
 	{
 		bLeftArrival = false, bRightArrival = false;
-		if (fRatio >= 1.0f && nIdx < GetControlPointNum() - 1)
+		if (fRatio >= 1.0f)
 		{
-			// マップの位置加算
-			nIdx++;
-			if (nP1 < GetControlPointNum() - 1)
-			{
+			if (m_bCrawl == false && nIdx < GetControlPointNum() - 1)
+			{// 巡回しない場合
+
+				// マップの位置加算
+				nIdx++;
+				if (nP1 < GetControlPointNum() - 1)
+				{
+					fMoveValue = fMoveValue - fPosLength;
+					fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
+					bRightArrival = true;
+				}
+			}
+			else
+			{// 巡回する場合
+
+				// マップの位置更新
+				nIdx = (nIdx + 1) % GetControlPointNum();
 				fMoveValue = fMoveValue - fPosLength;
 				fRatio = fMoveValue / GetPosLength(TargetPoint2, TargetPoint3);
 				bRightArrival = true;
 			}
-			else
-			{
-				return TargetPoint1;
-			}
 		}
 		else if (fRatio < 0.0f)
 		{
-			// マップの位置減算
-			nIdx--;
+			if (m_bCrawl == false)
+			{// 巡回しない場合
 
-			if (nIdx < -1)
-			{
-				nIdx = -1;
+				// マップの位置減算
+				nIdx--;
+
+				if (nIdx < -1)
+				{
+					nIdx = -1;
+					return TargetPoint1;
+				}
+				fMoveValue = fMoveValue + GetPosLength(TargetPoint0, TargetPoint1);
+				fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
 			}
-			fMoveValue = GetPosLength(TargetPoint0, TargetPoint1);
-			fRatio = fMoveValue / GetPosLength(TargetPoint0, TargetPoint1);
+			else
+			{// 巡回する場合
+
+				// マップの位置更新
+				nIdx = (nIdx + (GetControlPointNum() - 1)) % GetControlPointNum();
+
+				nP0 = nIdx;
+				nP1 = (nIdx + 1) % GetControlPointNum();
+				nP2 = (nIdx + 2) % GetControlPointNum();
+				nP3 = (nIdx + 3) % GetControlPointNum();
+
+				// 目標地点
+				D3DXVECTOR3 TargetPoint0 = GetControlPoint(nP0);
+				D3DXVECTOR3 TargetPoint1 = GetControlPoint(nP1);
+				D3DXVECTOR3 TargetPoint2 = GetControlPoint(nP2);
+				D3DXVECTOR3 TargetPoint3 = GetControlPoint(nP3);
+				fMoveValue = GetPosLength(TargetPoint1, TargetPoint2) - (-fMoveValue);
+				fRatio = fMoveValue / GetPosLength(TargetPoint1, TargetPoint2);
+			}
 			bLeftArrival = true;
 		}
 
@@ -619,10 +800,20 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 	{// 左右どっちか到着
 
 		// 補正の4点更新
-		nP0 = nIdx;
-		nP1 = nIdx + 1;
-		nP2 = nIdx + 2;
-		nP3 = nIdx + 3;
+		if (m_bCrawl == false)
+		{// 巡回しない場合
+			nP0 = nIdx;
+			nP1 = nIdx + 1;
+			nP2 = nIdx + 2;
+			nP3 = nIdx + 3;
+		}
+		else
+		{
+			nP0 = nIdx;
+			nP1 = (nIdx + 1) % GetControlPointNum();
+			nP2 = (nIdx + 2) % GetControlPointNum();
+			nP3 = (nIdx + 3) % GetControlPointNum();
+		}
 
 		// 4点の位置も更新
 		TargetPoint0 = GetControlPoint(nP0);
@@ -647,16 +838,20 @@ D3DXVECTOR3 CMapManager::UpdateNowPosition(int& nIdx, float& fRatio, float& fMov
 		}
 	}
 
-	if (nIdx <= -1 && fRatio < 1.0f && fRatio > 0.0f)
-	{
-		fRatio = 1.0f;
-		int nIdx1 = nP0 + 1, nIdx2 = nP1 + 1;
-		fMoveValue = fPosLength;
-	}
-	else if (nIdx >= GetControlPointNum() - 1)
-	{
-		fRatio = 0.0f;
-		fMoveValue = 0.0f;
+	if (m_bCrawl == false)
+	{// 巡回しない場合
+
+		if (nIdx <= -1 && fRatio < 1.0f && fRatio > 0.0f)
+		{
+			fRatio = 1.0f;
+			int nIdx1 = nP0 + 1, nIdx2 = nP1 + 1;
+			fMoveValue = fPosLength;
+		}
+		else if (nIdx >= GetControlPointNum() - 1)
+		{
+			fRatio = 0.0f;
+			fMoveValue = 0.0f;
+		}
 	}
 
 	// 曲線の位置

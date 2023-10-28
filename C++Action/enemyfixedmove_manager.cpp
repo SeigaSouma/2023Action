@@ -11,6 +11,7 @@
 #include "renderer.h"
 #include "enemy.h"
 #include "mapmanager.h"
+#include "game.h"
 
 //==========================================================================
 // マクロ定義
@@ -181,7 +182,7 @@ D3DXVECTOR3 CEnemyFixedMoveManager::UpdatePosition(CEnemy *pEnemy)
 	D3DXVECTOR3 pos = pEnemy->GetPosition();
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return pos;

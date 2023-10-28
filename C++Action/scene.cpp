@@ -11,12 +11,7 @@
 #include "map.h"
 #include "fade.h"
 #include "elevation.h"
-#include "enemymanager.h"
-#include "mapmanager.h"
 #include "player.h"
-#include "cameraaxis.h"
-#include "camerachasechanger.h"
-#include "enemybase.h"
 
 // 遷移先
 #include "game.h"
@@ -30,11 +25,6 @@
 //==========================================================================
 CXLoad *CScene::m_pXLoad = NULL;				// Xファイルのオブジェクト
 CElevation *CScene::m_pObject3DMesh = NULL;		// オブジェクト3Dメッシュのオブジェクト
-CEnemyManager *CScene::m_pEnemyManager = NULL;	// 敵マネージャのオブジェクト
-CMapManager *CScene::m_pMapManager = NULL;		// マップマネージャのオブジェクト
-CCameraAxis *CScene::m_pCameraAxis = NULL;		// カメラの軸のオブジェクト
-CCameraChaseChanger *CScene::m_pCameraChaseChanger = NULL;	// カメラ追従変更者のオブジェクト
-CEnemyBase *CScene::m_pEnemyBase = NULL;	// 敵の拠点
 
 //==========================================================================
 // コンストラクタ
@@ -127,53 +117,6 @@ HRESULT CScene::Init(void)
 	m_pXLoad->Init();
 
 	//**********************************
-	// マップマネージャ
-	//**********************************
-	m_pMapManager = CMapManager::Create("data\\BIN\\maptarget.bin");
-
-	if (m_pMapManager == NULL)
-	{// NULLだったら
-		return E_FAIL;
-	}
-
-	//**********************************
-	// 敵マネージャ
-	//**********************************
-	m_pEnemyManager = CEnemyManager::Create("data\\TEXT\\enemy_manager.txt");
-
-	if (m_pEnemyManager == NULL)
-	{// NULLだったら
-		return E_FAIL;
-	}
-
-	//**********************************
-	// カメラの軸
-	//**********************************
-	m_pCameraAxis = CCameraAxis::Create("data\\BIN\\cameraaxis.bin");
-	if (m_pCameraAxis == NULL)
-	{// NULLだったら
-		return E_FAIL;
-	}
-
-	//**********************************
-	// カメラ追従変更者
-	//**********************************
-	m_pCameraChaseChanger = CCameraChaseChanger::Create("data\\BIN\\camerachanger.bin");
-	if (m_pCameraChaseChanger == NULL)
-	{// NULLだったら
-		return E_FAIL;
-	}
-
-	//**********************************
-	// 敵の拠点
-	//**********************************
-	m_pEnemyBase = CEnemyBase::Create();
-	if (m_pEnemyBase == NULL)
-	{// NULLだったら
-		return E_FAIL;
-	}
-
-	//**********************************
 	// マップの生成
 	//**********************************
 	if (FAILED(map::Create("data\\TEXT\\edit_info.txt")))
@@ -217,46 +160,6 @@ void CScene::Uninit(void)
 		m_pXLoad = NULL;
 	}
 
-	// マップマネージャ
-	if (m_pMapManager != NULL)
-	{
-		m_pMapManager->Uninit();
-		delete m_pMapManager;
-		m_pMapManager = NULL;
-	}
-
-	// カメラの軸
-	if (m_pCameraAxis != NULL)
-	{
-		m_pCameraAxis->Uninit();
-		delete m_pCameraAxis;
-		m_pCameraAxis = NULL;
-	}
-
-	// カメラ追従変更者
-	if (m_pCameraChaseChanger != NULL)
-	{
-		m_pCameraChaseChanger->Uninit();
-		delete m_pCameraChaseChanger;
-		m_pCameraChaseChanger = NULL;
-	}
-
-	// 敵の拠点
-	if (m_pEnemyBase != NULL)
-	{
-		m_pEnemyBase->Uninit();
-		delete m_pEnemyBase;
-		m_pEnemyBase = NULL;
-	}
-
-	// 敵マネージャ
-	if (m_pEnemyManager != NULL)
-	{
-		m_pEnemyManager->Uninit();
-		delete m_pEnemyManager;
-		m_pEnemyManager = NULL;
-	}
-
 	// プレイヤーの破棄
 	if (m_pPlayer != NULL)
 	{// メモリの確保が出来ていたら
@@ -272,17 +175,7 @@ void CScene::Uninit(void)
 //==========================================================================
 void CScene::Update(void)
 {
-	// マップマネージャの更新処理
-	m_pMapManager->Update();
-
-	// カメラの軸の更新処理
-	m_pCameraAxis->Update();
-
-	// カメラ追従変更者
-	m_pCameraChaseChanger->Update();
-
-	// 敵の拠点
-	m_pEnemyBase->Update();
+	
 }
 
 //==========================================================================
@@ -298,83 +191,13 @@ void CScene::Draw(void)
 //==========================================================================
 void CScene::ResetScene(void)
 {
-	// マップマネージャ
-	if (m_pMapManager != NULL)
-	{
-		m_pMapManager->Uninit();
-		delete m_pMapManager;
-		m_pMapManager = NULL;
-	}
-
-	// カメラの軸
-	if (m_pCameraAxis != NULL)
-	{
-		m_pCameraAxis->Uninit();
-		delete m_pCameraAxis;
-		m_pCameraAxis = NULL;
-	}
-
-	// カメラ追従変更者
-	if (m_pCameraChaseChanger != NULL)
-	{
-		m_pCameraChaseChanger->Uninit();
-		delete m_pCameraChaseChanger;
-		m_pCameraChaseChanger = NULL;
-	}
-
-	// 敵の拠点
-	if (m_pEnemyBase != NULL)
-	{
-		m_pEnemyBase->Uninit();
-		delete m_pEnemyBase;
-		m_pEnemyBase = NULL;
-	}
-
 	// マップ
 	map::Release();
-
-
-	//**********************************
-	// マップマネージャ
-	//**********************************
-	m_pMapManager = CMapManager::Create("data\\BIN\\maptarget.bin");
-
-	if (m_pMapManager == NULL)
-	{// NULLだったら
-		return;
-	}
-
-	//**********************************
-	// カメラの軸
-	//**********************************
-	m_pCameraAxis = CCameraAxis::Create("data\\BIN\\cameraaxis.bin");
-	if (m_pCameraAxis == NULL)
-	{// NULLだったら
-		return;
-	}
-
-	//**********************************
-	// カメラ追従変更者
-	//**********************************
-	m_pCameraChaseChanger = CCameraChaseChanger::Create("data\\BIN\\camerachanger.bin");
-	if (m_pCameraChaseChanger == NULL)
-	{// NULLだったら
-		return;
-	}
-
-	//**********************************
-	// 敵の拠点
-	//**********************************
-	m_pEnemyBase = CEnemyBase::Create();
-	if (m_pEnemyBase == NULL)
-	{// NULLだったら
-		return;
-	}
 
 	//**********************************
 	// マップの生成
 	//**********************************
-	if (FAILED(map::Create("data\\TEXT\\edit_info.txt")))
+	if (FAILED(map::Create("data\\TEXT\\edit_info_boss.txt")))
 	{// 失敗した場合
 		return;
 	}
@@ -402,46 +225,6 @@ CXLoad *CScene::GetXLoad(void)
 CElevation *CScene::GetElevation(void)
 {
 	return m_pObject3DMesh;
-}
-
-//==========================================================================
-// 敵マネージャの取得
-//==========================================================================
-CEnemyManager *CScene::GetEnemyManager(void)
-{
-	return m_pEnemyManager;
-}
-
-//==========================================================================
-// マップマネージャの取得
-//==========================================================================
-CMapManager *CScene::GetMapManager(void)
-{
-	return m_pMapManager;
-}
-
-//==========================================================================
-// カメラの軸取得
-//==========================================================================
-CCameraAxis *CScene::GetCameraAxis(void)
-{
-	return m_pCameraAxis;
-}
-
-//==========================================================================
-// カメラ追従変更者の取得
-//==========================================================================
-CCameraChaseChanger *CScene::GetCameraChaseChanger(void)
-{
-	return m_pCameraChaseChanger;
-}
-
-//==========================================================================
-// 敵の拠点
-//==========================================================================
-CEnemyBase *CScene::GetEnemyBase(void)
-{
-	return m_pEnemyBase;
 }
 
 //==========================================================================

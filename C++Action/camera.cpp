@@ -8,6 +8,7 @@
 #include "manager.h"
 #include "renderer.h"
 #include "game.h"
+#include "gamemanager.h"
 #include "camera.h"
 #include "input.h"
 #include "calculation.h"
@@ -812,69 +813,75 @@ void CCamera::SetCameraRGame(void)
 
 
 
+		// 注視点
+		D3DXVECTOR3 DestPoint = mylib_const::DEFAULT_VECTOR3;
+		if (CGame::GetGameManager()->GetType() != CGameManager::SCENE_BOSS)
+		{// ボスじゃないとき
 
 
+			// マップマネージャの取得
+			CMapManager *pMapManager = CGame::GetMapManager();
+			if (pMapManager == NULL)
+			{// NULLだったら
+				return;
+			}
 
-		// マップマネージャの取得
-		CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
-		if (pMapManager == NULL)
-		{// NULLだったら
-			return;
-		}
+			// マップ情報取得
+			int nMapIdx = pPlayer->GetMapIndex();
+			float fMapRatio = pPlayer->GetMapPointRatio();
+			float fMapMoveValue = pPlayer->GetMapMoveValue();
 
-		// マップ情報取得
-		int nMapIdx = pPlayer->GetMapIndex();
-		float fMapRatio = pPlayer->GetMapPointRatio();
-		float fMapMoveValue = pPlayer->GetMapMoveValue();
+			// 曲線作る為の4点
+			int nP0 = nMapIdx;
+			int nP1 = nMapIdx + 1;
+			int nP2 = nMapIdx + 2;
 
-		// 曲線作る為の4点
-		int nP0 = nMapIdx;
-		int nP1 = nMapIdx + 1;
-		int nP2 = nMapIdx + 2;
+			// 目標地点
+			D3DXVECTOR3 TargetPoint0 = pMapManager->GetControlPoint(nP0);
+			D3DXVECTOR3 TargetPoint1 = pMapManager->GetControlPoint(nP1);
+			D3DXVECTOR3 TargetPoint2 = pMapManager->GetControlPoint(nP2);
 
-		// 目標地点
-		D3DXVECTOR3 TargetPoint0 = pMapManager->GetControlPoint(nP0);
-		D3DXVECTOR3 TargetPoint1 = pMapManager->GetControlPoint(nP1);
-		D3DXVECTOR3 TargetPoint2 = pMapManager->GetControlPoint(nP2);
+			int nAngle = 1;
+			if (pPlayer->GetMoveAngle() == CObject::ANGLE_LEFT)
+			{
+				nAngle = -1;
+			}
 
-		int nAngle = 1;
-		if (pPlayer->GetMoveAngle() == CObject::ANGLE_LEFT)
-		{
-			nAngle = -1;
-		}
-
-		static float time = 0.0f;
-		if (pPlayer->GetMoveAngle() == CObject::ANGLE_RIGHT && pPlayer->GetOldMoveAngle() != CObject::ANGLE_RIGHT)
-		{// 目標が右
-			time = 0.0f;
-			m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
-			m_fDestChaseDistance = CHASEDISTANCE_DEST;
-		}
-		else if (pPlayer->GetMoveAngle() == CObject::ANGLE_LEFT && pPlayer->GetOldMoveAngle() != CObject::ANGLE_LEFT)
-		{// 目標が右
-			time = 0.0f;
-			m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
-			m_fDestChaseDistance = -CHASEDISTANCE_DEST;
-		}
-		else if (
-			(pPlayer->GetMoveAngle() == CObject::ANGLE_UP && pPlayer->GetOldMoveAngle() != CObject::ANGLE_UP) ||
-			(pPlayer->GetMoveAngle() == CObject::ANGLE_DOWN && pPlayer->GetOldMoveAngle() != CObject::ANGLE_DOWN))
-		{// 目標が右
-			time = 0.0f;
-			m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
-			m_fDestChaseDistance = 0.0f;
-		}
-		time += CManager::GetInstance()->DeltaTime() * 0.5f;
+			static float time = 0.0f;
+			if (pPlayer->GetMoveAngle() == CObject::ANGLE_RIGHT && pPlayer->GetOldMoveAngle() != CObject::ANGLE_RIGHT)
+			{// 目標が右
+				time = 0.0f;
+				m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
+				m_fDestChaseDistance = CHASEDISTANCE_DEST;
+			}
+			else if (pPlayer->GetMoveAngle() == CObject::ANGLE_LEFT && pPlayer->GetOldMoveAngle() != CObject::ANGLE_LEFT)
+			{// 目標が右
+				time = 0.0f;
+				m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
+				m_fDestChaseDistance = -CHASEDISTANCE_DEST;
+			}
+			else if (
+				(pPlayer->GetMoveAngle() == CObject::ANGLE_UP && pPlayer->GetOldMoveAngle() != CObject::ANGLE_UP) ||
+				(pPlayer->GetMoveAngle() == CObject::ANGLE_DOWN && pPlayer->GetOldMoveAngle() != CObject::ANGLE_DOWN))
+			{// 目標が右
+				time = 0.0f;
+				m_fChaseLerpStart = m_fChaseDistance;	// 追従補正の初期値
+				m_fDestChaseDistance = 0.0f;
+			}
+			time += CManager::GetInstance()->DeltaTime() * 0.5f;
 #if 0
-		m_fChaseDistance = Lerp(m_fChaseLerpStart, m_fDestChaseDistance, time);
+			m_fChaseDistance = Lerp(m_fChaseLerpStart, m_fDestChaseDistance, time);
 #else
-		m_fChaseDistance += (m_fDestChaseDistance - m_fChaseDistance) * 0.02f;
+			m_fChaseDistance += (m_fDestChaseDistance - m_fChaseDistance) * 0.02f;
 #endif
-		// 少し先の地点取得
-		float fMoveValue = fMapMoveValue + m_fChaseDistance;
-		D3DXVECTOR3 DestPoint = pMapManager->GetTargetPosition(nMapIdx, fMoveValue);
-
-
+			// 少し先の地点取得
+			float fMoveValue = fMapMoveValue + m_fChaseDistance;
+			DestPoint = pMapManager->GetTargetPosition(nMapIdx, fMoveValue);
+		}
+		else
+		{
+			DestPoint = PlayerPos;
+		}
 
 		// 注視点の代入処理
 		m_posRDest.x = DestPoint.x;
@@ -1043,7 +1050,7 @@ void CCamera::ChaseMap(void)
 
 	D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -1195,7 +1202,7 @@ void CCamera::ChaseNone(void)
 
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -1508,6 +1515,37 @@ void CCamera::ResetGame(void)
 	m_fDistance = START_CAMERALEN;							// 距離
 	m_fDestDistance = START_CAMERALEN;						// 目標の距離
 	m_fOriginDistance = START_CAMERALEN;					// 元の距離
+	m_fDiffHeight = 0.0f;									// 高さの差分
+	m_fDiffHeightSave = 0.0f;								// 高さの差分保存用
+	m_fDiffHeightDest = 0.0f;								// 目標の高さの差分
+	m_state = CAMERASTATE_NONE;								// 状態
+	m_nCntState = 0;							// 状態カウンター
+	m_nCntDistance = 0;							// 距離カウンター
+	m_nOriginCntDistance = 0;					// 元の距離カウンター
+	m_fDistanceCorrection = 0;					// 距離の慣性補正係数
+	m_fDistanceDecrementValue = 0.0f;			// 距離の減少係数
+	m_fHeightMaxDest = 0.0f;					// カメラの最大高さの目標
+	m_ChaseType = CHASETYPE_MAP;				// 追従の種類
+	m_OldChaseType = m_ChaseType;			// 前回の追従の種類
+}
+
+//==========================================================================
+// リセット
+//==========================================================================
+void CCamera::ResetBoss(void)
+{
+	m_posR = CManager::GetInstance()->GetScene()->GetPlayer()->GetPosition();				// 注視点(見たい場所)
+	m_posV = D3DXVECTOR3(0.0f, 300.0f, m_posR.z + -400.0f);	// 視点(カメラの位置)
+	m_posVDest = m_posV;									// 目標の視点
+	m_posRDest = m_posR;									// 目標の注視点
+	m_vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);					// 上方向ベクトル
+	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);					// 移動量
+	m_rot = D3DXVECTOR3(0.0f, 0.0f, -0.25f);					// 向き
+	m_rotVDest = m_rot;										// 目標の視点の向き
+	m_TargetPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);			// 目標の位置
+	m_fDistance = 1600.0f;							// 距離
+	m_fDestDistance = m_fDistance;						// 目標の距離
+	m_fOriginDistance = m_fDistance;					// 元の距離
 	m_fDiffHeight = 0.0f;									// 高さの差分
 	m_fDiffHeightSave = 0.0f;								// 高さの差分保存用
 	m_fDiffHeightDest = 0.0f;								// 目標の高さの差分

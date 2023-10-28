@@ -282,7 +282,7 @@ void CBullet::Update(void)
 			}
 
 			// 雷のリング生成
-			m_pEffectThunderRing = CThunderRing::Create(GetPosition(), D3DXVECTOR2(300.0f, 300.0f));
+			m_pEffectThunderRing = CThunderRing::Create(GetPosition(), D3DXVECTOR2(fSize + 260.0f, fSize + 260.0f));
 
 			// 自動で消えないようにする
 			m_pEffectThunderRing->SetDesableAutoDeath();
@@ -308,7 +308,7 @@ void CBullet::Update(void)
 		if (m_pEffectThunderRing == NULL)
 		{
 			// 雷のリング生成
-			m_pEffectThunderRing = CThunderRing::Create(GetPosition(), D3DXVECTOR2(400.0f, 400.0f));
+			m_pEffectThunderRing = CThunderRing::Create(GetPosition(), D3DXVECTOR2(fSize + 360.0f, fSize + 360.0f));
 
 			// 色設定
 			m_pEffectThunderRing->SetColor(D3DXCOLOR(1.0f, 0.3f, 1.0f, 1.0f));
@@ -381,7 +381,7 @@ void CBullet::UpdatePos(void)
 	D3DXVECTOR3 rot = GetRotation();
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -554,7 +554,7 @@ void CBullet::CollisionPlayer(void)
 void CBullet::CollisionEnemy(void)
 {
 	// 敵マネージャ取得
-	CEnemyManager *pEnemyManager = CManager::GetInstance()->GetScene()->GetEnemyManager();
+	CEnemyManager *pEnemyManager = CGame::GetEnemyManager();
 	if (pEnemyManager == NULL)
 	{// NULLだったら
 		return;

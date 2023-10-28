@@ -1,10 +1,10 @@
 //=============================================================================
 // 
-//  群体敵処理 [enemy_crowd.cpp]
+//  飛行敵処理 [enemy_papion.cpp]
 //  Author : 相馬靜雅
 // 
 //=============================================================================
-#include "enemy_crowd.h"
+#include "enemy_papion.h"
 #include "manager.h"
 #include "renderer.h"
 #include "game.h"
@@ -20,7 +20,6 @@
 #include "player.h"
 #include "enemymanager.h"
 #include "camera.h"
-#include "ballast.h"
 #include "3D_Effect.h"
 #include "hp_gauge.h"
 #include "shadow.h"
@@ -30,9 +29,6 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
-#define PLAYER_SERCH	(800.0f)	// プレイヤー探索範囲
-#define CHACE_DISTABCE	(50.0f)		// 追い掛ける時の間隔
-#define JUMP			(18.0f)		// ジャンプ力初期値
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -41,7 +37,7 @@
 //==========================================================================
 // コンストラクタ
 //==========================================================================
-CEnemyCrowd::CEnemyCrowd(int nPriority) : CEnemy(nPriority)
+CEnemyPapion::CEnemyPapion(int nPriority) : CEnemy(nPriority)
 {
 	// 値のクリア
 }
@@ -49,42 +45,29 @@ CEnemyCrowd::CEnemyCrowd(int nPriority) : CEnemy(nPriority)
 //==========================================================================
 // デストラクタ
 //==========================================================================
-CEnemyCrowd::~CEnemyCrowd()
+CEnemyPapion::~CEnemyPapion()
 {
 
 }
 
+
 //==========================================================================
 // 初期化処理
 //==========================================================================
-HRESULT CEnemyCrowd::Init(void)
+HRESULT CEnemyPapion::Init(void)
 {
 	// 初期化処理
 	CEnemy::Init();
 
-	// 体力取得
-	int nLife = GetLife();
-
-	//// 体力ゲージ
-	//m_pHPGauge = CHP_Gauge::Create(80.0f, nLife, 0.8f);
-	m_state = STATE_SPAWN;	// 親追い掛け状態
-	m_Oldstate = STATE_PLAYERCHASE;
-	m_ActType = ACTTYPE_CHASE;
-	//if (m_pHPGauge == NULL)
-	//{// NULLだったら
-	//	m_pHPGauge = NULL;
-	//}
-
-	
-	// 生存時間
-	m_nSurvivalLifeOrigin = m_nSurvivalLife;
+	m_state = STATE_NONE;	// 親追い掛け状態
+	m_Oldstate = STATE_NONE;
 	return S_OK;
 }
 
 //==========================================================================
 // 終了処理
 //==========================================================================
-void CEnemyCrowd::Uninit(void)
+void CEnemyPapion::Uninit(void)
 {
 	// 終了処理
 	CEnemy::Uninit();
@@ -93,7 +76,7 @@ void CEnemyCrowd::Uninit(void)
 //==========================================================================
 // 死亡処理
 //==========================================================================
-void CEnemyCrowd::Kill(void)
+void CEnemyPapion::Kill(void)
 {
 	// 死亡処理
 	CEnemy::Kill();
@@ -102,7 +85,7 @@ void CEnemyCrowd::Kill(void)
 //==========================================================================
 // 更新処理
 //==========================================================================
-void CEnemyCrowd::Update(void)
+void CEnemyPapion::Update(void)
 {
 	// 死亡の判定
 	if (IsDeath() == true)
@@ -118,12 +101,46 @@ void CEnemyCrowd::Update(void)
 		return;
 	}
 
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+	D3DXVECTOR3 rot = GetRotation();
+
+	// 目標の向き取得
+	float fRotDest = GetRotDest();
+
+	// プレイヤー情報
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+
+	// 親の位置取得
+	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
+
+	// 目標の角度を求める
+	fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
+
+	// 目標との差分
+	float fRotDiff = fRotDest - rot.y;
+
+	//角度の正規化
+	RotNormalize(fRotDiff);
+
+	//角度の補正をする
+	rot.y += fRotDiff * 0.025f;
+
+	// 角度の正規化
+	RotNormalize(rot.y);
+
+	// 向き設定
+	SetRotation(rot);
+
+	// 目標の向き設定
+	SetRotDest(fRotDest);
+
 }
 
 //==========================================================================
 // 着地時の処理
 //==========================================================================
-void CEnemyCrowd::ProcessLanding(void)
+void CEnemyPapion::ProcessLanding(void)
 {
 	// 着地時の処理
 	CEnemy::ProcessLanding();
@@ -132,37 +149,16 @@ void CEnemyCrowd::ProcessLanding(void)
 //==========================================================================
 // 攻撃状態移行処理
 //==========================================================================
-void CEnemyCrowd::ChangeToAttackState(void)
+void CEnemyPapion::ChangeToAttackState(void)
 {
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
+	return;
 
-	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
-
-	if (pPlayer == NULL)
-	{
-		return;
-	}
-
-	// 親の位置取得
-	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
-
-	float fRadius = 500.0f;
-
-	if (CircleRange(pos, posPlayer, fRadius, pPlayer->GetRadius()) == true && m_sMotionFrag.bJump == false)
-	{// 一定距離間にプレイヤーが入ったら
-
-		// 攻撃状態にする
-		m_state = STATE_ATTACK;
-		m_sMotionFrag.bATK = true;
-	}
 }
 
 //==========================================================================
 // 出現
 //==========================================================================
-void CEnemyCrowd::Spawn(void)
+void CEnemyPapion::Spawn(void)
 {
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -194,7 +190,7 @@ void CEnemyCrowd::Spawn(void)
 //==========================================================================
 // 攻撃処理
 //==========================================================================
-void CEnemyCrowd::StateAttack(void)
+void CEnemyPapion::StateAttack(void)
 {
 	// 攻撃処理
 	CEnemy::StateAttack();
@@ -228,48 +224,48 @@ void CEnemyCrowd::StateAttack(void)
 	}
 
 
-	// プレイヤー情報
-	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
-	if (pPlayer == NULL)
-	{// NULLだったら
-		return;
-	}
+	//// プレイヤー情報
+	//CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	//if (pPlayer == NULL)
+	//{// NULLだったら
+	//	return;
+	//}
 
-	// 親の位置取得
-	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
+	//// 親の位置取得
+	//D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
 
-	// 位置取得
-	D3DXVECTOR3 pos = GetPosition();
+	//// 位置取得
+	//D3DXVECTOR3 pos = GetPosition();
 
-	// 向き取得
-	D3DXVECTOR3 rot = GetRotation();
+	//// 向き取得
+	//D3DXVECTOR3 rot = GetRotation();
 
-	// 目標の向き取得
-	float fRotDest = GetRotDest();
+	//// 目標の向き取得
+	//float fRotDest = GetRotDest();
 
-	// 目標の角度を求める
-	fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
+	//// 目標の角度を求める
+	//fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
 
-	// 目標との差分
-	float fRotDiff = fRotDest - rot.y;
+	//// 目標との差分
+	//float fRotDiff = fRotDest - rot.y;
 
-	//角度の正規化
-	RotNormalize(fRotDiff);
+	////角度の正規化
+	//RotNormalize(fRotDiff);
 
-	//角度の補正をする
-	rot.y += fRotDiff * 0.025f;
+	////角度の補正をする
+	//rot.y += fRotDiff * 0.025f;
 
-	// 角度の正規化
-	RotNormalize(rot.y);
+	//// 角度の正規化
+	//RotNormalize(rot.y);
 
-	// 向き設定
-	SetRotation(rot);
+	//// 向き設定
+	//SetRotation(rot);
 }
 
 //==========================================================================
 // 追い掛け移動
 //==========================================================================
-void CEnemyCrowd::ChaseMove(float fMove)
+void CEnemyPapion::ChaseMove(float fMove)
 {
 	// 向き取得
 	D3DXVECTOR3 rot = GetRotation();
@@ -288,7 +284,7 @@ void CEnemyCrowd::ChaseMove(float fMove)
 //==========================================================================
 // モーションの設定
 //==========================================================================
-void CEnemyCrowd::MotionSet(void)
+void CEnemyPapion::MotionSet(void)
 {
 	if (m_pMotion->IsFinish() == true)
 	{// 終了していたら
@@ -329,7 +325,7 @@ void CEnemyCrowd::MotionSet(void)
 //==========================================================================
 // 攻撃時処理
 //==========================================================================
-void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
+void CEnemyPapion::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 {
 	D3DXMATRIX mtxTrans;	// 計算用マトリックス宣言
 
@@ -361,24 +357,18 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	// プレイヤーの位置
 	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
 
+	// プレイヤーと敵のベクトル
+	D3DXVECTOR3 vec = weponpos - posPlayer;
 
 	// 目標の角度を求める
-	float fRotDest = atan2f((weponpos.x - posPlayer.x), (weponpos.z - posPlayer.z));
+	float fRotDest = atan2f(vec.x, vec.z);
+	float fRotHeight = atan2f((weponpos.y - posPlayer.y - 100.0f), D3DXVec3Length(&vec));
 
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
 
 	// 位置取得
 	D3DXVECTOR3 rot = GetRotation();
-
-	// 弾の生成
-	CObject *pBullet = CBullet::Create(
-		CBullet::TYPE_ENEMY,
-		CBullet::MOVETYPE_NORMAL,
-		D3DXVECTOR3(pos.x, 50.0f, pos.z),
-		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
-		40.0f);
 
 	// マップマネージャの取得
 	CMapManager *pMapManager = CGame::GetMapManager();
@@ -388,34 +378,16 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	}
 	ANGLE setAngle = pMapManager->GetTargetAngle(GetMapIndex(), pPlayer->GetMapIndex(), GetMapMoveValue(), pPlayer->GetMapMoveValue());
 
-	setAngle = ANGLE_UP;
-
-	pBullet->SetMapIndex(GetMapIndex());
-	pBullet->SetMapMoveValue(GetMapMoveValue());
-	pBullet->SetMapPointRatio(GetMapPointRatio());
-	pBullet->SetMoveAngle(setAngle);
-
-
-	pBullet = CBullet::Create(
+	// 弾の生成
+	CObject *pBullet = CBullet::Create(
 		CBullet::TYPE_ENEMY,
 		CBullet::MOVETYPE_NORMAL,
-		D3DXVECTOR3(pos.x, 150.0f, pos.z),
+		D3DXVECTOR3(pos.x, pos.y, pos.z),
 		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
+		D3DXVECTOR3(fabsf(sinf(D3DX_PI * 0.5f + fRotHeight) * 5.0f), cosf(D3DX_PI * 0.5f + fRotHeight) * 5.0f, 0.0f),
 		40.0f);
-	pBullet->SetMapIndex(GetMapIndex());
-	pBullet->SetMapMoveValue(GetMapMoveValue());
-	pBullet->SetMapPointRatio(GetMapPointRatio());
-	pBullet->SetMoveAngle(setAngle);
+	//SlashMove = D3DXVECTOR3(cosf(fRotX) * fFabsMove, sinf(D3DX_PI + fRotY) * fFabsMove, 0.0f);
 
-
-	pBullet = CBullet::Create(
-		CBullet::TYPE_ENEMY,
-		CBullet::MOVETYPE_NORMAL,
-		D3DXVECTOR3(pos.x, 250.0f, pos.z),
-		rot,
-		D3DXVECTOR3(3.0f, 0.0f, 0.0f),
-		40.0f);
 	pBullet->SetMapIndex(GetMapIndex());
 	pBullet->SetMapMoveValue(GetMapMoveValue());
 	pBullet->SetMapPointRatio(GetMapPointRatio());
@@ -425,7 +397,7 @@ void CEnemyCrowd::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 //==========================================================================
 // 描画処理
 //==========================================================================
-void CEnemyCrowd::Draw(void)
+void CEnemyPapion::Draw(void)
 {
 	// 描画処理
 	CEnemy::Draw();
@@ -434,7 +406,7 @@ void CEnemyCrowd::Draw(void)
 //==========================================================================
 // 敵の情報取得
 //==========================================================================
-CEnemyCrowd *CEnemyCrowd::GetEnemy(void)
+CEnemyPapion *CEnemyPapion::GetEnemy(void)
 {
 	// 自分自身のポインタを取得
 	return this;

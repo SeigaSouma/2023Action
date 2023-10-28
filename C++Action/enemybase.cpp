@@ -8,6 +8,7 @@
 #include "enemybase.h"
 #include "calculation.h"
 #include "game.h"
+#include "gamemanager.h"
 #include "3D_effect.h"
 #include "debugpointnumber.h"
 #include "objectX.h"
@@ -89,26 +90,35 @@ CEnemyBase *CEnemyBase::Create(void)
 //==========================================================================
 HRESULT CEnemyBase::Init(void)
 {
-	//// 総数リセット
-	//m_ppMapManager = DEBUG_NEW (CEnemyBase*);
-	//*m_ppMapManager = NULL;
-
+	// 敵マネージャ取得
 	CEnemyManager *pEnemyManager = CGame::GetEnemyManager();
 
-	// 生成する
-	for (int i = 0; i < m_nNumAll; i++)
+	if (CGame::GetGameManager()->GetType() != CGameManager::SCENE_BOSS)
 	{
-		// デバッグ用数字の生成
-		m_pMultiNumber[i] = CDebugPointNumber::Create(i);
+		// 生成する
+		for (int i = 0; i < m_nNumAll; i++)
+		{
+			// デバッグ用数字の生成
+			m_pMultiNumber[i] = CDebugPointNumber::Create(i);
 
-		if (m_ChaseChangeInfo[i].nRush == 0)
-		{// ラッシュ用じゃなかったら
-			pEnemyManager->SetEnemy(
-				D3DXVECTOR3(0.0f, m_ChaseChangeInfo[i].fSpawnPosY, 0.0f),
-				m_ChaseChangeInfo[i].nMapIdx,
-				m_ChaseChangeInfo[i].fMapMoveValue,
-				m_ChaseChangeInfo[i].nPattern);
+			if (m_ChaseChangeInfo[i].nRush == 0)
+			{// ラッシュ用じゃなかったら
+				pEnemyManager->SetEnemy(
+					D3DXVECTOR3(0.0f, m_ChaseChangeInfo[i].fSpawnPosY, 0.0f),
+					m_ChaseChangeInfo[i].nMapIdx,
+					m_ChaseChangeInfo[i].fMapMoveValue,
+					m_ChaseChangeInfo[i].nPattern);
+			}
 		}
+	}
+	else if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_BOSS)
+	{// ボス戦中
+
+		pEnemyManager->SetEnemy(
+			D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+			D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+			0);
+
 	}
 
 	return S_OK;
@@ -171,7 +181,7 @@ void CEnemyBase::Update(void)
 #if _DEBUG
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -204,6 +214,7 @@ void CEnemyBase::Update(void)
 //==========================================================================
 HRESULT CEnemyBase::ReadText(void)
 {
+#if 0
 
 	// ファイルを開く
 	FILE *pFile = fopen(FILE_ENEMYBASE, "rb");
@@ -255,6 +266,91 @@ HRESULT CEnemyBase::ReadText(void)
 		Save();
 	}
 
+#else
+
+	char aComment[MAX_COMMENT] = {};	// コメント用
+
+	FILE *pFile = NULL;	// ファイルポインタを宣言
+
+	// ファイルを開く
+	pFile = fopen("data\\TEXT\\enemybase.txt", "r");
+
+	if (pFile == NULL)
+	{// ファイルが開けなかった場合
+		return E_FAIL;
+	}
+
+	// リセット
+	m_nNumAll = 0;
+
+	while (1)
+	{// END_SCRIPTが来るまで繰り返す
+
+		// 文字列の読み込み
+		fscanf(pFile, "%s", &aComment[0]);
+
+		if (strcmp(aComment, "BASESET") == 0)
+		{// BASESETで敵拠点の読み込み開始
+
+			// 最後尾に生成
+			sInfo InitInfo;
+			memset(&InitInfo, NULL, sizeof(InitInfo));
+			m_ChaseChangeInfo.push_back(InitInfo);
+
+			while (strcmp(aComment, "END_BASESET") != 0)
+			{// END_BASESETが来るまで繰り返す
+
+				fscanf(pFile, "%s", &aComment[0]);	// 確認する
+
+				if (strcmp(aComment, "PATTERN") == 0)
+				{// PATTERNが来たら敵の種類読み込み
+
+					fscanf(pFile, "%s", &aComment[0]);	// =の分
+					fscanf(pFile, "%d", &m_ChaseChangeInfo[m_nNumAll].nPattern);	// キャラファイル番号
+				}
+
+				if (strcmp(aComment, "MAPIDX") == 0)
+				{// MAPIDXが来たらマップインデックス番号読み込み
+
+					fscanf(pFile, "%s", &aComment[0]);	// =の分
+					fscanf(pFile, "%d", &m_ChaseChangeInfo[m_nNumAll].nMapIdx);	// マップインデックス番号
+				}
+
+				if (strcmp(aComment, "MAPMOVEVALUE") == 0)
+				{// MAPMOVEVALUEが来たらマップ移動量読み込み
+
+					fscanf(pFile, "%s", &aComment[0]);	// =の分
+					fscanf(pFile, "%f", &m_ChaseChangeInfo[m_nNumAll].fMapMoveValue);	// マップ移動量
+				}
+
+				if (strcmp(aComment, "SPAWN_Y") == 0)
+				{// SPAWN_Yが来たら出現高さ読み込み
+
+					fscanf(pFile, "%s", &aComment[0]);	// =の分
+					fscanf(pFile, "%f", &m_ChaseChangeInfo[m_nNumAll].fSpawnPosY);	// マップ移動量
+				}
+
+				if (strcmp(aComment, "RUSH") == 0)
+				{// RUSHが来たらラッシュ用か読み込み
+
+					fscanf(pFile, "%s", &aComment[0]);	// =の分
+					fscanf(pFile, "%d", &m_ChaseChangeInfo[m_nNumAll].nRush);	// ラッシュ用
+				}
+
+			}// END_BASESETのかっこ
+
+			// 敵の拠点数加算
+			m_nNumAll++;
+		}
+
+		if (strcmp(&aComment[0], "END_SCRIPT") == 0)
+		{// 終了文字でループを抜ける
+
+			break;
+		}
+	}
+
+#endif
 	return S_OK;
 }
 
@@ -263,6 +359,7 @@ HRESULT CEnemyBase::ReadText(void)
 //==========================================================================
 void CEnemyBase::Save(void)
 {
+#if 0
 	// ファイルを開く
 	FILE *pFile = fopen(FILE_ENEMYBASE, "wb");
 
@@ -280,6 +377,48 @@ void CEnemyBase::Save(void)
 		// ファイルを閉じる
 		fclose(pFile);
 	}
+#else
+
+	FILE *pFile = NULL;	// ファイルポインタを宣言
+
+	// ファイルを開く
+	pFile = fopen("data\\TEXT\\enemybase.txt", "w");
+
+	if (pFile == NULL)
+	{// ファイルが開けなかった場合
+		return;
+	}
+
+	fprintf(pFile,
+		"\n"
+		"#==============================================================================\n"
+		"# 敵拠点の配置\n"
+		"#==============================================================================\n");
+
+	for (int i = 0; i < m_nNumAll; i++)
+	{
+		// 出力
+		fprintf(pFile,
+			"BASESET\n"
+			"\tPATTERN = %d\n"
+			"\tMAPIDX = %d\n"
+			"\tMAPMOVEVALUE = %.2f\n"
+			"\tSPAWN_Y = %.2f\n"
+			"\tRUSH = %d\n"
+			"END_BASESET\n\n",
+			m_ChaseChangeInfo[i].nPattern,
+			m_ChaseChangeInfo[i].nMapIdx,
+			m_ChaseChangeInfo[i].fMapMoveValue,
+			m_ChaseChangeInfo[i].fSpawnPosY,
+			m_ChaseChangeInfo[i].nRush);
+	}
+
+	fprintf(pFile, "\nEND_SCRIPT		# この行は絶対消さないこと！");
+
+	//ファイルを閉じる
+	fclose(pFile);
+
+#endif
 }
 
 //==========================================================================
@@ -301,7 +440,7 @@ D3DXVECTOR3 CEnemyBase::GetAxis(int nIdx)
 	}
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return mylib_const::DEFAULT_VECTOR3;

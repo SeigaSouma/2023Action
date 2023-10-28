@@ -43,6 +43,7 @@ public:
 	void Uninit(void);
 	void Update(void);
 	void SetCamera(void);
+
 	void SetRotation(const D3DXVECTOR3 rot);	// 向き設定
 	D3DXVECTOR3 GetRotation(void) const;		// 向き取得
 	D3DXVECTOR3 GetPositionV(void) const;		// カメラの位置取得
@@ -55,6 +56,7 @@ public:
 	void SetChaseType(CHASETYPE type);	// 追従の種類設定
 	CHASETYPE GetChaseType(void);		// 追従の種類取得
 	void Reset(CScene::MODE mode);	// リセット
+	void ResetBoss(void);	// リセット
 private:
 
 	// メンバ変数

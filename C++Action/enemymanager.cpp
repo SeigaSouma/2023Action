@@ -38,7 +38,6 @@ CEnemy *CEnemyManager::m_pEnemy[mylib_const::MAX_OBJ] = {};
 int CEnemyManager::m_nNumAll = 0;		// 総数
 int CEnemyManager::m_nNumChara = 0;		// 敵の種類の総数
 int CEnemyManager::m_nCntSpawn = 0;		// 出現カウント
-bool CEnemyManager::m_bLoadPattern = false;	// パターン読み込み判定
 bool CEnemyManager::m_bHitStop = false;	// ヒットストップの判定
 CEnemyManager::STATE CEnemyManager::m_state = CEnemyManager::STATE_NONE;		// 状態
 CEnemyManager::sRushWave *CEnemyManager::m_pRushWaveInfo = NULL;					// ラッシュのウェーブ情報
@@ -172,59 +171,100 @@ void CEnemyManager::Release(int nIdx)
 }
 
 //==========================================================================
+// 破棄
+//==========================================================================
+void CEnemyManager::Kill(void)
+{
+	for (int nCntEnemy = 0; nCntEnemy < mylib_const::MAX_OBJ; nCntEnemy++)
+	{
+		if (m_pEnemy[nCntEnemy] != NULL)
+		{
+			m_pEnemy[nCntEnemy]->Uninit();
+			m_pEnemy[nCntEnemy] = NULL;
+		}
+	}
+}
+
+//==========================================================================
 // 更新処理
 //==========================================================================
 void CEnemyManager::Update(void)
 {
+	CGameManager::SceneType SceneType = CGame::GetGameManager()->GetType();
 
-	//if (m_nNumAll <= 0)
-	//{
-	//	SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 0);
-	//	/*SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 1);
-	//	SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 2);
-	//	SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 3);*/
-	//	SetEnemy(D3DXVECTOR3(0.0f, 200.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), 4);
-	//}
+	switch (SceneType)
+	{
+	case CGameManager::SCENE_MAIN:
+		break;
 
-	if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_RUSH)
-	{// 敵のラッシュ中
-		if (m_nNumRushEnemy <= 0)
-		{// 総数がゼロになったら
+	case CGameManager::SCENE_RUSH:
+		UpdateRush();
+		break;
 
-			if (m_nNumWave <= m_nNowWave)
-			{// ウェーブの総数を超えたら
-				// シーンの種類設定
-				CGame::GetGameManager()->SetType(CGameManager::SCENE_MAIN);
+	case CGameManager::SCENE_BOSS:
+		UpdateBoss();
+		break;
 
-				// ラッシュの終了判定有効
-				CGame::GetGameManager()->SetEnableRush();
-				return;
-			}
+	case CGameManager::SCENE_TRANSITIONWAIT:
+		break;
 
-			for (int nCntEnemy = 0; nCntEnemy < m_pRushWaveInfo[m_nNowWave].nWaveNumEnemy; nCntEnemy++)
-			{
-				int nAxisNum = CGame::GetEnemyBase()->GetAxisNum();
-				int nBase = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nBase;
+	case CGameManager::SCENE_TRANSITION:
+		break;
 
-				CEnemyBase::sInfo info = CGame::GetEnemyBase()->GetChaseChangeInfo(nBase);
-				int nType = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nPatternType;
-
-				// 敵配置
-				SetEnemy(CGame::GetEnemyBase()->GetAxis(nBase), info.nMapIdx, info.fMapMoveValue, nType);
-
-				// ラッシュ中の敵の数加算
-				m_nNumRushEnemy += m_aPattern[nType].nNumEnemy;
-			}
-
-			// ウェーブ加算
-			m_nNowWave++;
-		}
+	default:
+		break;
 	}
 
 	// テキストの描画
 	CManager::GetInstance()->GetDebugProc()->Print(
 		"---------------- 敵情報 ----------------\n"
 		"【残り人数】[%d]\n", m_nNumAll);
+}
+
+//==========================================================================
+// ラッシュ時
+//==========================================================================
+void CEnemyManager::UpdateRush(void)
+{
+	if (m_nNumRushEnemy <= 0)
+	{// 総数がゼロになったら
+
+		if (m_nNumWave <= m_nNowWave)
+		{// ウェーブの総数を超えたら
+			// シーンの種類設定
+			CGame::GetGameManager()->SetType(CGameManager::SCENE_MAIN);
+
+			// ラッシュの終了判定有効
+			CGame::GetGameManager()->SetEnableRush();
+			return;
+		}
+
+		for (int nCntEnemy = 0; nCntEnemy < m_pRushWaveInfo[m_nNowWave].nWaveNumEnemy; nCntEnemy++)
+		{
+			int nAxisNum = CGame::GetEnemyBase()->GetAxisNum();
+			int nBase = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nBase;
+
+			CEnemyBase::sInfo info = CGame::GetEnemyBase()->GetChaseChangeInfo(nBase);
+			int nType = m_pRushWaveInfo[m_nNowWave].pRushInfo[nCntEnemy].nPatternType;
+
+			// 敵配置
+			SetEnemy(CGame::GetEnemyBase()->GetAxis(nBase), info.nMapIdx, info.fMapMoveValue, nType);
+
+			// ラッシュ中の敵の数加算
+			m_nNumRushEnemy += m_aPattern[nType].nNumEnemy;
+		}
+
+		// ウェーブ加算
+		m_nNowWave++;
+	}
+}
+
+//==========================================================================
+// ボス戦時
+//==========================================================================
+void CEnemyManager::UpdateBoss(void)
+{
+
 }
 
 //==========================================================================
@@ -383,11 +423,6 @@ int CEnemyManager::GetNumAll(void)
 HRESULT CEnemyManager::ReadText(const std::string pTextFile)
 {
 
-	if (m_bLoadPattern == true)
-	{// 既に読み込まれていたら
-		return S_OK;
-	}
-
 	FILE *pFile = NULL;	// ファイルポインタを宣言
 
 	// ファイルを開く
@@ -398,13 +433,14 @@ HRESULT CEnemyManager::ReadText(const std::string pTextFile)
 		return E_FAIL;
 	}
 
-	// 読み込み判定ON
-	m_bLoadPattern = true;
-
 	char aComment[MAX_COMMENT];	// コメント
 	int nType = 0;				// 配置する種類
 	int nCntPatten = 0;			// パターンのカウント
 	int nCntFileName = 0;
+
+	memset(&m_aPattern[0], NULL, sizeof(m_aPattern));	// 読み込みデータ
+	m_nPatternNum = 0;
+	m_nNumChara = 0;
 
 	while (1)
 	{// END_SCRIPTが来るまで繰り返す

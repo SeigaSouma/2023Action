@@ -423,7 +423,7 @@ void CEnemyFly::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	D3DXVECTOR3 rot = GetRotation();
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;

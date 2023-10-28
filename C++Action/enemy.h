@@ -33,6 +33,7 @@ public:
 		TYPE_BOSS = 0,	// ボス
 		TYPE_CROUWD,
 		TYPE_FLY,
+		TYPE_PAPION,
 		TYPE_MAX
 	}TYPE;
 
@@ -48,6 +49,7 @@ public:
 		STATE_PARENTCHASE,	// 親追い掛け
 		STATE_ATTACK,		// 攻撃
 		STATE_WAIT,			// 待機
+		STATE_BASECHANGE,	// 拠点切り替え
 		STATE_MAX
 	}STATE;
 
@@ -92,6 +94,14 @@ protected:
 		COLORTYPE_SWIFTFOOT,	// 脚はやい
 		COLORTYPE_TUTORIAL,		// チュートリアル
 		COLORTYPE_MAX
+	};
+
+	// 拠点位置の種類
+	enum eBaseType
+	{
+		BASETYPE_MAP = 0,	// マップに沿っている
+		BASETYPE_ORIGIN,	// 出現位置
+		BASETYPE_MAX
 	};
 
 	enum ACTTYPE
@@ -140,6 +150,7 @@ protected:
 	virtual void TriggerChasePlayer(void);	// プレイヤー追従ONにするトリガー
 	virtual void ChangeToAttackState(void);	// 攻撃状態移行処理
 	virtual void StateWait(void);			// 待機処理
+	virtual void ChangeBase(void);			// 拠点切り替え
 
 	STATE m_state;							// 状態
 	STATE m_Oldstate;						// 前回の状態

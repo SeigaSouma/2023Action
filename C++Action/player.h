@@ -30,11 +30,6 @@ class CPlayer : public CObjectChara
 {
 public:
 
-	// 列挙型定義
-#if ACTION_MODE
-
-#else
-
 	// 状態定義
 	typedef enum
 	{
@@ -46,7 +41,6 @@ public:
 		STATE_ATTACK,		// 攻撃処理
 		STATE_MAX
 	}STATE;
-#endif
 
 	CPlayer(int nPriority = mylib_const::DEF2D_PRIORITY);
 	~CPlayer();
@@ -71,11 +65,13 @@ protected:
 		MOTION_DEF = 0,			// ニュートラルモーション
 		MOTION_WALK,			// 移動モーション
 		MOTION_ATK,				// 攻撃
-		MOTION_ATK2,				// 攻撃(派生)
+		MOTION_ATK2,			// 攻撃(派生)
 		MOTION_KNOCKBACK,		// やられモーション
+		MOTION_JUMP,			// ジャンプ
 		MOTION_MAX
 	};
 
+	// 連続攻撃の方向
 	enum ATKRUSH
 	{
 		ATKRUSH_RIGHT = 0,

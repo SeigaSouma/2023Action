@@ -30,6 +30,7 @@ public:
 	void Update(void) override;
 	void Draw(void) override;
 	void Kill(void) override;
+	bool Hit(const int nValue) override;
 
 	CEnemyBoss *GetEnemy(void);
 protected:
@@ -39,7 +40,9 @@ private:
 	{
 		MOTION_DEF = 0,		// ニュートラルモーション
 		MOTION_WALK,		// 移動モーション
-		MOTION_BULLETATK,			// 攻撃
+		MOTION_BULLETATK,	// 攻撃
+		MOTION_SUPERBULLETATK,	// 攻撃
+		MOTION_ASSULTATK,	// 攻撃
 		MOTION_KNOCKBACK,	// やられモーション
 		MOTION_FADEOUT,		// 帰還モーション
 		MOTION_MAX
@@ -48,13 +51,16 @@ private:
 	enum ATKTYPE
 	{
 		ATKTYPE_BULLET = 0,	// 弾発射攻撃
+		ATKTYPE_SUPERBULLET,// ちょうたま
+		ATKTYPE_ASSULT,		// 突進
+		ATKTYPE_ENEMYSPAWN,	// 敵出現
 		ATKTYPE_MAX
 	};
 
 	// 行動の構造体定義
 	struct BOSSACT
 	{
-		int nCntWait;		// 待機カウンター
+		int nAssultAngle;	// 突進の向き
 		ATKTYPE AtkType;	// 攻撃の種類
 	};
 
@@ -65,8 +71,11 @@ private:
 	void StateAttack(void) override;	// 攻撃処理
 	void MotionSet(void) override;		// モーションの設定
 	void StateWait(void) override;		// 待機処理
+	void PlayerChase(void) override;			// プレイヤー追従
+	void ChangeBase(void) override;			// 拠点切り替え
 
 	// 状態更新系
+	void Damage(void) override;		// ダメージ
 	void Spawn(void) override;		// スポーン
 
 	// メンバ関数
@@ -74,9 +83,15 @@ private:
 	void ChangeToAttackState(void);		// 攻撃状態移行処理
 	void UpdateByAttack(void);			// 攻撃別処理
 	void UpdateAttackBullet(void);		// 弾攻撃
+	void UpdateAttackAssult(void);		// 突進攻撃
+	void DrawingACT(void);				// 行動抽選
+	void RotPlayer(void);				// プレイヤーの方を見る
 
 	// メンバ変数
 	BOSSACT m_sAct;	// ボスの行動
+	eBaseType m_BaseType;	// 拠点の種類
+	eBaseType m_BaseTypeDest;	// 目標の拠点種類
+	int m_nCntDamage;			// ダメージカウンター
 };
 
 

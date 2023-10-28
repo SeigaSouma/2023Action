@@ -13,6 +13,7 @@
 #include "3D_effect.h"
 #include "multinumber.h"
 #include "mapmanager.h"
+#include "game.h"
 
 //==========================================================================
 // マクロ定義
@@ -80,13 +81,13 @@ CDebugPointNumber *CDebugPointNumber::Create(int nIdx)
 //==========================================================================
 HRESULT CDebugPointNumber::Init(void)
 {
-	//if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+	//if (CGame::GetMapManager() == NULL)
 	//{// NULLで抜ける
 	//	return E_FAIL;
 	//}
 
 	//// マップマネージャ取得
-	//CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	//CMapManager *pMapManager = CGame::GetMapManager();
 
 	// 数字生成
 	m_pMultiNumber = CMultiNumber::Create(
@@ -124,7 +125,7 @@ void CDebugPointNumber::Uninit(void)
 void CDebugPointNumber::Update(void)
 {
 	// マップマネージャ取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLで抜ける
 		return;

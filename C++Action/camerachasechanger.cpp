@@ -168,7 +168,7 @@ void CCameraChaseChanger::Update(void)
 #if _DEBUG
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -247,7 +247,7 @@ HRESULT CCameraChaseChanger::ReadText(const std::string pFileName)
 		}
 
 		// マップマネージャの取得
-		CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+		CMapManager *pMapManager = CGame::GetMapManager();
 		if (pMapManager == NULL)
 		{// NULLだったら
 			return S_OK;
@@ -335,7 +335,7 @@ D3DXVECTOR3 CCameraChaseChanger::GetAxis(int nIdx)
 	}
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return mylib_const::DEFAULT_VECTOR3;

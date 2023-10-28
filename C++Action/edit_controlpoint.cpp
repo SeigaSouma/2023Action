@@ -22,6 +22,8 @@
 //==========================================================================
 // マクロ定義
 //==========================================================================
+#define NORMAL_BIN	"data\\BIN\\maptarget.bin"
+#define BOSS_BIN	"data\\BIN\\maptarget_boss.bin"
 #define MOVE		(10.0f)
 #define MOVE_SLOW	(1.0f)
 
@@ -105,7 +107,7 @@ void CEditControlPoint::Update(void)
 
 	// 操作
 	Control(m_pos);
-	CEffect3D::Create(m_pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.6f, 0.1f, 1.0f), 50.0f, 2, CEffect3D::MOVEEFFECT_NONE, CEffect3D::TYPE_NORMAL);
+	CEffect3D::Create(m_pos, D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.6f, 1.0f, 1.0f), 50.0f, 2, CEffect3D::MOVEEFFECT_NONE, CEffect3D::TYPE_SMOKEBLACK);
 
 	// 掴み処理
 	if (pInputKeyboard->GetPress(DIK_SPACE) == true)
@@ -117,11 +119,11 @@ void CEditControlPoint::Update(void)
 	{// ENTERで配置
 
 		// マップマネージャの取得
-		if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+		if (CGame::GetMapManager() == NULL)
 		{
 			return;
 		}
-		CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+		CMapManager *pMapManager = CGame::GetMapManager();
 		pMapManager->CreatePos(m_pos);
 	}
 
@@ -134,12 +136,12 @@ void CEditControlPoint::Update(void)
 	{// セーブ
 
 		// マップマネージャの取得
-		if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+		if (CGame::GetMapManager() == NULL)
 		{
 			return;
 		}
-		CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
-		pMapManager->Save("data\\BIN\\maptarget.bin");
+		CMapManager *pMapManager = CGame::GetMapManager();
+		pMapManager->Save("data\\BIN\\maptarget_boss.bin");
 	}
 
 	// デバッグ情報
@@ -344,7 +346,7 @@ void CEditControlPoint::Grab(void)
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
-	if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+	if (CGame::GetMapManager() == NULL)
 	{// NULLで抜ける
 		return;
 	}
@@ -356,7 +358,7 @@ void CEditControlPoint::Grab(void)
 	}
 
 	// マップマネージャ取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 
 	for (int i = 0; i < pMapManager->GetNumAll(); i++)
 	{
@@ -381,18 +383,18 @@ void CEditControlPoint::Delete(void)
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
-	if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+	if (CGame::GetMapManager() == NULL)
 	{// NULLで抜ける
 		return;
 	}
 
 	// マップマネージャ取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 
 	for (int i = 0; i < pMapManager->GetNumAll(); i++)
 	{
 		D3DXVECTOR3 TargetPoint = pMapManager->GetControlPoint(i);
-		if (SphereRange(m_pos, TargetPoint, 50.0f, 50.0f))
+		if (CircleRange(m_pos, TargetPoint, 50.0f, 50.0f))
 		{// 球に当たってたら
 			pMapManager->DeletePos(i);
 		}

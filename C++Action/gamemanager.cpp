@@ -10,6 +10,8 @@
 #include "manager.h"
 #include "renderer.h"
 #include "instantfade.h"
+#include "player.h"
+#include "camera.h"
 
 //==========================================================================
 // マクロ定義
@@ -98,12 +100,21 @@ void CGameManager::Update(void)
 
 		if (fadestate == CInstantFade::STATE_FADECOMPLETION)
 		{// 完了した瞬間
+			
+			// 追従の種類設定
+			m_SceneType = SCENE_BOSS;
 
 			// リセット処理
 			CGame::Reset();
 
 			// シーンのリセット
 			CManager::GetInstance()->GetScene()->ResetScene();
+
+			// カメラの情報取得
+			CCamera *pCamera = CManager::GetInstance()->GetCamera();
+			pCamera->ResetBoss();
+
+			CManager::GetInstance()->GetScene()->GetPlayer()->SetPosition(D3DXVECTOR3(0.0f, 2000.0f, 0.0f));
 		}
 	}
 	

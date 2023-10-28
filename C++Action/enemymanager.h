@@ -79,6 +79,9 @@ public:
 	HRESULT Init(void);
 	void Uninit(void);
 	virtual void Update(void);
+	void UpdateRush(void);
+	void UpdateBoss(void);
+	void Kill(void);		// 破棄
 
 	static CEnemyManager *Create(const std::string pTextFile);
 	HRESULT ReadText(const std::string pTextFile);	// 外部ファイル読み込み処理
@@ -107,7 +110,6 @@ private:
 	static int m_nCntSpawn;		// 出現カウント
 	static int m_nPatternNum;	// 出現パターン数
 	static int m_nNumChara;		// 敵の種類の総数
-	static bool m_bLoadPattern;	// パターン読み込み判定
 	static int m_nNumWave;		// ラッシュウェーブの総数
 	static int m_nNumAll;		// 敵の総数
 	static int m_nNumRushEnemy;	// ラッシュ中の敵の総数

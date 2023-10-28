@@ -16,6 +16,7 @@
 #include "camera.h"
 #include "cameraaxis.h"
 #include "3D_effect.h"
+#include "game.h"
 
 //==========================================================================
 // マクロ定義
@@ -115,7 +116,7 @@ void CEditCameraAxis::Update(void)
 	{// ENTERで配置
 
 		// マップマネージャの取得
-		CCameraAxis *pCameraAxis = CManager::GetInstance()->GetScene()->GetCameraAxis();
+		CCameraAxis *pCameraAxis = CGame::GetCameraAxis();
 		if (pCameraAxis == NULL)
 		{
 			return;
@@ -132,11 +133,11 @@ void CEditCameraAxis::Update(void)
 	{// セーブ
 
 		// マップマネージャの取得
-		if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+		if (CGame::GetMapManager() == NULL)
 		{
 			return;
 		}
-		CCameraAxis *pCameraAxis = CManager::GetInstance()->GetScene()->GetCameraAxis();
+		CCameraAxis *pCameraAxis = CGame::GetCameraAxis();
 		pCameraAxis->Save("data\\BIN\\cameraaxis.bin");
 	}
 
@@ -316,7 +317,7 @@ void CEditCameraAxis::Grab(void)
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// マップマネージャ取得
-	CCameraAxis *pCameraAxis = CManager::GetInstance()->GetScene()->GetCameraAxis();
+	CCameraAxis *pCameraAxis = CGame::GetCameraAxis();
 	if (pCameraAxis == NULL)
 	{// NULLで抜ける
 		return;
@@ -351,13 +352,13 @@ void CEditCameraAxis::Delete(void)
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
-	if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+	if (CGame::GetMapManager() == NULL)
 	{// NULLで抜ける
 		return;
 	}
 
 	// マップマネージャ取得
-	CCameraAxis *pCameraAxis = CManager::GetInstance()->GetScene()->GetCameraAxis();
+	CCameraAxis *pCameraAxis = CGame::GetCameraAxis();
 
 	for (int i = 0; i < pCameraAxis->GetNumAll(); i++)
 	{

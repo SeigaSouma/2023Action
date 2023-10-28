@@ -33,6 +33,7 @@
 #include "enemy_boss.h"
 #include "enemy_crowd.h"
 #include "enemy_fly.h"
+#include "enemy_papion.h"
 
 //==========================================================================
 // マクロ定義
@@ -122,6 +123,10 @@ CEnemy *CEnemy::Create(int nIdx, const char *pFileName, D3DXVECTOR3 pos, TYPE ty
 
 		case TYPE_FLY:
 			pEnemy = DEBUG_NEW CEnemyFly;
+			break;
+
+		case TYPE_PAPION:
+			pEnemy = DEBUG_NEW CEnemyPapion;
 			break;
 
 		default:
@@ -506,7 +511,7 @@ void CEnemy::Collision(void)
 	pos += move;
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -612,7 +617,7 @@ bool CEnemy::Hit(const int nValue)
 	int nLife = GetLife();
 
 
-	if (nValue == mylib_const::DMG_BOUNCE || (m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_SPAWN))
+	if ((nValue == mylib_const::DMG_BOUNCE && m_state != STATE_DEAD) || (m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_SPAWN))
 	{// なにもない状態の時
 
 		// 体力減らす
@@ -679,7 +684,7 @@ bool CEnemy::Hit(const int nValue)
 		// 遷移カウンター設定
 		if (nValue == mylib_const::DMG_SLASH)
 		{
-			m_nCntState = 5;
+			m_nCntState = 10;
 
 			// ヒットストップ
 			//CManager::GetInstance()->SetEnableHitStop(2);
@@ -689,7 +694,7 @@ bool CEnemy::Hit(const int nValue)
 		}
 		else
 		{
-			m_nCntState = 20;
+			m_nCntState = 30;
 
 			// ヒットストップ
 			CManager::GetInstance()->SetEnableHitStop(5);
@@ -769,6 +774,10 @@ void CEnemy::UpdateState(void)
 
 	case STATE_WAIT:
 		StateWait();
+		break;
+
+	case STATE_BASECHANGE:
+		ChangeBase();
 		break;
 
 	}
@@ -1088,7 +1097,7 @@ void CEnemy::PlayerChase(void)
 	CObject *pObj = NULL;
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -1473,6 +1482,15 @@ void CEnemy::StateWait(void)
 {
 	return;
 }
+
+//==========================================================================
+// 拠点切り替え
+//==========================================================================
+void CEnemy::ChangeBase(void)
+{
+	return;
+}
+
 
 //==========================================================================
 // プレイヤー追従ONにするトリガー

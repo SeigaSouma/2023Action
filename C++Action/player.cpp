@@ -182,7 +182,7 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
-	SetMapIndex(39);
+	//SetMapIndex(35);
 
 	return S_OK;
 }
@@ -653,7 +653,7 @@ void CPlayer::Controll(void)
 	}
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -878,7 +878,12 @@ void CPlayer::Controll(void)
 		switch (MoveAngle)
 		{
 		case CPlayer::ANGLE_UP:
-			m_fAtkStickRot = 0.0f;
+
+			if (m_fAtkStickRot <= 0.0f)
+			{// 左半分
+				m_fAtkStickRot *= -1;
+			}
+			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
 			break;
 
 		case CPlayer::ANGLE_RIGHT:
@@ -928,7 +933,16 @@ void CPlayer::Controll(void)
 			break;
 
 		case CPlayer::ANGLE_DOWN:
-			m_fAtkStickRot = 0.0f;
+
+			if (m_fAtkStickRot >= 0.0f)
+			{// 右半分
+				m_fAtkStickRot *= -1;
+				m_fAtkStickRot += D3DX_PI * 0.5f;
+			}
+			else
+			{
+				m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
+			}
 			break;
 
 		case CPlayer::ANGLE_LEFT:
@@ -1199,7 +1213,7 @@ void CPlayer::Atack(void)
 				//	true,								// 加算合成するかどうか
 				//	GetMoveAngle()
 				//);
-				CSlash::Create
+				CSlash *pSlash = CSlash::Create
 				(
 					D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),	// 位置
 					D3DXVECTOR3(0.0f, 0.0f, 0.0f),		// 向き
@@ -1213,6 +1227,8 @@ void CPlayer::Atack(void)
 					true,								// 加算合成するかどうか
 					GetMoveAngle()
 				);
+				pSlash->SetMapIndex(GetMapIndex());
+				pSlash->SetMapMoveValue(GetMapMoveValue());
 
 				// 歩行音再生
 				CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_IMPACT01);
@@ -1438,14 +1454,14 @@ bool CPlayer::Collision(D3DXVECTOR3 &pos, D3DXVECTOR3 &move)
 void CPlayer::CollisionChaseChanger(void)
 {
 	// 追従の変更者取得
-	CCameraChaseChanger *pCameraChaseChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+	CCameraChaseChanger *pCameraChaseChanger = CGame::GetCameraChaseChanger();
 	if (pCameraChaseChanger == NULL)
 	{// NULLだったら
 		return;
 	}
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -1453,6 +1469,13 @@ void CPlayer::CollisionChaseChanger(void)
 
 	// カメラの情報取得
 	CCamera *pCamera = CManager::GetInstance()->GetCamera();
+
+	if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_BOSS)
+	{// ボス中
+		pCamera->SetChaseType(CCamera::CHASETYPE_NORMAL);
+		pCamera->SetTargetPosition(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		return;
+	}
 
 	// 情報取得
 	CCameraChaseChanger::sChaseChangeInfo ChaseChangerInfo;
@@ -1545,7 +1568,7 @@ void CPlayer::CollisionChaseChanger(void)
 
 		case CCamera::CHASETYPE_MAP:
 			pCamera->SetChaseType(CCamera::CHASETYPE_NORMAL);
-			D3DXVECTOR3 AxisPos = CManager::GetInstance()->GetScene()->GetCameraAxis()->GetAxis(ChaseChangerInfo.nByTypeIdx);
+			D3DXVECTOR3 AxisPos = CGame::GetCameraAxis()->GetAxis(ChaseChangerInfo.nByTypeIdx);
 			pCamera->SetTargetPosition(AxisPos);
 			CameraChaseType = CCamera::CHASETYPE_NORMAL;
 			break;

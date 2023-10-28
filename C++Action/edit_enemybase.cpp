@@ -149,7 +149,7 @@ void CEditEnemyBase::Update(void)
 
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -214,7 +214,7 @@ void CEditEnemyBase::Update(void)
 	{// ENTERで配置
 
 		// 敵の拠点の取得
-		CEnemyBase *pEnemyBase = CManager::GetInstance()->GetScene()->GetEnemyBase();
+		CEnemyBase *pEnemyBase = CGame::GetEnemyBase();
 		if (pEnemyBase == NULL)
 		{
 			return;
@@ -232,7 +232,7 @@ void CEditEnemyBase::Update(void)
 	{// セーブ
 
 		// 敵の拠点の取得
-		CEnemyBase *pEnemyBase = CManager::GetInstance()->GetScene()->GetEnemyBase();
+		CEnemyBase *pEnemyBase = CGame::GetEnemyBase();
 		if (pEnemyBase == NULL)
 		{
 			return;
@@ -306,7 +306,7 @@ void CEditEnemyBase::Control(D3DXVECTOR3 &pos)
 
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -390,7 +390,7 @@ void CEditEnemyBase::Grab(void)
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 敵の拠点の取得
-	CEnemyBase *pEnemyBase = CManager::GetInstance()->GetScene()->GetEnemyBase();
+	CEnemyBase *pEnemyBase = CGame::GetEnemyBase();
 	if (pEnemyBase == NULL)
 	{
 		return;
@@ -426,7 +426,7 @@ void CEditEnemyBase::Delete(void)
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// 敵の拠点の取得
-	CEnemyBase *pEnemyBase = CManager::GetInstance()->GetScene()->GetEnemyBase();
+	CEnemyBase *pEnemyBase = CGame::GetEnemyBase();
 	if (pEnemyBase == NULL)
 	{
 		return;

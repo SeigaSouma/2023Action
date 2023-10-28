@@ -137,7 +137,7 @@ void CEditCameraChaseChanger::Update(void)
 	{// ENTERで配置
 
 		// マップマネージャの取得
-		CCameraChaseChanger *pCmaeraChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+		CCameraChaseChanger *pCmaeraChanger = CGame::GetCameraChaseChanger();
 		if (pCmaeraChanger == NULL)
 		{
 			return;
@@ -154,11 +154,11 @@ void CEditCameraChaseChanger::Update(void)
 	{// セーブ
 
 		// マップマネージャの取得
-		if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+		if (CGame::GetMapManager() == NULL)
 		{
 			return;
 		}
-		CCameraChaseChanger *pCmaeraChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+		CCameraChaseChanger *pCmaeraChanger = CGame::GetCameraChaseChanger();
 		pCmaeraChanger->Save("data\\BIN\\camerachanger.bin");
 	}
 
@@ -248,7 +248,7 @@ void CEditCameraChaseChanger::Control(D3DXVECTOR3 &pos)
 	}
 
 	// マップマネージャの取得
-	CMapManager *pMapManager = CManager::GetInstance()->GetScene()->GetMapManager();
+	CMapManager *pMapManager = CGame::GetMapManager();
 	if (pMapManager == NULL)
 	{// NULLだったら
 		return;
@@ -269,7 +269,7 @@ void CEditCameraChaseChanger::Grab(void)
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	// マップマネージャ取得
-	CCameraChaseChanger *pCmaeraChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+	CCameraChaseChanger *pCmaeraChanger = CGame::GetCameraChaseChanger();
 	if (pCmaeraChanger == NULL)
 	{// NULLで抜ける
 		return;
@@ -304,13 +304,13 @@ void CEditCameraChaseChanger::Delete(void)
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
-	if (CManager::GetInstance()->GetScene()->GetMapManager() == NULL)
+	if (CGame::GetMapManager() == NULL)
 	{// NULLで抜ける
 		return;
 	}
 
 	// マップマネージャ取得
-	CCameraChaseChanger *pCmaeraChanger = CManager::GetInstance()->GetScene()->GetCameraChaseChanger();
+	CCameraChaseChanger *pCmaeraChanger = CGame::GetCameraChaseChanger();
 
 	for (int i = 0; i < pCmaeraChanger->GetNumAll(); i++)
 	{

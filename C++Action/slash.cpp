@@ -349,6 +349,12 @@ void  CSlash::Collision(void)
 					fRotX += D3DX_PI;
 				}
 
+				if (ppBullet[nCntBullet]->GetMoveAngle() == ANGLE_UP ||
+					ppBullet[nCntBullet]->GetMoveAngle() == ANGLE_DOWN)
+				{// 弾の向きが奥か手前
+					ppBullet[nCntBullet]->SetMapIndex(GetMapIndex());
+					ppBullet[nCntBullet]->SetMapMoveValue(GetMapMoveValue());
+				}
 
 				SlashMove = D3DXVECTOR3(cosf(fRotX) * fFabsMove, sinf(D3DX_PI + fRotY) * fFabsMove, 0.0f);
 				ppBullet[nCntBullet]->SetMove(SlashMove);
@@ -373,7 +379,7 @@ void  CSlash::Collision(void)
 
 
 	// 敵マネージャ取得
-	CEnemyManager *pEnemyManager = CManager::GetInstance()->GetScene()->GetEnemyManager();
+	CEnemyManager *pEnemyManager = CGame::GetEnemyManager();
 	if (pEnemyManager == NULL)
 	{// NULLだったら
 		return;
