@@ -125,6 +125,7 @@ public:
 	void SetOldMoveAngle(ANGLE angle);		// 過去の移動方向設定
 	ANGLE GetOldMoveAngle(void);			// 過去の移動方向取得
 
+	void SetEnableDisp(bool bDisp) { m_bDisp = bDisp; }			// 描画設定
 	int SetEffectParent(CEffect3D *pEffect3D);	// エフェクト設定
 	CEffect3D *GetEffectParent(int nIdx);	// 親設定したエフェクト取得
 	int GetEffectParentNum(void);			// 親設定したエフェクトの数取得
@@ -169,6 +170,7 @@ private:
 	CObject *m_pPrev;	// 前のオブジェクトへのポインタ
 	CObject *m_pNext;	// 次のオブジェクトへのポインタ
 	bool m_bDeath;		// 死亡フラグ
+	bool m_bDisp;		// 描画フラグ
 	CEffect3D *m_pEffect[mylib_const::MAX_OBJ];	// エフェクトのポインタ
 	int m_nNumEffectParent;	// エフェクトの親設定した数
 	bool m_bHitstopMove;		// ヒットストップ時に動くかのフラグ

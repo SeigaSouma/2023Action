@@ -11,6 +11,7 @@
 #include "object2D.h"
 #include "objectBillboard.h"
 #include "texture.h"
+#include "calculation.h"
 
 //==========================================================================
 // マクロ定義
@@ -28,13 +29,15 @@
 CMultiNumber::CMultiNumber(int nPriority)
 {
 	// 値のクリア
-	m_nNum = 0;			// 数字
-	m_nNumNumber = 0;	// 数字の数
+	m_nNum = 0;				// 数字
+	m_nNumNumber = 0;		// 数字の数
+	m_nTexIdx = 0;			// テクスチャのインデックス番号
 	m_ppMultiNumber = NULL;	// 数字のオブジェクト
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);	// 位置
 	m_col =mylib_const::DEFAULT_COLOR;		// 色
 	size = D3DXVECTOR2(0.0f, 0.0f);	// 数字のサイズ
 	m_objType = CNumber::OBJECTTYPE_2D;	// オブジェクトの種類
+	m_bDigitDraw = false;				// 桁数描画
 }
 
 //==========================================================================
@@ -48,7 +51,7 @@ CMultiNumber::~CMultiNumber()
 //==========================================================================
 // 生成処理
 //==========================================================================
-CMultiNumber *CMultiNumber::Create(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nNum, CNumber::EObjectType objtype)
+CMultiNumber *CMultiNumber::Create(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nNum, CNumber::EObjectType objtype, bool bDigitDraw)
 {
 	// 生成用のオブジェクト
 	CMultiNumber *pNumber = NULL;
@@ -74,6 +77,60 @@ CMultiNumber *CMultiNumber::Create(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nNum, 
 			// 数字の数
 			pNumber->m_nNumNumber = nNum;
 
+			// 桁数描画
+			pNumber->m_bDigitDraw = bDigitDraw;
+
+			// 初期化処理
+			pNumber->Init();
+		}
+		else
+		{
+			delete pNumber;
+			pNumber = NULL;
+		}
+
+		return pNumber;
+	}
+
+	return NULL;
+}
+
+
+//==========================================================================
+// 生成処理(オーバーロード)
+//==========================================================================
+CMultiNumber *CMultiNumber::Create(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nNum, CNumber::EObjectType objtype, const char *pTextureFile, bool bDigitDraw)
+{
+	// 生成用のオブジェクト
+	CMultiNumber *pNumber = NULL;
+
+	if (pNumber == NULL)
+	{// NULLだったら
+
+		// メモリの確保
+		pNumber = DEBUG_NEW CMultiNumber;
+
+		if (pNumber != NULL)
+		{// メモリの確保が出来ていたら
+
+			// オブジェクトの種類
+			pNumber->m_objType = objtype;
+
+			// サイズ
+			pNumber->size = size;
+
+			// 位置
+			pNumber->m_pos = pos;
+
+			// 数字の数
+			pNumber->m_nNumNumber = nNum;
+
+			// 桁数描画
+			pNumber->m_bDigitDraw = bDigitDraw;
+
+			// テクスチャ読み込み
+			pNumber->m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(pTextureFile);
+
 			// 初期化処理
 			pNumber->Init();
 		}
@@ -98,7 +155,11 @@ HRESULT CMultiNumber::Init(void)
 	m_ppMultiNumber = DEBUG_NEW (CNumber*[m_nNumNumber]);
 
 	// 生成処理
-	int nTex = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
+	if (m_nTexIdx == 0)
+	{
+		m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
+	}
+
 	for (int nCntNum = 0; nCntNum < m_nNumNumber; nCntNum++)
 	{
 		// 生成処理
@@ -115,7 +176,7 @@ HRESULT CMultiNumber::Init(void)
 			m_ppMultiNumber[nCntNum]->GetObject2D()->SetType(CObject::TYPE_SCORE);
 
 			// テクスチャの割り当て
-			m_ppMultiNumber[nCntNum]->GetObject2D()->BindTexture(nTex);
+			m_ppMultiNumber[nCntNum]->GetObject2D()->BindTexture(m_nTexIdx);
 			break;
 
 		case CNumber::OBJECTTYPE_BILLBOARD:
@@ -126,7 +187,7 @@ HRESULT CMultiNumber::Init(void)
 			m_ppMultiNumber[nCntNum]->GetObjectBillboard()->SetType(CObject::TYPE_SCORE);
 
 			// テクスチャの割り当て
-			m_ppMultiNumber[nCntNum]->GetObjectBillboard()->BindTexture(nTex);
+			m_ppMultiNumber[nCntNum]->GetObjectBillboard()->BindTexture(m_nTexIdx);
 			break;
 
 		default:
@@ -190,7 +251,46 @@ void CMultiNumber::Release(void)
 //==========================================================================
 void CMultiNumber::Update(void)
 {
-	// 更新処理
+	if (m_bDigitDraw == false)
+	{// 桁数描画じゃない場合
+		return;
+	}
+
+	int nNumberDigit = GetDigit(m_nNum);
+
+	for (int nCntNum = 0; nCntNum < m_nNumNumber; nCntNum++)
+	{
+		if (m_ppMultiNumber[nCntNum] == NULL)
+		{// NULLだったら
+			continue;
+		}
+
+		// 右詰めの描き方
+		switch (m_objType)
+		{
+		case CNumber::OBJECTTYPE_2D:
+			if (m_nNumNumber - nNumberDigit <= nCntNum)
+			{// 桁数
+				m_ppMultiNumber[nCntNum]->GetObject2D()->SetEnableDisp(true);
+			}
+			else
+			{
+				m_ppMultiNumber[nCntNum]->GetObject2D()->SetEnableDisp(false);
+			}
+			break;
+
+		case CNumber::OBJECTTYPE_BILLBOARD:
+			if (m_nNumNumber - nNumberDigit <= nCntNum)
+			{// 桁数
+				m_ppMultiNumber[nCntNum]->GetObjectBillboard()->SetEnableDisp(true);
+			}
+			else
+			{
+				m_ppMultiNumber[nCntNum]->GetObjectBillboard()->SetEnableDisp(false);
+			}
+			break;
+		}
+	}
 }
 
 //==========================================================================
@@ -198,7 +298,13 @@ void CMultiNumber::Update(void)
 //==========================================================================
 void CMultiNumber::Draw(void)
 {
-	for (int nCntNum = 0; nCntNum < m_nNumNumber; nCntNum++)
+	int nNumNumber = m_nNumNumber;
+	if (m_bDigitDraw == true)
+	{// 桁数描画だったら
+		nNumNumber = GetDigit(m_nNum);
+	}
+
+	for (int nCntNum = 0; nCntNum < nNumNumber; nCntNum++)
 	{
 		if (m_ppMultiNumber[nCntNum] == NULL)
 		{// NULLだったら
@@ -228,6 +334,14 @@ void CMultiNumber::SetValue(int nValue)
 
 	// 値の設定処理
 	SetValue();
+}
+
+//==========================================================================
+// 値の取得処理
+//==========================================================================
+int CMultiNumber::GetValue(void)
+{
+	return m_nNum;
 }
 
 //==========================================================================

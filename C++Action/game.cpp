@@ -27,6 +27,7 @@
 #include "bulletmanager.h"
 #include "stage.h"
 #include "gamemanager.h"
+#include "hitscore.h"
 
 #include "enemymanager.h"
 #include "mapmanager.h"
@@ -54,7 +55,8 @@ CEnemyManager *CGame::m_pEnemyManager = NULL;	// 敵マネージャのオブジェクト
 CMapManager *CGame::m_pMapManager = NULL;		// マップマネージャのオブジェクト
 CCameraAxis *CGame::m_pCameraAxis = NULL;		// カメラの軸のオブジェクト
 CCameraChaseChanger *CGame::m_pCameraChaseChanger = NULL;	// カメラ追従変更者のオブジェクト
-CEnemyBase *CGame::m_pEnemyBase = NULL;	// 敵の拠点
+CEnemyBase *CGame::m_pEnemyBase = NULL;			// 敵の拠点
+CHitScore *CGame::m_pHitScore = NULL;			// ヒットスコア
 
 //==========================================================================
 // コンストラクタ
@@ -156,12 +158,14 @@ HRESULT CGame::Init(void)
 	// ステージ
 	m_pStage = CStage::Create("data\\TEXT\\stage_info.txt");
 
-
 	// スコアの生成処理
 	m_pScore = CScore::Create(D3DXVECTOR3(1000.0f, 50.0f, 0.0f));
 
 	// タイマーの生成処理
 	m_pTimer = CTimer::Create(D3DXVECTOR3(200.0f, 50.0f, 0.0f));
+
+	// ヒットスコア
+	m_pHitScore = CHitScore::Create(D3DXVECTOR3(1300.0f, 600.0f, 0.0f));
 
 	CManager::GetInstance()->GetCamera()->Reset(CScene::MODE_GAME);
 
@@ -204,6 +208,15 @@ void CGame::Uninit(void)
 		// メモリの開放
 		delete m_pTimer;
 		m_pTimer = NULL;
+	}
+
+	// ヒットスコアの破棄
+	if (m_pHitScore != NULL)
+	{
+		// 終了処理
+		m_pHitScore->Uninit();
+		delete m_pHitScore;
+		m_pHitScore = NULL;
 	}
 
 	// ステージの破棄
@@ -323,9 +336,6 @@ void CGame::Update(void)
 	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 #if 1
-	// スコアの更新処理
-	m_pScore->Update();
-
 	if (CManager::GetInstance()->GetEdit() == NULL &&
 		m_pEditControlPoint == NULL &&
 		m_pEditCameraAxis == NULL &&
@@ -333,6 +343,16 @@ void CGame::Update(void)
 	{
 		// タイマーの更新処理
 		m_pTimer->Update();
+
+		// スコアの更新処理
+		m_pScore->Update();
+
+		// ヒットスコアの更新処理
+		if (m_pHitScore != NULL)
+		{
+			// 更新処理
+			m_pHitScore->Update();
+		}
 	}
 #endif
 
@@ -438,6 +458,7 @@ void CGame::Update(void)
 	}
 #endif
 
+	// シーンの更新
 	CScene::Update();
 
 }
@@ -464,6 +485,14 @@ CScore *CGame::GetScore(void)
 CTimer *CGame::GetTimer(void)
 {
 	return m_pTimer;
+}
+
+//==========================================================================
+// ヒットスコアの取得
+//==========================================================================
+CHitScore *CGame::GetHitScore(void)
+{
+	return m_pHitScore;
 }
 
 //==========================================================================

@@ -68,6 +68,7 @@ protected:
 		MOTION_ATK2,			// 攻撃(派生)
 		MOTION_KNOCKBACK,		// やられモーション
 		MOTION_JUMP,			// ジャンプ
+		MOTION_FALL,			// 落下中
 		MOTION_MAX
 	};
 
@@ -79,13 +80,19 @@ protected:
 		ATKRUSH_MAX
 	};
 
+	// モーションの判定
+	struct SMotionFrag
+	{
+		bool bJump;			// ジャンプ中かどうか
+		bool bATK;			// 攻撃中かどうか
+		bool bKnockBack;	// ノックバック中かどうか
+		bool bMove;			// 移動中かどうか
+	};
+
 	bool Collision(D3DXVECTOR3 &pos, D3DXVECTOR3 &move);	// 当たり判定
 	void CollisionChaseChanger(void);	// 追従の変更者との判定
 
 	bool m_bJump;				// ジャンプ中かどうか
-	bool m_bKnockback;			// ノックバック中かどうか
-	bool m_bMove;				// 移動中かどうか
-	bool m_bATK;				// 攻撃中かどうか
 	bool m_bLandOld;			// 過去の着地情報
 	bool m_bHitStage;			// ステージの当たり判定
 	bool m_bLandField;			// フィールドの着地判定
@@ -93,6 +100,7 @@ protected:
 	int m_nCntWalk;				// 歩行カウンター
 	STATE m_state;			// 状態
 	CMotion *m_pMotion;		// モーションの情報
+	SMotionFrag m_sMotionFrag;		// モーションのフラグ
 private:
 
 	// メンバ関数

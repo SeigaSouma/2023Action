@@ -188,6 +188,7 @@
     <ClCompile Include="fade.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gamemanager.cpp" />
+    <ClCompile Include="hitscore.cpp" />
     <ClCompile Include="hp_gauge.cpp" />
     <ClCompile Include="impactwave.cpp" />
     <ClCompile Include="input.cpp" />
@@ -283,6 +284,7 @@
     <ClInclude Include="fade.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="gamemanager.h" />
+    <ClInclude Include="hitscore.h" />
     <ClInclude Include="hp_gauge.h" />
     <ClInclude Include="impactwave.h" />
     <ClInclude Include="input.h" />

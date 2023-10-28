@@ -1,26 +1,31 @@
 //=============================================================================
 // 
-//  背景処理 [score.cpp]
+//  ヒットスコア処理 [hitscore.cpp]
 //  Author : 相馬靜雅
 // 
 //=============================================================================
-#include "score.h"
+#include "hitscore.h"
 #include "manager.h"
 #include "texture.h"
 #include "renderer.h"
 #include "object2D.h"
 #include "multinumber.h"
+#include "calculation.h"
+#include "game.h"
 
 //==========================================================================
 // マクロ定義
 //==========================================================================
-#define TEXTURE			"data\\TEXTURE\\number_blackclover_01.png"	// テクスチャのファイル
-#define MAX_VALUE		(999999)						// 値の最大値
-#define TEX_U			(0.1f)							// Uの分割
-#define WIDTH			(40.0f)							// 横幅
-#define HEIGHT			(50.0f)							// 縦幅
-#define DIS_X			(50.0f)							// 間隔
-#define SCROLL_SPEED	(-0.005f)						// スクロール速度
+#define TEXTURE			"data\\TEXTURE\\number_blackclover_02.png"	// テクスチャのファイル
+#define HIT_TEXTURE		"data\\TEXTURE\\hit.png"	// テクスチャのファイル
+#define NUM_SCORE		(4)			// 桁数
+#define MAX_VALUE		(999999)	// 値の最大値
+#define TEX_U			(0.1f)		// Uの分割
+#define WIDTH			(40.0f)		// 横幅
+#define HEIGHT			(40.0f)		// 縦幅
+#define MOVETIME		(20)		// 移動時間
+#define COOLTIME		(60 * 5 + MOVETIME)	// 移動までのクールタイム
+#define DEST_POSITION	(1000.0f)	// 目標の位置
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -29,18 +34,20 @@
 //==========================================================================
 // コンストラクタ
 //==========================================================================
-CScore::CScore(int nPriority)
+CHitScore::CHitScore(int nPriority)
 {
 	// 値のクリア
 	m_apNumber = NULL;
-	m_nNum = 0;		// 値
+	m_pObj2D = NULL;	// オブジェクト2Dのオブジェクト
 	m_nTexIdx = 0;		// テクスチャのインデックス番号
+	m_nCntCooltime = 0;	// クールタイムのカウンター
+	m_posOrigin = mylib_const::DEFAULT_VECTOR3;	// 元の位置
 }
 
 //==========================================================================
 // デストラクタ
 //==========================================================================
-CScore::~CScore()
+CHitScore::~CHitScore()
 {
 
 }
@@ -48,16 +55,16 @@ CScore::~CScore()
 //==========================================================================
 // 生成処理
 //==========================================================================
-CScore *CScore::Create(void)
+CHitScore *CHitScore::Create(void)
 {
 	// 生成用のオブジェクト
-	CScore *pScore = NULL;
+	CHitScore *pScore = NULL;
 
 	if (pScore == NULL)
 	{// NULLだったら
 
 		// メモリの確保
-		pScore = DEBUG_NEW CScore;
+		pScore = DEBUG_NEW CHitScore;
 
 		if (pScore != NULL)
 		{// メモリの確保が出来ていたら
@@ -75,16 +82,16 @@ CScore *CScore::Create(void)
 //==========================================================================
 // 生成処理
 //==========================================================================
-CScore *CScore::Create(D3DXVECTOR3 pos)
+CHitScore *CHitScore::Create(D3DXVECTOR3 pos)
 {
 	// 生成用のオブジェクト
-	CScore *pScore = NULL;
+	CHitScore *pScore = NULL;
 
 	if (pScore == NULL)
 	{// NULLだったら
 
 		// メモリの確保
-		pScore = DEBUG_NEW CScore;
+		pScore = DEBUG_NEW CHitScore;
 
 		if (pScore != NULL)
 		{// メモリの確保が出来ていたら
@@ -102,26 +109,46 @@ CScore *CScore::Create(D3DXVECTOR3 pos)
 //==========================================================================
 // 初期化処理
 //==========================================================================
-HRESULT CScore::Init(void)
+HRESULT CHitScore::Init(void)
 {
-	
+	// 生成処理
+	m_apNumber = CMultiNumber::Create(mylib_const::DEFAULT_VECTOR3, D3DXVECTOR2(WIDTH, HEIGHT), NUM_SCORE, CNumber::OBJECTTYPE_2D, TEXTURE, true);
+
+	// 値の設定処理
+	m_apNumber->SetValue(0);
 	return S_OK;
 }
 
 //==========================================================================
 // 初期化処理
 //==========================================================================
-HRESULT CScore::Init(D3DXVECTOR3 pos)
+HRESULT CHitScore::Init(D3DXVECTOR3 pos)
 {
+	// 元の位置
+	m_posOrigin = pos;
+
 	// 生成処理
-	m_apNumber = CMultiNumber::Create(pos, D3DXVECTOR2(WIDTH, HEIGHT), NUM_SCORE, CNumber::OBJECTTYPE_2D, TEXTURE);
+	m_apNumber = CMultiNumber::Create(m_posOrigin, D3DXVECTOR2(WIDTH, HEIGHT), NUM_SCORE, CNumber::OBJECTTYPE_2D, TEXTURE, true);
+
+	// オブジェクト2Dのオブジェクト
+	m_pObj2D = CObject2D::Create(7);
+	m_pObj2D->SetType(CObject::TYPE_BALLAST);
+
+	int nHitTex = CManager::GetInstance()->GetTexture()->Regist(HIT_TEXTURE);
+	m_pObj2D->BindTexture(nHitTex);
+
+	m_pObj2D->SetSize(CManager::GetInstance()->GetTexture()->GetImageSize(nHitTex) * 0.3f);
+	m_pObj2D->SetPosition(D3DXVECTOR3(m_posOrigin.x + (WIDTH * NUM_SCORE) + m_pObj2D->GetSize().x - 20.0f, m_posOrigin.y, m_posOrigin.z));
+
+	// 値の設定処理
+	m_apNumber->SetValue(0);
 	return S_OK;
 }
 
 //==========================================================================
 // 終了処理
 //==========================================================================
-void CScore::Uninit(void)
+void CHitScore::Uninit(void)
 {
 	// 数字のオブジェクトの終了処理
 	if (m_apNumber != NULL)
@@ -135,100 +162,97 @@ void CScore::Uninit(void)
 //==========================================================================
 // 更新処理
 //==========================================================================
-void CScore::Update(void)
+void CHitScore::Update(void)
 {
-	// 値の設定処理
-	m_apNumber->SetValue(m_nNum);
+	// 移動処理
+	UpdateMove();
+
+	// マルチナンバーの更新
+	m_apNumber->Update();
 }
 
 //==========================================================================
-// 値の設定処理
+// 移動処理
 //==========================================================================
-void CScore::SetValue(void)
+void CHitScore::UpdateMove(void)
 {
-	int aTexU[NUM_SCORE];
-	int nDigit = 1;		// aTexU計算用
+	// クールタイム減算
+	m_nCntCooltime--;
 
-	// 計算用割り出し
-	for (int nCntDigit = 0; nCntDigit < NUM_SCORE; nCntDigit++)
+	// 位置取得
+	D3DXVECTOR3 pos = m_apNumber->GetPosition();
+	D3DXVECTOR3 posOrigin = pos;
+	D3DXVECTOR3 Hitpos = m_pObj2D->GetPosition();
+
+	if (m_nCntCooltime == MOVETIME)
 	{
-		nDigit *= 10;
+		// ヒット数リセット
+		CGame::GetHitScore()->Reset();
 	}
 
-	// テクスチャ座標に代入する
-	for (int nCntTex = 0; nCntTex < NUM_SCORE; nCntTex++)
-	{// 桁数分設定
+	if (m_nCntCooltime <= MOVETIME)
+	{// 移動時間以下で移動
 
-		aTexU[nCntTex] = m_nNum % nDigit / (nDigit / 10);
-		nDigit /= 10;
+		// 移動
+		pos.x += (m_posOrigin.x - pos.x) * 0.1f;
+	}
+	else
+	{
+		// 移動
+		pos.x += (DEST_POSITION - pos.x) * 0.1f;
 	}
 
-	
+	if (m_nCntCooltime <= 0)
+	{
+		m_nCntCooltime = 0;
+	}
+
+	float fDiff = pos.x - posOrigin.x;
+	Hitpos.x += fDiff;
+
+	// 位置設定
+	m_apNumber->SetPosition(pos);
+	m_pObj2D->SetPosition(Hitpos);
 }
 
 //==========================================================================
 // 描画処理
 //==========================================================================
-void CScore::Draw(void)
+void CHitScore::Draw(void)
 {
+	// 描画処理
 	m_apNumber->Draw();
 }
 
 //==========================================================================
 // 加算処理
 //==========================================================================
-void CScore::Add(int nValue)
+void CHitScore::Add(int nValue)
 {
+	// 値の取得
+	int nNum = m_apNumber->GetValue();
+
 	// 値加算
-	m_nNum += nValue;
+	nNum += nValue;
 
-	// スコアの加算
-	CManager::GetInstance()->GetResultManager()->AddScore(nValue);
-
-	if (m_nNum >= MAX_VALUE)
+	if (nNum >= MAX_VALUE)
 	{// 最大値で固定
-		m_nNum = MAX_VALUE;
+		nNum = MAX_VALUE;
 	}
 
-	// 値の設定処理
-	SetValue();
+	// 値の設定
+	m_apNumber->SetValue(nNum);
+
+	// クールタイムのカウンターリセット
+	m_nCntCooltime = COOLTIME;
+
 }
 
 //==========================================================================
-// 加算処理
+// リセット
 //==========================================================================
-void CScore::Add(CResultManager::ADDTYPE AddType)
+void CHitScore::Reset(void)
 {
-	// 値加算
-	/*switch (AddType)
-	{
-	case CResultManager::ADDTYPE_NONE:
-		break;
-
-	case CResultManager::ADDTYPE_NORMAL:
-		m_nNum += mylib_const::COMBOBONUS_1;
-		break;
-
-	case CResultManager::ADDTYPE_BLUE:
-		m_nNum += mylib_const::COMBOBONUS_2;
-		break;
-
-	case CResultManager::ADDTYPE_GOLD:
-		m_nNum += mylib_const::COMBOBONUS_3;
-		break;
-
-	default:
-		break;
-	}*/
-
-	// スコアの加算
-	CManager::GetInstance()->GetResultManager()->AddScoreNum(AddType);
-
-	if (m_nNum >= MAX_VALUE)
-	{// 最大値で固定
-		m_nNum = MAX_VALUE;
-	}
-
-	// 値の設定処理
-	SetValue();
+	// 値の設定
+	m_apNumber->SetValue(0);
 }

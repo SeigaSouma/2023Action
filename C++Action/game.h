@@ -25,6 +25,7 @@ class CEditCameraChaseChanger;
 class CEditEnemyBase;
 class CStage;
 class CGameManager;
+class CHitScore;
 
 class CEnemyManager;
 class CMapManager;
@@ -77,6 +78,7 @@ public:
 	static CCameraAxis *GetCameraAxis(void);	// カメラの軸取得
 	static CCameraChaseChanger *GetCameraChaseChanger(void);	// カメラ追従種類の変更者取得
 	static CEnemyBase *GetEnemyBase(void);		// 敵の拠点
+	static CHitScore *GetHitScore(void);		// ヒットスコア
 
 private:
 
@@ -101,6 +103,7 @@ private:
 	static CCameraAxis *m_pCameraAxis;	// カメラの軸のオブジェクト
 	static CCameraChaseChanger *m_pCameraChaseChanger;	// カメラ追従変更者のオブジェクト
 	static CEnemyBase *m_pEnemyBase;	// 敵の拠点
+	static CHitScore *m_pHitScore;		// ヒットスコア
 };
 
 

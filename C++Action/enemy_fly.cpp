@@ -142,6 +142,10 @@ void CEnemyFly::Update(void)
 
 	// プレイヤー情報
 	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	if (pPlayer == NULL)
+	{
+		return;
+	}
 
 	// 親の位置取得
 	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();

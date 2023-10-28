@@ -186,13 +186,22 @@ int Random(int nMinNum, int nMaxNum)
 //==================================================================================
 int GetDigit(int nNum)
 {
-	int nDigit = 0, nValue = nNum;
-	do
-	{//0になるまでカウント進める
+	if (nNum <= 0)
+	{
+		nNum = 0;
+	}
 
-		nValue /= 10;
-		nDigit++;
-	} while (nValue > 0);
+	// 整数を文字列に変換
+	std::string number;
+	sprintf((char*)number.c_str(), "%d", nNum);
+
+	// 文字列の長さ（桁数）を取得
+	int nDigit = strlen(number.c_str());
+
+	if (nDigit <= 0)
+	{
+		nDigit = 1;
+	}
 
 	return nDigit;
 }

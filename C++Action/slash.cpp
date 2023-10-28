@@ -16,6 +16,7 @@
 #include "enemymanager.h"
 #include "enemy.h"
 #include "effect_slashhit.h"
+#include "hitscore.h"
 
 //==========================================================================
 // マクロ定義
@@ -373,6 +374,9 @@ void  CSlash::Collision(void)
 
 			// 斬撃のヒットエフェクト生成
 			CEffectSlashHit::Create(BulletPosition);
+
+			// ヒットスコア加算
+			CGame::GetHitScore()->Add(1);
 		}
 	}
 
@@ -427,8 +431,15 @@ void  CSlash::Collision(void)
 				pImpactWave->SetEnableHitstopMove();
 			}
 
+			if (ppEnemy[nCntEnemy]->GetState() != CEnemy::STATE_DMG && ppEnemy[nCntEnemy]->GetState() != CEnemy::STATE_DEAD)
+			{
+				// ヒットスコア加算
+				CGame::GetHitScore()->Add(1);
+			}
+
 			// ヒット処理
 			ppEnemy[nCntEnemy]->Hit(mylib_const::DMG_SLASH);
+
 			bHit = true;
 		}
 	}

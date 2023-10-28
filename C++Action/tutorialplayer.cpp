@@ -147,7 +147,7 @@ void CTutorialPlayer::Controll(void)
 
 #ifndef AUTO_MOVE
 		// ˆÚ“®’†‚É‚·‚é
-		m_bMove = true;
+		m_sMotionFrag.bMove = true;
 #endif
 
 		if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
@@ -268,10 +268,10 @@ void CTutorialPlayer::Controll(void)
 	//Collision();
 
 	if ((pInputKeyboard->GetTrigger(DIK_RETURN) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_A, 0) == true) &&
-		m_bATK == false)
+		m_sMotionFrag.bATK == false)
 	{// UŒ‚
 
 		// UŒ‚”»’èON
-		m_bATK = true;
+		m_sMotionFrag.bATK = true;
 	}
 }

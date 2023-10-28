@@ -41,6 +41,7 @@ CObject::CObject(int nPriority)
 	m_angle = ANGLE_UP;			// 移動方向
 	m_angleOld = ANGLE_UP;		// 過去の向き
 	m_bDeath = false;			// 死亡フラグ
+	m_bDisp = true;			// 描画フラグ
 	memset(&m_pEffect[0], NULL, sizeof(m_pEffect));	// エフェクトのポインタ
 	m_nNumEffectParent = 0;		// エフェクトの親設定した数
 	m_bHitstopMove = false;		// ヒットストップ時に動くかのフラグ
@@ -234,15 +235,11 @@ void CObject::DrawAll(void)
 			// 次のオブジェクトを一時保存
 			CObject *pObjNext = pObject->m_pNext;
 
-			if (pObject->m_bDeath == false && pObject->m_type != TYPE_NONE)
+			if (pObject->m_bDisp == true && pObject->m_bDeath == false && pObject->m_type != TYPE_NONE)
 			{// NONEじゃなければ
 
 				// 描画処理
 				pObject->Draw();
-			}
-			else if (pObject->m_bDeath == false && pObject->m_type == TYPE_NONE && nCntPriority == 4)
-			{
-				int n = 0;
 			}
 
 			// 次のオブジェクトを代入

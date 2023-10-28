@@ -25,10 +25,18 @@ class CMultiNumber
 {
 public:
 
+	// 寄せ種類
+	enum AlignmentType
+	{
+		ALIGNMENT_RIGHT = 0,	// 右寄せ
+		ALIGNMENT_MAX
+	};
+
 	CMultiNumber(int nPriority = 6);
 	~CMultiNumber();
 
-	static CMultiNumber *Create(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nNum, CNumber::EObjectType objtype);
+	static CMultiNumber *Create(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nNum, CNumber::EObjectType objtype, bool bDigitDraw = false);
+	static CMultiNumber *Create(D3DXVECTOR3 pos, D3DXVECTOR2 size, int nNum, CNumber::EObjectType objtype, const char *pTextureFile, bool bDigitDraw = false);
 
 	// メンバ関数
 	HRESULT Init(void);
@@ -39,6 +47,7 @@ public:
 	void AddNumber(int nValue);
 	void SetValue(void);		// 値の設定処理
 	void SetValue(int nValue);	// 値の設定処理(オーバーロード)
+	int GetValue(void);			// 値の取得処理
 	void SetPosition(const D3DXVECTOR3 pos);	// 位置設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
 	void SetColor(const D3DXCOLOR col);			// 色設定
@@ -53,6 +62,8 @@ private:
 	D3DXVECTOR2 size;				// 数字のサイズ
 	int m_nNum;						// 数字
 	int m_nNumNumber;				// 数字の数
+	int m_nTexIdx;					// テクスチャのインデックス番号
+	bool m_bDigitDraw;				// 桁数描画
 	CNumber **m_ppMultiNumber;		// 数字のオブジェクト
 	CNumber::EObjectType m_objType;	// オブジェクトの種類
 

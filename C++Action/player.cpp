@@ -72,9 +72,10 @@ CPlayer::CPlayer(int nPriority) : CObjectChara(nPriority)
 	m_KnokBackMove = mylib_const::DEFAULT_VECTOR3;	// ノックバックの移動量
 	m_bLandOld = false;				// 過去の着地情報
 	m_bJump = false;				// ジャンプ中かどうか
-	m_bKnockback = false;			// ノックバック中かどうか
-	m_bMove = false;				// 移動中かどうか
-	m_bATK = false;					// 攻撃中かどうか
+	m_sMotionFrag.bATK = false;		// モーションのフラグ
+	m_sMotionFrag.bJump = false;		// モーションのフラグ
+	m_sMotionFrag.bKnockBack = false;	// モーションのフラグ
+	m_sMotionFrag.bMove = false;		// モーションのフラグ
 	m_nAngle = 1;					// 向き
 	m_nCntState = 0;				// 状態遷移カウンター
 	m_nCntWalk = 0;					// 歩行カウンター
@@ -529,7 +530,7 @@ void CPlayer::Controll(void)
 	{// 移動可能モーションの時
 
 		// 移動中にする
-		m_bMove = true;
+		m_sMotionFrag.bMove = true;
 
 		// スティックの向き
 		float fStickRot = pInputGamepad->GetStickRotL(0);
@@ -538,7 +539,7 @@ void CPlayer::Controll(void)
 		{//←キーが押された,左移動
 
 			// 移動中にする
-			m_bMove = true;
+			m_sMotionFrag.bMove = true;
 
 			move.x -= fMove;
 
@@ -550,7 +551,7 @@ void CPlayer::Controll(void)
 		{//Dキーが押された,右移動
 
 			// 移動中にする
-			m_bMove = true;
+			m_sMotionFrag.bMove = true;
 
 			move.x += fMove;
 
@@ -562,7 +563,7 @@ void CPlayer::Controll(void)
 		{//Wが押された、上移動
 
 			// 移動中にする
-			m_bMove = true;
+			m_sMotionFrag.bMove = true;
 
 			// 上向き
 			MoveAngle = ANGLE_UP;
@@ -571,7 +572,7 @@ void CPlayer::Controll(void)
 		{//Sが押された、下移動
 
 			// 移動中にする
-			m_bMove = true;
+			m_sMotionFrag.bMove = true;
 
 			// 上向き
 			MoveAngle = ANGLE_DOWN;
@@ -579,7 +580,7 @@ void CPlayer::Controll(void)
 		else
 		{
 			// 移動中かどうか
-			m_bMove = false;
+			m_sMotionFrag.bMove = false;
 		}
 
 
@@ -618,6 +619,7 @@ void CPlayer::Controll(void)
 		{//SPACEが押された,ジャンプ
 
 			m_bJump = true;
+			m_sMotionFrag.bJump = true;
 			move.y += 17.0f;
 		}
 	}
@@ -757,7 +759,7 @@ void CPlayer::Controll(void)
 	//m_bLandOld = bLandStage;
 
 	if (m_bHitWall == false && 
-		(bLandStage == false || bMove == true || m_bLandField == true || m_bJump == true || m_bKnockback == true))
+		(bLandStage == false || bMove == true || m_bLandField == true || m_bJump == true || m_sMotionFrag.bKnockBack == true))
 	{
 		pos.x = newPosition.x;
 		pos.z = newPosition.z;
@@ -845,13 +847,12 @@ void CPlayer::Controll(void)
 		m_bStick = false;
 	}
 	
-	if (/*m_bATK == false &&*/
+	if (/*m_sMotionFrag.bATK == false &&*/
 		(
-		pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
-		pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f))
+			pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
+			pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f))
 	{// 攻撃
 
-		
 		if (pInputGamepad->GetStickPositionRatioR(0).x >= 0.2f)
 		{
 			m_StickAngle = ANGLE_RIGHT;		// スティックの向き
@@ -872,153 +873,55 @@ void CPlayer::Controll(void)
 		// 攻撃判定ON
 		if (m_StickAngle != m_OldStickAngle)
 		{
-		// スティックの向き
-		m_fAtkStickRot = pInputGamepad->GetStickRotR(0);
+			// スティックの向き
+			m_fAtkStickRot = pInputGamepad->GetStickRotR(0);
 
-		switch (MoveAngle)
-		{
-		case CPlayer::ANGLE_UP:
-
-			if (m_fAtkStickRot <= 0.0f)
-			{// 左半分
-				m_fAtkStickRot *= -1;
-			}
-			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
-			break;
-
-		case CPlayer::ANGLE_RIGHT:
-
-
-			//if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot >= -D3DX_PI * 0.5f)
-			//{
-			//	m_fAtkStickRot = 0.0f;
-			//}
-			///*else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot < -D3DX_PI * 0.5f)
-			//{
-			//	m_fAtkStickRot = D3DX_PI * 0.75f;
-			//}*/
-			//else if (m_fAtkStickRot >= D3DX_PI * 0.75f)
-			//{
-			//	m_fAtkStickRot = D3DX_PI * 0.75f;
-			//}
-
-			//if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot < D3DX_PI * 0.15f)
-			//{// 右上
-			//	m_fAtkStickRot = -D3DX_PI * 0.15f;
-			//	m_nAtkAngle = 1;
-			//}
-			//else if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot >= D3DX_PI * 0.85f)
-			//{// 右下
-			//	m_fAtkStickRot = -D3DX_PI * 0.85f;
-			//	m_nAtkAngle = 1;
-			//}
-			//else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot > -D3DX_PI * 0.15f)
-			//{// 左上
-			//	m_fAtkStickRot = -D3DX_PI * 0.15f;
-			//	m_nAtkAngle = -1;
-			//}
-			//else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot <= -D3DX_PI * 0.85f)
-			//{// 左下
-			//	m_fAtkStickRot = -D3DX_PI * 0.85f;
-			//	m_nAtkAngle = -1;
-			//}
-
-			//if (m_fAtkStickRot < 0.0f)
-			//{
-			//	//m_fAtkStickRot += D3DX_PI;	// 半周分
-			//}
-
-			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
-
-			break;
-
-		case CPlayer::ANGLE_DOWN:
-
-			if (m_fAtkStickRot >= 0.0f)
-			{// 右半分
-				m_fAtkStickRot *= -1;
-				m_fAtkStickRot += D3DX_PI * 0.5f;
-			}
-			else
-			{
-				m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
-			}
-			break;
-
-		case CPlayer::ANGLE_LEFT:
-
-			//if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot < D3DX_PI * 0.15f)
-			//{// 右上
-			//	m_fAtkStickRot = D3DX_PI * 0.15f;
-			//	m_nAtkAngle = -1;
-			//}
-			//else if (m_fAtkStickRot >= 0.0f && m_fAtkStickRot >= D3DX_PI * 0.85f)
-			//{// 右下
-			//	m_fAtkStickRot = D3DX_PI * 0.85f;
-			//	m_nAtkAngle = -1;
-			//}
-			//else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot > -D3DX_PI * 0.15f)
-			//{// 左上
-			//	m_fAtkStickRot = D3DX_PI * 0.15f;
-			//	m_nAtkAngle = 1;
-			//}
-			//else if (m_fAtkStickRot <= 0.0f && m_fAtkStickRot <= -D3DX_PI * 0.85f)
-			//{// 左下
-			//	m_fAtkStickRot = D3DX_PI * 0.85f;
-			//	m_nAtkAngle = 1;
-			//}
-
-			//m_fAtkStickRot *= -1;
-
-			/*if (m_fAtkStickRot <= 0.0f)
-			{
-				m_fAtkStickRot = 0.0f;
-			}
-			else if (m_fAtkStickRot >= D3DX_PI * 0.75f)
-			{
-				m_fAtkStickRot = D3DX_PI * 0.75f;
-			}*/
-
-			//if (m_fAtkStickRot > 0.0f)
-			//{
-			//	//m_fAtkStickRot += D3DX_PI;	// 半周分
-			//}
-			m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
-			//m_fAtkStickRot += D3DX_PI * 0.5f;	// 半周分
-			break;
-
-		default:
-			break;
-		}
-		RotNormalize(m_fAtkStickRot);
-
-		
 			switch (MoveAngle)
 			{
 			case CPlayer::ANGLE_UP:
-				m_fBodyRot = 0.0f;	// 攻撃時の身体向き
+
+				if (m_fAtkStickRot <= 0.0f)
+				{// 左半分
+					m_fAtkStickRot *= -1;
+				}
+				m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
 				break;
 
 			case CPlayer::ANGLE_RIGHT:
-				m_fBodyRot = m_fAtkStickRot;	// 攻撃時の身体向き
+				m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
 				break;
 
 			case CPlayer::ANGLE_DOWN:
-				m_fBodyRot = 0.0f;	// 攻撃時の身体向き
+
+				if (m_fAtkStickRot >= 0.0f)
+				{// 右半分
+					m_fAtkStickRot *= -1;
+					m_fAtkStickRot += D3DX_PI * 0.5f;
+				}
+				else
+				{
+					m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
+				}
 				break;
 
 			case CPlayer::ANGLE_LEFT:
-				m_fBodyRot = m_fAtkStickRot;	// 攻撃時の身体向き
-				m_fBodyRot += D3DX_PI;
+				m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
 				break;
 
 			default:
 				break;
 			}
+			RotNormalize(m_fAtkStickRot);
 
+			int nType = m_pMotion->GetType();
+			if (nType == MOTION_JUMP || nType == MOTION_FALL)
+			{
+				m_pMotion->ToggleFinish(true);
+			}
 
-			m_bATK = true;
-			//	m_pMotion->ToggleFinish(true);
+			m_sMotionFrag.bJump = false;
+			m_sMotionFrag.bATK = true;
+
 		}
 
 		// スティック倒した判定
@@ -1034,14 +937,6 @@ void CPlayer::Controll(void)
 		// スティック倒した判定
 		m_bStick = false;
 	}
-
-	//if ((nMotionType == MOTION_ATK ||
-	//	nMotionType == MOTION_ATK2) &&
-	//	pInputGamepad->GetStickPositionRatioR(0).y <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).y >= -0.5f &&
-	//	pInputGamepad->GetStickPositionRatioR(0).x <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).x >= -0.5f)
-	//{// 攻撃中にスティック倒してないとき
-	//	m_pMotion->ToggleFinish(true);
-	//}
 }
 
 //==========================================================================
@@ -1061,24 +956,39 @@ void CPlayer::MotionSet(void)
 		int nType = m_pMotion->GetType();
 		int nOldType = m_pMotion->GetOldType();
 
-		if (m_bMove == true && m_bATK == false && m_bKnockback == false)
+		if (m_sMotionFrag.bMove == true && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false && m_bJump == false)
 		{// 移動していたら
 
-			m_bMove = false;	// 移動判定OFF
+			m_sMotionFrag.bMove = false;	// 移動判定OFF
 
 			// 移動モーション
 			m_pMotion->Set(MOTION_WALK);
 		}
-		else if (m_bKnockback == true)
+		else if (m_sMotionFrag.bJump == true && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false)
+		{// ジャンプ中
+
+			// ジャンプのフラグOFF
+			m_sMotionFrag.bJump = false;
+
+			// ジャンプモーション
+			m_pMotion->Set(MOTION_JUMP);
+		}
+		else if (m_bJump == true && m_sMotionFrag.bJump == false && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false)
+		{// ジャンプ中&&ジャンプモーションが終わってる時
+
+			// 落下モーション
+			m_pMotion->Set(MOTION_FALL);
+		}
+		else if (m_sMotionFrag.bKnockBack == true)
 		{// やられ中だったら
 
 			// やられモーション
 			m_pMotion->Set(MOTION_KNOCKBACK);
 		}
-		else if (m_bATK == true)
+		else if (m_sMotionFrag.bATK == true)
 		{// 攻撃していたら
 
-			m_bATK = false;		// 攻撃判定OFF
+			m_sMotionFrag.bATK = false;		// 攻撃判定OFF
 
 			// 連続アタックの種類
 			m_atkRush = (ATKRUSH)(((int)m_atkRush + 1) % (int)ATKRUSH_MAX);
@@ -1409,15 +1319,21 @@ bool CPlayer::Collision(D3DXVECTOR3 &pos, D3DXVECTOR3 &move)
 			if (bLand == true)
 			{// 着地してたら
 
-				if ((m_bKnockback || m_bJump == true) && GetPosition().y  >= fHeight)
+				if ((m_sMotionFrag.bKnockBack || m_bJump == true) && GetPosition().y  >= fHeight)
 				{
 					m_bLandOld = true;
+				}
+
+				if (m_bJump == true)
+				{// ジャンプ中だったら
+					m_pMotion->ToggleFinish(true);
 				}
 
 				// ジャンプ使用可能にする
 				m_bJump = false;
 				move.y = 0.0f;
 				bNowLand = true;
+				m_sMotionFrag.bJump = false;
 			}
 		}
 	}
@@ -1589,7 +1505,6 @@ void CPlayer::CollisionChaseChanger(void)
 //==========================================================================
 bool CPlayer::Hit(const int nValue)
 {
-	return false;
 	// 体力取得
 	int nLife = GetLife();
 
@@ -1602,9 +1517,6 @@ bool CPlayer::Hit(const int nValue)
 		m_KnokBackMove.y += 18.0f;
 		m_bHitStage = false;
 
-		// 補正
-		ValueNormalize(nLife, MAX_LIFE, 0);
-
 		// 体力設定
 		SetLife(nLife);
 
@@ -1613,6 +1525,9 @@ bool CPlayer::Hit(const int nValue)
 
 			// 死状態
 			m_state = STATE_DEAD;
+
+			// 体力設定
+			SetLife(0);
 
 			// 死亡処理
 			Kill();
@@ -1639,7 +1554,7 @@ bool CPlayer::Hit(const int nValue)
 		m_posKnokBack = pos;
 
 		// ノックバック判定にする
-		m_bKnockback = true;
+		m_sMotionFrag.bKnockBack = true;
 
 		// やられモーション
 		m_pMotion->Set(MOTION_KNOCKBACK);
@@ -1769,7 +1684,7 @@ void CPlayer::Damage(void)
 		m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// ノックバック判定消す
-		m_bKnockback = false;
+		m_sMotionFrag.bKnockBack = false;
 		m_pMotion->ToggleFinish(true);
 
 
@@ -1866,7 +1781,7 @@ void CPlayer::KnockBack(void)
 		m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		
 		// ノックバック判定消す
-		m_bKnockback = false;
+		m_sMotionFrag.bKnockBack = false;
 		m_pMotion->ToggleFinish(true);
 
 		// Xファイルとの判定
