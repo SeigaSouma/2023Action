@@ -184,7 +184,7 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
-	//SetMapIndex(35);
+	//SetMapIndex(39);
 
 	return S_OK;
 }
@@ -1412,11 +1412,16 @@ void CPlayer::CollisionChaseChanger(void)
 		// 円の判定
 		if (CircleRange(pos, posMapIndex, GetRadius(), 900.0f))
 		{
-			// 追従の種類設定
-			CGame::GetGameManager()->SetType(CGameManager::SCENE_RUSH);
 			pCamera->SetChaseType(CCamera::CHASETYPE_NONE);
 			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 150.0f, posMapIndex.z));
 			pCamera->SetLenDest(pCamera->GetOriginDistance() + 500.0f);
+
+			if (CircleRange(pos, posMapIndex, GetRadius(), 300.0f))
+			{
+				// 追従の種類設定
+				CGame::GetGameManager()->SetType(CGameManager::SCENE_RUSH);
+			}
+
 			return;
 		}
 	}
@@ -1542,6 +1547,9 @@ bool CPlayer::Hit(const int nValue)
 
 		// 過去の状態保存
 		m_Oldstate = m_state;
+
+		// 色設定
+		m_mMatcol = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
 
 		// ダメージ状態にする
 		m_state = STATE_DMG;
@@ -1830,11 +1838,19 @@ void CPlayer::KnockBack(void)
 //==========================================================================
 void CPlayer::Draw(void)
 {
-#if _DEBUG
-	CObjectChara::Draw(m_mMatcol);
-#else
-	CObjectChara::Draw();
-#endif
+
+	if (m_state == STATE_DMG)
+	{
+		CObjectChara::Draw(m_mMatcol);
+	}
+	else if (m_state == STATE_INVINCIBLE)
+	{
+		CObjectChara::Draw(m_mMatcol.a);
+	}
+	else
+	{
+		CObjectChara::Draw();
+	}
 }
 
 //==========================================================================

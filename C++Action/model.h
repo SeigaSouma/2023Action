@@ -29,6 +29,7 @@ public:
 	void Update(void);
 	void Draw(void);
 	void Draw(D3DXCOLOR col);
+	void Draw(float fAlpha);
 	void BindXData(int nIdxXFile);
 
 	void SetWorldMtx(const D3DXMATRIX mtx);		// マトリックス設定
@@ -52,6 +53,9 @@ public:
 protected:
 
 private:
+
+	void CalWorldMtx(void);	// ワールドマトリックスの計算処理
+
 	D3DXMATRIX	m_mtxWorld;	// ワールドマトリックス
 	D3DXVECTOR3 m_pos;		// 位置
 	D3DXVECTOR3 m_posOld;	// 前回の位置

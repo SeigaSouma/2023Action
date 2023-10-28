@@ -60,6 +60,7 @@ public:
 	void Update(void);
 	void Draw(void);
 	void Draw(D3DXCOLOR col);
+	void Draw(float fAlpha);
 
 	void SetmtxWorld(const D3DXMATRIX mtxWorld);
 	D3DXMATRIX GetmtxWorld(void) const;			// ワールドマトリックス取得

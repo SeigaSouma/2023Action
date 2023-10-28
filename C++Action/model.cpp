@@ -157,17 +157,15 @@ void CModel::Update(void)
 }
 
 //==========================================================================
-// 描画処理
+// ワールドマトリックスの計算処理
 //==========================================================================
-void CModel::Draw(void)
+void CModel::CalWorldMtx(void)
 {
 	// デバイスの取得
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス宣言
 	D3DXMATRIX mtxRotOrigin;		// 計算用マトリックス宣言
-	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
-	D3DXMATERIAL *pMat;				// マテリアルデータへのポインタ
 	D3DXMATRIX mtxnParent;			// 親の計算用マトリックス
 
 	// 親マトリックスの初期化
@@ -208,6 +206,24 @@ void CModel::Draw(void)
 
 	// ワールドマトリックスの設定
 	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
+}
+
+//==========================================================================
+// 描画処理
+//==========================================================================
+void CModel::Draw(void)
+{
+	// デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
+
+	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス宣言
+	D3DXMATRIX mtxRotOrigin;		// 計算用マトリックス宣言
+	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
+	D3DXMATERIAL *pMat;				// マテリアルデータへのポインタ
+	D3DXMATRIX mtxnParent;			// 親の計算用マトリックス
+
+	// ワールドマトリックスの計算処理
+	CalWorldMtx();
 
 	// 現在のマテリアルを取得
 	pDevice->GetMaterial(&matDef);
@@ -256,44 +272,8 @@ void CModel::Draw(D3DXCOLOR col)
 	matNow.MatD3D.Diffuse = col;
 	matNow.MatD3D.Ambient = col;
 
-	// 親マトリックスの初期化
-	D3DXMatrixIdentity(&mtxRotOrigin);
-	D3DXMatrixIdentity(&mtxnParent);
-
-	// ワールドマトリックスの初期化
-	D3DXMatrixIdentity(&m_mtxWorld);
-
-	// 元の向きを反映する
-	D3DXMatrixRotationYawPitchRoll(&mtxRotOrigin, m_rotOrigin.y, m_rotOrigin.x, m_rotOrigin.z);
-
-	// 向きを反映する
-	D3DXMatrixRotationYawPitchRoll(&mtxRot, m_rot.y, m_rot.x, m_rot.z);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRot);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxRotOrigin);
-
-	// 位置を反映する
-	D3DXMatrixTranslation(&mtxTrans, m_pos.x, m_pos.y, m_pos.z);
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxTrans);
-
-	// 親のマトリックスと掛け合わせる
-	if (m_pParent == NULL)
-	{// 自分が親だった場合
-
-		// 最新のマトリックスを渡す(DirectXが覚えているもの)
-		pDevice->GetTransform(D3DTS_WORLD, &mtxnParent);
-	}
-	else
-	{// 親がいる場合
-
-		// 親のマトリックスを渡す
-		mtxnParent = m_pParent->GetWorldMtx();
-	}
-
-	// 自分に親のワールドマトリックスを掛ける
-	D3DXMatrixMultiply(&m_mtxWorld, &m_mtxWorld, &mtxnParent);
-
-	// ワールドマトリックスの設定
-	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
+	// ワールドマトリックスの計算処理
+	CalWorldMtx();
 
 	// 現在のマテリアルを取得
 	pDevice->GetMaterial(&matDef);
@@ -308,6 +288,61 @@ void CModel::Draw(D3DXCOLOR col)
 	for (int nCntMat = 0; nCntMat < (int)pXData->dwNumMat; nCntMat++)
 	{
 		// マテリアルの設定
+		pDevice->SetMaterial(&matNow.MatD3D);
+
+		// テクスチャの設定
+		pDevice->SetTexture(0, CManager::GetInstance()->GetTexture()->GetAdress(pXData->nIdxTexture[nCntMat]));
+
+		// パーツの描画
+		pXData->pMesh->DrawSubset(nCntMat);
+	}
+
+	// 保存していたマテリアルを戻す
+	pDevice->SetMaterial(&matDef);
+}
+
+//==========================================================================
+// 描画処理
+//==========================================================================
+void CModel::Draw(float fAlpha)
+{
+	// デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
+
+	D3DXMATRIX mtxRot, mtxTrans;	// 計算用マトリックス宣言
+	D3DXMATRIX mtxRotOrigin;		// 計算用マトリックス宣言
+	D3DMATERIAL9 matDef;			// 現在のマテリアル保存用
+	D3DXMATERIAL *pMat;				// マテリアルデータへのポインタ
+	D3DXMATRIX mtxnParent;			// 親の計算用マトリックス
+
+	D3DXMATERIAL matNow;			// 今回のマテリアル
+
+	// 他の情報クリア
+	ZeroMemory(&matNow, sizeof(D3DXMATERIAL));
+
+	// ワールドマトリックスの計算処理
+	CalWorldMtx();
+
+	// 現在のマテリアルを取得
+	pDevice->GetMaterial(&matDef);
+
+	// Xファイルのデータ取得
+	CXLoad::SXFile *pXData = CScene::GetXLoad()->GetObjectX(m_nIdxXFile);
+
+	// マテリアルデータへのポインタを取得
+	pMat = (D3DXMATERIAL*)pXData->pBuffMat->GetBufferPointer();
+
+	// 頂点数分繰り返し
+	for (int nCntMat = 0; nCntMat < (int)pXData->dwNumMat; nCntMat++)
+	{
+		// 不透明度設定
+		matNow.MatD3D.Diffuse = D3DXCOLOR(pMat[nCntMat].MatD3D.Diffuse.r, pMat[nCntMat].MatD3D.Diffuse.g, pMat[nCntMat].MatD3D.Diffuse.b, fAlpha);
+		matNow.MatD3D.Ambient = D3DXCOLOR(pMat[nCntMat].MatD3D.Ambient.r, pMat[nCntMat].MatD3D.Ambient.g, pMat[nCntMat].MatD3D.Ambient.b, fAlpha);
+		matNow.MatD3D.Emissive = pMat[nCntMat].MatD3D.Emissive;
+		matNow.MatD3D.Power = pMat[nCntMat].MatD3D.Power;
+		matNow.MatD3D.Specular = pMat[nCntMat].MatD3D.Specular;
+
+		//マテリアルの設定
 		pDevice->SetMaterial(&matNow.MatD3D);
 
 		// テクスチャの設定

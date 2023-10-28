@@ -41,7 +41,6 @@ private:
 		MOTION_DEF = 0,		// ニュートラルモーション
 		MOTION_WALK,		// 移動モーション
 		MOTION_BULLETATK,	// 攻撃
-		MOTION_SUPERBULLETATK,	// 攻撃
 		MOTION_ASSULTATK,	// 攻撃
 		MOTION_KNOCKBACK,	// やられモーション
 		MOTION_FADEOUT,		// 帰還モーション
@@ -51,7 +50,6 @@ private:
 	enum ATKTYPE
 	{
 		ATKTYPE_BULLET = 0,	// 弾発射攻撃
-		ATKTYPE_SUPERBULLET,// ちょうたま
 		ATKTYPE_ASSULT,		// 突進
 		ATKTYPE_ENEMYSPAWN,	// 敵出現
 		ATKTYPE_MAX

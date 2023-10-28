@@ -30,7 +30,7 @@ MODEL_FILENAME = data/MODEL/tyuuni/15_R_foot.x		# [12]右足
 MODEL_FILENAME = data/MODEL/tyuuni/10_L_UPleg.x		# [13]左太もも
 MODEL_FILENAME = data/MODEL/tyuuni/11_L_DWleg.x		# [14]左脛
 MODEL_FILENAME = data/MODEL/tyuuni/12_L_foot.x		# [15]左足
-MODEL_FILENAME = data/MODEL/katana_01.x			# [16]大剣
+MODEL_FILENAME = data/MODEL/MonnMonnsowd_Low.x			# [16]大剣
 
 #------------------------------------------------------------------------------
 # キャラクター情報

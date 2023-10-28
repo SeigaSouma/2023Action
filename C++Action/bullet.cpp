@@ -378,8 +378,11 @@ void CBullet::Update(void)
 			m_pEffectThunderRing = NULL;
 		}
 
-		// ’e‚Ì¶¬ˆ—
-		CBulletExplosion::Create(GetPosition(), GetWidthLen() + 200.0f);
+		if (m_type == TYPE_PLAYER)
+		{
+			// ’e‚Ì¶¬ˆ—
+			CBulletExplosion::Create(GetPosition(), GetWidthLen() + 200.0f);
+		}
 
 		Uninit();
 		return;

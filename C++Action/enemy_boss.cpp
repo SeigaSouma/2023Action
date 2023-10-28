@@ -315,10 +315,6 @@ void CEnemyBoss::UpdateByAttack(void)
 		UpdateAttackBullet();
 		break;
 
-	case ATKTYPE_SUPERBULLET:
-		UpdateAttackBullet();
-		break;
-
 	case ATKTYPE_ASSULT:
 		UpdateAttackAssult();
 		break;
@@ -337,8 +333,7 @@ void CEnemyBoss::UpdateByAttack(void)
 void CEnemyBoss::UpdateAttackBullet(void)
 {
 	int nType = m_pMotion->GetType();
-	if ((nType == MOTION_BULLETATK && m_pMotion->IsFinish() == true) ||
-		(nType == MOTION_SUPERBULLETATK && m_pMotion->IsFinish() == true))
+	if (nType == MOTION_BULLETATK && m_pMotion->IsFinish() == true)
 	{// ’eUŒ‚‚ªI‚í‚Á‚Ä‚½‚ç
 
 		// ‘Ò‹@ŽžŠÔ
@@ -351,7 +346,7 @@ void CEnemyBoss::UpdateAttackBullet(void)
 		return;
 	}
 	
-	if (nType != MOTION_BULLETATK && nType != MOTION_SUPERBULLETATK)
+	if (nType != MOTION_BULLETATK)
 	{// ’eUŒ‚‚¶‚á‚È‚¢ê‡
 
 		switch (m_sAct.AtkType)
@@ -359,11 +354,6 @@ void CEnemyBoss::UpdateAttackBullet(void)
 		case ATKTYPE_BULLET:
 			// ’eUŒ‚ƒ‚[ƒVƒ‡ƒ“Ý’è
 			m_pMotion->Set(MOTION_BULLETATK);
-			break;
-
-		case ATKTYPE_SUPERBULLET:
-			// ’eUŒ‚ƒ‚[ƒVƒ‡ƒ“Ý’è
-			m_pMotion->Set(MOTION_SUPERBULLETATK);
 			break;
 		}
 	}
@@ -840,7 +830,6 @@ void CEnemyBoss::DrawingACT(void)
 	switch (m_sAct.AtkType)
 	{
 	case ATKTYPE_BULLET:
-	case ATKTYPE_SUPERBULLET:
 		if (m_BaseType == BASETYPE_MAP)
 		{// ƒ}ƒbƒv‚ÅˆÚ“®‚µ‚Ä‚éê‡
 			m_state = STATE_BASECHANGE;
@@ -969,22 +958,6 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	switch (nType)
 	{
 	case MOTION_BULLETATK:
-		// ’e‚Ì¶¬
-		pBullet = CBullet::Create(
-			CBullet::TYPE_ENEMY,
-			CBullet::MOVETYPE_NORMAL,
-			D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),
-			rot,
-			D3DXVECTOR3(sinf(D3DX_PI + rot.y) * 10.0f, 0.0f, cosf(D3DX_PI + rot.y) * 10.0f),
-			80.0f);
-
-		pBullet->SetMapIndex(GetMapIndex());
-		pBullet->SetMapMoveValue(GetMapMoveValue());
-		pBullet->SetMapPointRatio(GetMapPointRatio());
-		pBullet->SetMoveAngle(ANGLE_UP);
-		break;
-
-	case MOTION_SUPERBULLETATK:
 		for (int i = 0; i < 17; i++)
 		{
 			float fRot = ((D3DX_PI * 2.0f) / 16.0f) * i;
