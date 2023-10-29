@@ -130,7 +130,7 @@ HRESULT CGame::Init(void)
 	//**********************************
 	// “G‚Ì‹’“_
 	//**********************************
-	m_pEnemyBase = CEnemyBase::Create();
+	m_pEnemyBase = CEnemyBase::Create("data\\TEXT\\enemybase.txt");
 	if (m_pEnemyBase == NULL)
 	{// NULL‚¾‚Á‚½‚ç
 		return E_FAIL;
@@ -636,7 +636,7 @@ void CGame::Reset(void)
 	//**********************************
 	// “G‚Ì‹’“_
 	//**********************************
-	m_pEnemyBase = CEnemyBase::Create();
+	m_pEnemyBase = CEnemyBase::Create("data\\TEXT\\enemybase_boss.txt");
 	if (m_pEnemyBase == NULL)
 	{// NULL‚¾‚Á‚½‚ç
 		return;

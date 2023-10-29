@@ -575,6 +575,11 @@ void CEnemy::CollisionPlayer(void)
 		return;
 	}
 
+	if (m_state == STATE_SPAWN || m_state == STATE_DEAD || m_state == STATE_FADEOUT)
+	{
+		return;
+	}
+
 	// ©•ª‚Ìî•ñæ“¾
 	D3DXVECTOR3 pos = GetPosition();
 	float fRadius = GetRadius();

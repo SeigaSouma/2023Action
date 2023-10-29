@@ -48,7 +48,7 @@ CEnemyBase::~CEnemyBase()
 //==========================================================================
 // 生成処理
 //==========================================================================
-CEnemyBase *CEnemyBase::Create(void)
+CEnemyBase *CEnemyBase::Create(const char *pFileName)
 {
 	// 生成用のオブジェクト
 	CEnemyBase *pModel = NULL;
@@ -63,7 +63,7 @@ CEnemyBase *CEnemyBase::Create(void)
 		{// メモリの確保が出来ていたら
 
 			// 初期化処理
-			HRESULT hr = pModel->ReadText();
+			HRESULT hr = pModel->ReadText(pFileName);
 
 			if (FAILED(hr))
 			{// 失敗していたら
@@ -119,6 +119,21 @@ HRESULT CEnemyBase::Init(void)
 			D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 			0);
 
+		// 生成する
+		for (int i = 0; i < m_nNumAll; i++)
+		{
+			// デバッグ用数字の生成
+			m_pMultiNumber[i] = CDebugPointNumber::Create(i);
+
+			//if (m_ChaseChangeInfo[i].nRush == 0)
+			//{// ラッシュ用じゃなかったら
+			//	pEnemyManager->SetEnemy(
+			//		D3DXVECTOR3(0.0f, m_ChaseChangeInfo[i].fSpawnPosY, 0.0f),
+			//		m_ChaseChangeInfo[i].nMapIdx,
+			//		m_ChaseChangeInfo[i].fMapMoveValue,
+			//		m_ChaseChangeInfo[i].nPattern);
+			//}
+		}
 	}
 
 	return S_OK;
@@ -212,7 +227,7 @@ void CEnemyBase::Update(void)
 //==========================================================================
 // テキスト読み込み処理
 //==========================================================================
-HRESULT CEnemyBase::ReadText(void)
+HRESULT CEnemyBase::ReadText(const char *pFileName)
 {
 #if 0
 
@@ -273,7 +288,7 @@ HRESULT CEnemyBase::ReadText(void)
 	FILE *pFile = NULL;	// ファイルポインタを宣言
 
 	// ファイルを開く
-	pFile = fopen("data\\TEXT\\enemybase.txt", "r");
+	pFile = fopen(pFileName, "r");
 
 	if (pFile == NULL)
 	{// ファイルが開けなかった場合

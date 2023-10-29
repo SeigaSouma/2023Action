@@ -36,8 +36,8 @@
 #define MAX_ROT			(D3DX_PI * 0.49f)	// ÉJÉÅÉâå≈íËóp
 #define BACKFOLLOW_TIME	(20)				// îwñ ï‚ê≥Ç‹Ç≈ÇÃéûä‘
 #define TITLE_POSR_DEST	(D3DXVECTOR3(0.0f, 0.0f, 0.0f))
-#define TITLE_LEN_DEST	(3660.0f)
-#define TITLECAMERAROT_NONE		(D3DXVECTOR3(0.0f, -0.79f, -0.40f))
+#define TITLE_LEN_DEST	(6700.0f)
+#define TITLECAMERAROT_NONE		(D3DXVECTOR3(0.0f, -0.79f, -0.25f))
 #define TITLECAMERAROT_ENEMY	(D3DXVECTOR3(0.0f, -0.79f, -0.12f))
 #define TITLESTATE_CHANGE	(60 * 14)
 #define TITLESTATE_CHASE	(60 * 20)

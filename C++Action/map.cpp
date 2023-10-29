@@ -573,11 +573,11 @@ HRESULT map::ReadText(const char *pTextFile)
 	switch (CManager::GetInstance()->GetMode())
 	{
 	case CScene::MODE_TITLE:
-		pFile = fopen("data\\TEXT\\edit_info.txt", "r");
+		pFile = fopen("data\\TEXT\\edit_info_title.txt", "r");
 		break;
 
 	case CScene::MODE_TUTORIAL:
-		pFile = fopen("data\\TEXT\\edit_info.txt", "r");
+		pFile = fopen("data\\TEXT\\edit_info_title.txt", "r");
 		break;
 
 	case CScene::MODE_GAME:
@@ -585,11 +585,11 @@ HRESULT map::ReadText(const char *pTextFile)
 		break;
 
 	case CScene::MODE_RESULT:
-		pFile = fopen("data\\TEXT\\edit_info.txt", "r");
+		pFile = fopen("data\\TEXT\\edit_info_title.txt", "r");
 		break;
 
 	case CScene::MODE_RANKING:
-		pFile = fopen("data\\TEXT\\edit_info.txt", "r");
+		pFile = fopen("data\\TEXT\\edit_info_title.txt", "r");
 		break;
 
 	default:

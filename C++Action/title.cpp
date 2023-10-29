@@ -83,6 +83,16 @@ void CTitle::Update(void)
 	// 切り替えのカウンター加算
 	m_nCntSwitch++;
 
+	if (CManager::GetInstance()->GetFade()->GetState() != CFade::STATE_NONE)
+	{// フェード中は抜ける
+		return;
+	}
+
+	if (m_nCntSwitch <= 120)
+	{
+		return;
+	}
+
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_A, 0) == true)
 	{
 		// モード設定

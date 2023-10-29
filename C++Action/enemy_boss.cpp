@@ -30,6 +30,7 @@
 #include "objectX.h"
 #include "debugproc.h"
 #include "fade.h"
+#include "enemybase.h"
 
 //==========================================================================
 // マクロ定義
@@ -41,8 +42,9 @@
 #define CHACE_DISTABCE	(50.0f)		// 追い掛ける時の間隔
 #define JUMP			(18.0f)					// ジャンプ力初期値
 #define BASECHANGETIME	(120)	// 拠点切り替え時間
-#define PLAYERCHASETIME	(60 * 5)	// 親追い掛け時間
+#define PLAYERCHASETIME	(60 * 6)	// 親追い掛け時間
 #define WAITTIME	(60 * 2)	// 待機時間
+#define BULLETCOUNT		(3)		// 弾の回数
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -54,6 +56,7 @@
 CEnemyBoss::CEnemyBoss(int nPriority) : CEnemy(nPriority)
 {
 	// 値のクリア
+	m_sAct.nBulletCnt = 0;		// 弾のカウンター
 	m_sAct.nAssultAngle = 1;	// 突進の向き
 	m_sAct.AtkType = ATKTYPE_BULLET;	// 攻撃の種類
 	m_BaseType = BASETYPE_ORIGIN;	// 拠点の種類
@@ -320,6 +323,7 @@ void CEnemyBoss::UpdateByAttack(void)
 		break;
 
 	case ATKTYPE_ENEMYSPAWN:
+		UpdateChildSpawn();
 		break;
 
 	default:
@@ -336,13 +340,27 @@ void CEnemyBoss::UpdateAttackBullet(void)
 	if (nType == MOTION_BULLETATK && m_pMotion->IsFinish() == true)
 	{// 弾攻撃が終わってたら
 
-		// 待機時間
-		m_nCntState = WAITTIME;
-		m_state = STATE_WAIT;
-		m_sMotionFrag.bATK = false;
+		// 弾のカウンター加算
+		m_sAct.nBulletCnt++;
 
-		// 通常モーション設定
-		m_pMotion->Set(MOTION_DEF);
+		if (BULLETCOUNT <= m_sAct.nBulletCnt)
+		{//　弾の回数に満たしていたら
+
+			// 待機時間
+			m_nCntState = WAITTIME;
+			m_state = STATE_WAIT;
+			m_sMotionFrag.bATK = false;
+
+			// 通常モーション設定
+			m_pMotion->Set(MOTION_DEF);
+		}
+		else
+		{// まだ弾の回数が残ってる場合
+			m_state = STATE_ATTACK;
+
+			// 通常モーション設定
+			m_pMotion->Set(MOTION_DEF);
+		}
 		return;
 	}
 	
@@ -378,6 +396,33 @@ void CEnemyBoss::UpdateAttackAssult(void)
 	
 	// 弾攻撃モーション設定
 	m_pMotion->Set(MOTION_ASSULTATK);
+}
+
+//==========================================================================
+// 子分出現攻撃
+//==========================================================================
+void CEnemyBoss::UpdateChildSpawn(void)
+{
+	int nType = m_pMotion->GetType();
+	if (nType == MOTION_CHILDSPAWN && m_pMotion->IsFinish() == true)
+	{// 出現攻撃が終わってたら
+
+		// 突進に移る
+		m_state = STATE_BASECHANGE;
+		m_nCntState = BASECHANGETIME;
+		m_BaseTypeDest = BASETYPE_MAP;
+
+		// 通常モーション設定
+		m_pMotion->Set(MOTION_DEF);
+		return;
+	}
+	
+	if (nType != MOTION_CHILDSPAWN)
+	{// 子分出現じゃない場合
+
+		// 子分出現モーション設定
+		m_pMotion->Set(MOTION_CHILDSPAWN);
+	}
 }
 
 //==========================================================================
@@ -828,7 +873,19 @@ void CEnemyBoss::ChangeBase(void)
 //==========================================================================
 void CEnemyBoss::DrawingACT(void)
 {
-	m_sAct.AtkType = (ATKTYPE)(rand() % ATKTYPE_MAX);
+	while (1)
+	{
+		// 行動抽選
+		m_sAct.AtkType = (ATKTYPE)(rand() % ATKTYPE_MAX);
+
+		if (m_sAct.AtkType != ATKTYPE_ENEMYSPAWN)
+		{// 敵出現以外
+			break;
+		}
+	}
+
+	// 弾の回数リセット
+	m_sAct.nBulletCnt = 0;
 
 	// 次の行動別
 	switch (m_sAct.AtkType)
@@ -855,9 +912,13 @@ void CEnemyBoss::DrawingACT(void)
 		}
 		else
 		{// 中心にいる場合
-			m_state = STATE_BASECHANGE;
+
+			m_state = STATE_ATTACK;
+			m_sAct.AtkType = ATKTYPE_ENEMYSPAWN;
+
+			/*m_state = STATE_BASECHANGE;
 			m_nCntState = BASECHANGETIME;
-			m_BaseTypeDest = BASETYPE_MAP;
+			m_BaseTypeDest = BASETYPE_MAP;*/
 		}
 		m_sAct.nAssultAngle = 1;	// 突進の向き
 
@@ -980,6 +1041,21 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 			pBullet->SetMapPointRatio(GetMapPointRatio());
 			pBullet->SetMoveAngle(ANGLE_UP);
 		}
+		break;
+
+	case MOTION_CHILDSPAWN:
+		int nNumAll = CGame::GetEnemyBase()->GetNumAll();
+		int nRandom = Random(0, nNumAll - 1);
+
+		// 敵の拠点情報取得
+		CEnemyBase::sInfo sInfo = CGame::GetEnemyBase()->GetChaseChangeInfo(nRandom);
+
+		// 敵配置
+		CGame::GetEnemyManager()->SetEnemy(
+					D3DXVECTOR3(0.0f, sInfo.fSpawnPosY, 0.0f),
+					sInfo.nMapIdx,
+					sInfo.fMapMoveValue,
+					sInfo.nPattern);
 		break;
 	}
 	

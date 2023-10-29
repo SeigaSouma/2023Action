@@ -1831,4 +1831,22 @@ PATTERNSET
 	
 END_PATTERNSET
 
+
+#------------------------------------------------------------------
+# [35]飛行敵1体（横長）
+#------------------------------------------------------------------
+PATTERNSET
+	
+	FIXEDMOVE = 0		# 一定の動きの種類
+	
+	ENEMYSET
+		TYPE = 2			# キャラの種類
+		INDEX = 0
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 0		# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
+	END_ENEMYSET
+	
+END_PATTERNSET
+
 END_SCRIPT		# この行は絶対消さないこと！

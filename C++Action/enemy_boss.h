@@ -42,6 +42,7 @@ private:
 		MOTION_WALK,		// 移動モーション
 		MOTION_BULLETATK,	// 攻撃
 		MOTION_ASSULTATK,	// 攻撃
+		MOTION_CHILDSPAWN,	// 子分出現
 		MOTION_KNOCKBACK,	// やられモーション
 		MOTION_FADEOUT,		// 帰還モーション
 		MOTION_MAX
@@ -58,6 +59,7 @@ private:
 	// 行動の構造体定義
 	struct BOSSACT
 	{
+		int nBulletCnt;		// 弾のカウンター
 		int nAssultAngle;	// 突進の向き
 		ATKTYPE AtkType;	// 攻撃の種類
 	};
@@ -82,6 +84,7 @@ private:
 	void UpdateByAttack(void);			// 攻撃別処理
 	void UpdateAttackBullet(void);		// 弾攻撃
 	void UpdateAttackAssult(void);		// 突進攻撃
+	void UpdateChildSpawn(void);		// 子分出現攻撃
 	void DrawingACT(void);				// 行動抽選
 	void RotPlayer(void);				// プレイヤーの方を見る
 

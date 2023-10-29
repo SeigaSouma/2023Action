@@ -1,0 +1,61 @@
+
+#==============================================================================
+# 敵拠点の配置
+#==============================================================================
+BASESET
+	PATTERN = 35
+	MAPIDX = 0
+	MAPMOVEVALUE = 0.00
+	SPAWN_Y = 2080.0
+	RUSH = 0
+END_BASESET
+
+BASESET
+	PATTERN = 35
+	MAPIDX = 1
+	MAPMOVEVALUE = 0.00
+	SPAWN_Y = 2080.0
+	RUSH = 0
+END_BASESET
+
+BASESET
+	PATTERN = 35
+	MAPIDX = 2
+	MAPMOVEVALUE = 0.00
+	SPAWN_Y = 2080.0
+	RUSH = 0
+END_BASESET
+
+BASESET
+	PATTERN = 35
+	MAPIDX = 3
+	MAPMOVEVALUE = 0.00
+	SPAWN_Y = 2080.0
+	RUSH = 0
+END_BASESET
+
+BASESET
+	PATTERN = 35
+	MAPIDX = 4
+	MAPMOVEVALUE = 0.00
+	SPAWN_Y = 2080.0
+	RUSH = 0
+END_BASESET
+
+BASESET
+	PATTERN = 35
+	MAPIDX = 5
+	MAPMOVEVALUE = 0.00
+	SPAWN_Y = 2080.0
+	RUSH = 0
+END_BASESET
+
+BASESET
+	PATTERN = 35
+	MAPIDX = 6
+	MAPMOVEVALUE = 0.00
+	SPAWN_Y = 2080.0
+	RUSH = 0
+END_BASESET
+
+END_SCRIPT		# この行は絶対消さないこと！

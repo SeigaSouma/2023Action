@@ -263,6 +263,8 @@ CInputGamepad::CInputGamepad()
 	m_bLeftStickSelect[STICK_X] = false;				// 左トリガーの選択判定
 	m_bLeftStickSelect[STICK_Y] = false;				// 左トリガーの選択判定
 	m_bVibrationUse = false;				// バイブを使用するかどうか
+
+	m_nCntPadrepeat = 0;									// リピート用カウント
 }
 
 //==================================================================================

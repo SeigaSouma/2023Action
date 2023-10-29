@@ -44,10 +44,10 @@ public:
 
 	void CreatePos(int nPattern, int nMapIdx, float fMapMoveValue, int nRush, float PosY);	// 位置作成
 	void DeletePos(int nIdx);					// 位置削除
-	HRESULT ReadText(void);	// 外部ファイル読み込み処理
+	HRESULT ReadText(const char *pFileName);	// 外部ファイル読み込み処理
 	void Save(void);			// 外部ファイル書き出し処理
 
-	static CEnemyBase *Create(void);
+	static CEnemyBase *Create(const char *pFileName);
 	int GetAxisNum(void);			// 軸数取得
 	D3DXVECTOR3 GetAxis(int nIdx);	// 軸取得
 	void SetSpawnPoint(int nIdx, int nMapIdx, float fMapMoveValue, float PosY);	// 軸設定
