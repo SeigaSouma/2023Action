@@ -9,7 +9,7 @@ SCRIPT			# この行は絶対消さないこと！
 #------------------------------------------------------------------
 # キャラクター数
 #------------------------------------------------------------------
-NUM_CHARACTER = 4
+NUM_CHARACTER = 5
 
 #------------------------------------------------------------------
 # キャラクターファイル名
@@ -18,6 +18,7 @@ MOTION_FILENAME = data/TEXT/motion_enemyboss.txt			# [0]ボス
 MOTION_FILENAME = data/TEXT/motion_crowd_poison.txt			# [1]きのこ
 MOTION_FILENAME = data/TEXT/motion_enemyfly_01.txt			# [2]飛行
 MOTION_FILENAME = data/TEXT/motion_enemyfly_02.txt			# [3]蝶
+MOTION_FILENAME = data/TEXT/motion_enemybee.txt				# [4]ハチ
 
 #===================================================================================================
 # 敵の情報
@@ -1841,6 +1842,40 @@ PATTERNSET
 	
 	ENEMYSET
 		TYPE = 2			# キャラの種類
+		INDEX = 0
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 0		# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
+	END_ENEMYSET
+	
+END_PATTERNSET
+
+#------------------------------------------------------------------
+# [36]ハチ1体（横長）
+#------------------------------------------------------------------
+PATTERNSET
+	
+	FIXEDMOVE = 0		# 一定の動きの種類
+	
+	ENEMYSET
+		TYPE = 4			# キャラの種類
+		INDEX = 0
+		STARTKEY = 0		# 初期キー
+		STARTFRAME = 0		# 初期フレーム
+		STARTMOVEVALUE = 0	# 初期マップ移動量
+	END_ENEMYSET
+	
+END_PATTERNSET
+
+#------------------------------------------------------------------
+# [37]ハチ1体（横長）（逆）
+#------------------------------------------------------------------
+PATTERNSET
+	
+	FIXEDMOVE = 10		# 一定の動きの種類
+	
+	ENEMYSET
+		TYPE = 4			# キャラの種類
 		INDEX = 0
 		STARTKEY = 0		# 初期キー
 		STARTFRAME = 0		# 初期フレーム

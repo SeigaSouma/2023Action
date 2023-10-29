@@ -34,6 +34,7 @@ public:
 		TYPE_CROUWD,
 		TYPE_FLY,
 		TYPE_PAPION,
+		TYPE_BEE,
 		TYPE_MAX
 	}TYPE;
 

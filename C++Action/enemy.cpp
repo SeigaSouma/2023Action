@@ -34,6 +34,7 @@
 #include "enemy_crowd.h"
 #include "enemy_fly.h"
 #include "enemy_papion.h"
+#include "enemy_bee.h"
 
 //==========================================================================
 // É}ÉNÉçíËã`
@@ -126,6 +127,10 @@ CEnemy *CEnemy::Create(int nIdx, const char *pFileName, D3DXVECTOR3 pos, TYPE ty
 
 		case TYPE_PAPION:
 			pEnemy = DEBUG_NEW CEnemyPapion;
+			break;
+
+		case TYPE_BEE:
+			pEnemy = DEBUG_NEW CEnemyBee;
 			break;
 
 		default:

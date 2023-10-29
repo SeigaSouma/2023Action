@@ -181,6 +181,7 @@
     <ClCompile Include="enemybase.cpp" />
     <ClCompile Include="enemyfixedmove_manager.cpp" />
     <ClCompile Include="enemymanager.cpp" />
+    <ClCompile Include="enemy_bee.cpp" />
     <ClCompile Include="enemy_boss.cpp" />
     <ClCompile Include="enemy_crowd.cpp" />
     <ClCompile Include="enemy_fly.cpp" />
@@ -281,6 +282,7 @@
     <ClInclude Include="enemybase.h" />
     <ClInclude Include="enemyfixedmove_manager.h" />
     <ClInclude Include="enemymanager.h" />
+    <ClInclude Include="enemy_bee.h" />
     <ClInclude Include="enemy_boss.h" />
     <ClInclude Include="enemy_crowd.h" />
     <ClInclude Include="enemy_fly.h" />
