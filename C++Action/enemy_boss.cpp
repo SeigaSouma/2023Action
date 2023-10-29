@@ -31,6 +31,7 @@
 #include "debugproc.h"
 #include "fade.h"
 #include "enemybase.h"
+#include "effect_enemyspawn.h"
 
 //==========================================================================
 // マクロ定義
@@ -45,6 +46,7 @@
 #define PLAYERCHASETIME	(60 * 6)	// 親追い掛け時間
 #define WAITTIME	(60 * 2)	// 待機時間
 #define BULLETCOUNT		(3)		// 弾の回数
+#define PIYOPIYOTIME	(60 * 6)	// ピヨピヨの時間
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -192,8 +194,17 @@ bool CEnemyBoss::Hit(const int nValue)
 			CManager::GetInstance()->GetCamera()->SetShake(5, 8.0f, 0.0f);
 		}
 		else
-		{
+		{// 弾撃ち返しのダメージの時
 			m_nCntDamage = 20;
+
+			if (m_sAct.AtkType == ATKTYPE_ASSULT)
+			{// 突進中の時
+
+				// スタン状態にする
+				m_state = STATE_ATTACK;
+				m_nCntState = PIYOPIYOTIME;
+				m_sAct.AtkType = ATKTYPE_STUN;
+			}
 
 			// ヒットストップ
 			CManager::GetInstance()->SetEnableHitStop(5);
@@ -326,6 +337,10 @@ void CEnemyBoss::UpdateByAttack(void)
 		UpdateChildSpawn();
 		break;
 
+	case ATKTYPE_STUN:
+		UpdateStun();
+		break;
+
 	default:
 		break;
 	}
@@ -423,6 +438,32 @@ void CEnemyBoss::UpdateChildSpawn(void)
 		// 子分出現モーション設定
 		m_pMotion->Set(MOTION_CHILDSPAWN);
 	}
+}
+
+//==========================================================================
+// ピヨピヨ攻撃(?)
+//==========================================================================
+void CEnemyBoss::UpdateStun(void)
+{
+	m_nCntState--;
+	if (m_nCntState <= 0)
+	{// 遷移カウンターが0になったら
+
+		// 待機時間
+		m_nCntState = WAITTIME;
+		m_state = STATE_WAIT;
+		m_sMotionFrag.bATK = false;
+
+		// 通常モーション設定
+		m_pMotion->Set(MOTION_DEF);
+
+		// 通常モーション設定
+		m_pMotion->Set(MOTION_DEF);
+		return;
+	}
+	
+	// スタンモーション設定
+	m_pMotion->Set(MOTION_STUN);
 }
 
 //==========================================================================
@@ -878,8 +919,9 @@ void CEnemyBoss::DrawingACT(void)
 		// 行動抽選
 		m_sAct.AtkType = (ATKTYPE)(rand() % ATKTYPE_MAX);
 
-		if (m_sAct.AtkType != ATKTYPE_ENEMYSPAWN)
-		{// 敵出現以外
+		if (m_sAct.AtkType != ATKTYPE_ENEMYSPAWN &&
+			m_sAct.AtkType != ATKTYPE_STUN)
+		{// 敵出現 && スタン以外
 			break;
 		}
 	}
@@ -1023,9 +1065,11 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	switch (nType)
 	{
 	case MOTION_BULLETATK:
-		for (int i = 0; i < 17; i++)
+	{
+		int nCircleDivision = 15;
+		for (int i = 0; i < nCircleDivision + 1; i++)
 		{
-			float fRot = ((D3DX_PI * 2.0f) / 16.0f) * i;
+			float fRot = ((D3DX_PI * 2.0f) / (float)nCircleDivision) * i;
 
 			// 弾の生成
 			pBullet = CBullet::Create(
@@ -1041,6 +1085,7 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 			pBullet->SetMapPointRatio(GetMapPointRatio());
 			pBullet->SetMoveAngle(ANGLE_UP);
 		}
+	}
 		break;
 
 	case MOTION_CHILDSPAWN:
@@ -1056,6 +1101,9 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 					sInfo.nMapIdx,
 					sInfo.fMapMoveValue,
 					sInfo.nPattern);
+
+		// 敵のスポーンエフェクト生成
+		CEffectEnemySpawn::Create(pMapManager->GetTargetPosition(sInfo.nMapIdx, sInfo.fMapMoveValue));
 		break;
 	}
 	

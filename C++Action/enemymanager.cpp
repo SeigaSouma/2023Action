@@ -21,6 +21,8 @@
 #include "sound.h"
 #include "enemyfixedmove_manager.h"
 #include "enemybase.h"
+#include "effect_enemyspawn.h"
+#include "mapmanager.h"
 
 //==========================================================================
 // マクロ定義
@@ -374,6 +376,7 @@ CEnemy **CEnemyManager::SetEnemy(D3DXVECTOR3 pos, int nMapIndex, float fMapMoveV
 			m_pEnemy[nCntNULL]->SetMapIndexOrigin(nMapIndex);
 			m_pEnemy[nCntNULL]->SetMapIndex(nMapIndex);
 			m_pEnemy[nCntNULL]->SetMapMoveValueOrigin(NowPattern.EnemyData[nCntEnemy].fStartMoveValue + fMapMoveValue);
+			m_pEnemy[nCntNULL]->SetMapMoveValue(NowPattern.EnemyData[nCntEnemy].fStartMoveValue + fMapMoveValue);
 
 			// 敵の一定の動きマネージャポインタ取得
 			CEnemyFixedMoveManager *pFixed = m_pEnemy[nCntNULL]->GetFixedManager();
@@ -383,6 +386,15 @@ CEnemy **CEnemyManager::SetEnemy(D3DXVECTOR3 pos, int nMapIndex, float fMapMoveV
 			}
 			pFixed->Set(NowPattern.nFixedType);
 			pFixed->StartSet(NowPattern.EnemyData[nCntEnemy].nStartKey, NowPattern.EnemyData[nCntEnemy].nStartFrame);
+
+
+			// 敵のスポーンエフェクト生成
+			if (CGame::GetGameManager()->GetType() == CGameManager::SCENE_RUSH)
+			{
+				D3DXVECTOR3 spawnPos = CManager::GetInstance()->GetFixedManager()->UpdatePosition(m_pEnemy[nCntNULL]);
+
+				CEffectEnemySpawn::Create(spawnPos);
+			}
 
 			// 総数加算
 			m_nNumAll++;

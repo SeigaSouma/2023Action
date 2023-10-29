@@ -43,6 +43,7 @@ private:
 		MOTION_BULLETATK,	// 攻撃
 		MOTION_ASSULTATK,	// 攻撃
 		MOTION_CHILDSPAWN,	// 子分出現
+		MOTION_STUN,		// スタン
 		MOTION_KNOCKBACK,	// やられモーション
 		MOTION_FADEOUT,		// 帰還モーション
 		MOTION_MAX
@@ -53,6 +54,7 @@ private:
 		ATKTYPE_BULLET = 0,	// 弾発射攻撃
 		ATKTYPE_ASSULT,		// 突進
 		ATKTYPE_ENEMYSPAWN,	// 敵出現
+		ATKTYPE_STUN,		// スタン
 		ATKTYPE_MAX
 	};
 
@@ -85,6 +87,7 @@ private:
 	void UpdateAttackBullet(void);		// 弾攻撃
 	void UpdateAttackAssult(void);		// 突進攻撃
 	void UpdateChildSpawn(void);		// 子分出現攻撃
+	void UpdateStun(void);				// ピヨピヨ攻撃(?)
 	void DrawingACT(void);				// 行動抽選
 	void RotPlayer(void);				// プレイヤーの方を見る
 

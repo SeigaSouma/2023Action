@@ -176,7 +176,7 @@ CEnemy *CEnemy::Create(int nIdx, const char *pFileName, D3DXVECTOR3 pos, TYPE ty
 HRESULT CEnemy::Init(void)
 {
 	// 各種変数の初期化
-	m_state = STATE_SPAWN;	// 状態
+	m_state = STATE_NONE;	// 状態
 	m_Oldstate = STATE_PLAYERCHASE;
 	m_nCntState = 0;		// 状態遷移カウンター
 	m_nSurvivalLife = SURVIVALLIFE;	// 生存時間

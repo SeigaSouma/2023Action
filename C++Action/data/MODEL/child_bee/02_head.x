@@ -1553,7 +1553,7 @@ Mesh {
    0.000000;0.000000;0.000000;;
    0.000000;0.000000;0.000000;;
    TextureFilename {
-    "C:\\Users\\student\\Desktop\\2023Action\\C++Action\\data\\TEXTURE\\boss_bee\\Bee_body.png";
+    "data\\TEXTURE\\boss_bee\\Bee_body.png";
    }
   }
  }

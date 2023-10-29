@@ -14,6 +14,7 @@
 #include "slash.h"
 #include "effect_slashhit.h"
 #include "effect_thunderring.h"
+#include "effect_enemyspawn.h"
 
 //==========================================================================
 // マクロ定義
@@ -73,6 +74,9 @@ HRESULT CTexture::LoadAll(void)
 
 	// 雷のリング
 	CThunderRing::LoadTexture();
+
+	// 敵スポーン
+	CEffectEnemySpawn::LoadTexture();
 
 	return S_OK;
 }

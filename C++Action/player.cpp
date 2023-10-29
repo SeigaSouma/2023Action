@@ -190,7 +190,7 @@ HRESULT CPlayer::Init(void)
 	m_pMotion->ResetPose(MOTION_DEF);
 
 #if _DEBUG
-	SetMapIndex(39);
+	//SetMapIndex(39);
 #endif
 	return S_OK;
 }
