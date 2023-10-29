@@ -39,6 +39,7 @@
 #include "gamemanager.h"
 #include "instantfade.h"
 #include "hp_gauge_player.h"
+#include "fade.h"
 
 // 派生先
 #include "tutorialplayer.h"
@@ -54,6 +55,8 @@
 #define INVINCIBLE_INT	(2)				// 無敵の間隔
 #define INVINCIBLE_TIME	(90)			// 無敵の時間
 #define CONFUSIONTIME	(60 * 2)		// 混乱時間
+#define DEADTIME		(120)
+#define FADEOUTTIME		(60)
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -76,6 +79,7 @@ CPlayer::CPlayer(int nPriority) : CObjectChara(nPriority)
 	m_sMotionFrag.bATK = false;		// モーションのフラグ
 	m_sMotionFrag.bJump = false;		// モーションのフラグ
 	m_sMotionFrag.bKnockBack = false;	// モーションのフラグ
+	m_sMotionFrag.bDead = false;		// モーションのフラグ
 	m_sMotionFrag.bMove = false;		// モーションのフラグ
 	m_nAngle = 1;					// 向き
 	m_nCntState = 0;				// 状態遷移カウンター
@@ -184,8 +188,10 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
-	//SetMapIndex(39);
 
+#if _DEBUG
+	SetMapIndex(39);
+#endif
 	return S_OK;
 }
 
@@ -246,7 +252,7 @@ void  CPlayer::UninitByMode(void)
 void CPlayer::Kill(void)
 {
 
-	my_particle::Create(GetPosition(), my_particle::TYPE_OFFSETTING);
+	my_particle::Create(GetPosition(), my_particle::TYPE_ENEMY_FADE);
 
 	// HPゲージを消す
 	if (m_pHPGauge != NULL)
@@ -728,7 +734,7 @@ void CPlayer::Controll(void)
 	RotNormalize(rot.y);
 
 	// 重力処理
-	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG)
+	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_FADEOUT)
 	{
 		move.y -= mylib_const::GRAVITY;
 
@@ -760,7 +766,7 @@ void CPlayer::Controll(void)
 	//m_bLandOld = bLandStage;
 
 	if (m_bHitWall == false && 
-		(bLandStage == false || bMove == true || m_bLandField == true || m_bJump == true || m_sMotionFrag.bKnockBack == true))
+		(bLandStage == false || bMove == true || m_bLandField == true || m_bJump == true || m_sMotionFrag.bKnockBack == true || m_sMotionFrag.bDead == true))
 	{
 		pos.x = newPosition.x;
 		pos.z = newPosition.z;
@@ -809,7 +815,7 @@ void CPlayer::Controll(void)
 	//pos.y += move.y;
 
 	// 慣性補正
-	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG)
+	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_FADEOUT)
 	{
 		move.x += (0.0f - move.x) * 0.25f;
 		move.z += (0.0f - move.z) * 0.25f;
@@ -957,7 +963,7 @@ void CPlayer::MotionSet(void)
 		int nType = m_pMotion->GetType();
 		int nOldType = m_pMotion->GetOldType();
 
-		if (m_sMotionFrag.bMove == true && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false && m_bJump == false)
+		if (m_sMotionFrag.bMove == true && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false && m_sMotionFrag.bDead == false && m_bJump == false)
 		{// 移動していたら
 
 			m_sMotionFrag.bMove = false;	// 移動判定OFF
@@ -965,7 +971,7 @@ void CPlayer::MotionSet(void)
 			// 移動モーション
 			m_pMotion->Set(MOTION_WALK);
 		}
-		else if (m_sMotionFrag.bJump == true && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false)
+		else if (m_sMotionFrag.bJump == true && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false && m_sMotionFrag.bDead == false)
 		{// ジャンプ中
 
 			// ジャンプのフラグOFF
@@ -974,7 +980,7 @@ void CPlayer::MotionSet(void)
 			// ジャンプモーション
 			m_pMotion->Set(MOTION_JUMP);
 		}
-		else if (m_bJump == true && m_sMotionFrag.bJump == false && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false)
+		else if (m_bJump == true && m_sMotionFrag.bJump == false && m_sMotionFrag.bATK == false && m_sMotionFrag.bKnockBack == false && m_sMotionFrag.bDead == false)
 		{// ジャンプ中&&ジャンプモーションが終わってる時
 
 			// 落下モーション
@@ -985,6 +991,12 @@ void CPlayer::MotionSet(void)
 
 			// やられモーション
 			m_pMotion->Set(MOTION_KNOCKBACK);
+		}
+		else if (m_sMotionFrag.bDead == true)
+		{// 死亡中だったら
+
+			// やられモーション
+			m_pMotion->Set(MOTION_DEAD);
 		}
 		else if (m_sMotionFrag.bATK == true)
 		{// 攻撃していたら
@@ -1249,7 +1261,7 @@ bool CPlayer::Collision(D3DXVECTOR3 &pos, D3DXVECTOR3 &move)
 	m_bHitWall = false;			// 壁の当たり判定
 
 	// 高さ取得
-	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG)
+	if (m_state != STATE_KNOCKBACK && m_state != STATE_DMG && m_state != STATE_DEAD && m_state != STATE_FADEOUT)
 	{
 		fHeight = CManager::GetInstance()->GetScene()->GetElevation()->GetHeight(pos, bLand);
 	}
@@ -1441,7 +1453,7 @@ void CPlayer::CollisionChaseChanger(void)
 			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 150.0f, posMapIndex.z));
 			pCamera->SetLenDest(pCamera->GetOriginDistance() - 200.0f);
 
-			if (CircleRange(pos, posMapIndex, GetRadius(), 300.0f))
+			if (CircleRange(pos, posMapIndex, GetRadius(), 200.0f))
 			{// 更に中央
 
 				// ゲームパッド情報取得
@@ -1514,7 +1526,13 @@ bool CPlayer::Hit(const int nValue)
 	// 体力取得
 	int nLife = GetLife();
 
-	if (m_state != STATE_DEAD && m_state != STATE_DMG && m_state != STATE_KNOCKBACK && m_state != STATE_INVINCIBLE)
+	if (nLife <= 0)
+	{
+		// 死んだ
+		return true;
+	}
+
+	if (m_state != STATE_DMG && m_state != STATE_KNOCKBACK && m_state != STATE_INVINCIBLE && m_state != STATE_DEAD && m_state != STATE_FADEOUT)
 	{// ダメージ受付状態の時
 
 		// 体力減らす
@@ -1532,14 +1550,43 @@ bool CPlayer::Hit(const int nValue)
 			// 死状態
 			m_state = STATE_DEAD;
 
+			m_KnokBackMove.y = 8.0f;
+
+			// 遷移カウンター設定
+			m_nCntState = DEADTIME;
+
 			// 体力設定
 			SetLife(0);
 
-			// 死亡処理
-			Kill();
+			// ノックバック判定にする
+			m_sMotionFrag.bKnockBack = true;
 
-			// 終了処理
-			Uninit();
+			// やられモーション
+			m_pMotion->Set(MOTION_KNOCKBACK);
+
+			// ノックバックの位置更新
+			D3DXVECTOR3 pos = GetPosition();
+			D3DXVECTOR3 rot = GetRotation();
+			m_posKnokBack = pos;
+
+			// 衝撃波生成
+			CImpactWave::Create
+			(
+				D3DXVECTOR3(pos.x, pos.y + 80.0f, pos.z),	// 位置
+				D3DXVECTOR3(D3DX_PI * 0.5f, D3DX_PI + rot.y, D3DX_PI),				// 向き
+				D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f),			// 色
+				80.0f,										// 幅
+				80.0f,										// 高さ
+				20,											// 寿命
+				10.0f,										// 幅の移動量
+				CImpactWave::TYPE_GIZAWHITE,				// テクスチャタイプ
+				false										// 加算合成するか
+			);
+
+			CManager::GetInstance()->SetEnableHitStop(18);
+
+			// 振動
+			CManager::GetInstance()->GetCamera()->SetShake(21, 30.0f, 0.0f);
 
 			// 死んだ
 			return true;
@@ -1613,6 +1660,14 @@ void CPlayer::UpdateState(void)
 
 	case STATE_DMG:
 		Damage();
+		break;
+
+	case STATE_DEAD:
+		Dead();
+		break;
+
+	case STATE_FADEOUT:
+		FadeOut();
 		break;
 
 	case STATE_KNOCKBACK:
@@ -1742,6 +1797,117 @@ void CPlayer::Damage(void)
 }
 
 //==========================================================================
+// 死亡
+//==========================================================================
+void CPlayer::Dead(void)
+{
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+
+	// 移動量取得
+	D3DXVECTOR3 move = GetMove();
+
+	// 位置更新
+	if (m_nCntState > 0)
+	{
+		int nCnt = DEADTIME - m_nCntState;
+		pos.y = (-0.1f * (float)(nCnt * nCnt) + m_KnokBackMove.y * (float)nCnt) + m_posKnokBack.y;
+		pos.x += move.x;
+	}
+
+	// 状態遷移カウンター減算
+	m_nCntState--;
+
+	// 起伏との判定
+	if (m_bHitStage && m_nCntState >= 10)
+	{// 地面と当たっていたら
+
+		//// フェードを設定する
+		//CManager::GetInstance()->GetInstantFade()->SetFade();
+
+		//if (CManager::GetInstance()->GetInstantFade()->GetState() == CInstantFade::STATE_FADECOMPLETION)
+		//{// フェード完了した時
+
+
+
+		//}
+
+		m_state = STATE_FADEOUT;	// フェードアウト
+		m_nCntState = FADEOUTTIME;
+		m_KnokBackMove.y = 0.0f;	// 移動量ゼロ
+		m_bLandOld = true;
+		move.x = 0.0f;
+
+		// 色設定
+		m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+
+		// ノックバック判定消す
+		m_sMotionFrag.bKnockBack = false;
+		m_sMotionFrag.bDead = true;
+		//m_pMotion->ToggleFinish(true);
+
+		// ぶっ倒れモーション
+		m_pMotion->Set(MOTION_DEAD);
+
+		// Xファイルとの判定
+		CStage *pStage = CGame::GetStage();
+		if (pStage == NULL)
+		{// NULLだったら
+			return;
+		}
+
+		// ステージに当たった判定
+		for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
+		{
+			// オブジェクト取得
+			CObjectX *pObjX = pStage->GetObj(nCntStage);
+
+			if (pObjX == NULL)
+			{// NULLだったら
+				continue;
+			}
+
+			// 高さ取得
+			bool bLand = false;
+			pos.y = pObjX->GetHeight(pos, bLand);
+		}
+	}
+
+	// 位置設定
+	SetPosition(pos);
+
+	// 移動量設定
+	SetMove(move);
+}
+
+//==========================================================================
+// フェードアウト
+//==========================================================================
+void CPlayer::FadeOut(void)
+{
+
+	// 状態遷移カウンター減算
+	m_nCntState--;
+
+	// 色設定
+	m_mMatcol.a = (float)m_nCntState / (float)FADEOUTTIME;
+
+	if (m_nCntState <= 0)
+	{// 遷移カウンターが0になったら
+
+		// モード設定
+		CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_RESULT);
+
+		// 死亡処理
+		Kill();
+
+		// 終了処理
+		Uninit();
+		return;
+	}
+}
+
+//==========================================================================
 // ノックバック
 //==========================================================================
 void CPlayer::KnockBack(void)
@@ -1843,7 +2009,7 @@ void CPlayer::Draw(void)
 	{
 		CObjectChara::Draw(m_mMatcol);
 	}
-	else if (m_state == STATE_INVINCIBLE)
+	else if (m_state == STATE_INVINCIBLE || m_state == STATE_FADEOUT)
 	{
 		CObjectChara::Draw(m_mMatcol.a);
 	}

@@ -38,6 +38,7 @@ public:
 		STATE_DMG,			// ダメージ
 		STATE_KNOCKBACK,	// ノックバック
 		STATE_DEAD,			// 死
+		STATE_FADEOUT,		// フェードアウト
 		STATE_ATTACK,		// 攻撃処理
 		STATE_MAX
 	}STATE;
@@ -67,6 +68,7 @@ protected:
 		MOTION_ATK,				// 攻撃
 		MOTION_ATK2,			// 攻撃(派生)
 		MOTION_KNOCKBACK,		// やられモーション
+		MOTION_DEAD,			// 死亡モーション
 		MOTION_JUMP,			// ジャンプ
 		MOTION_FALL,			// 落下中
 		MOTION_MAX
@@ -86,6 +88,7 @@ protected:
 		bool bJump;			// ジャンプ中かどうか
 		bool bATK;			// 攻撃中かどうか
 		bool bKnockBack;	// ノックバック中かどうか
+		bool bDead;			// 死亡中かどうか
 		bool bMove;			// 移動中かどうか
 	};
 
@@ -107,6 +110,8 @@ private:
 	void UpdateState(void);	// 状態更新処理
 	void KnockBack(void);	// ノックバック
 	void Damage(void);		// ダメージ
+	void Dead(void);		// 死亡
+	void FadeOut(void);		// フェードアウト
 	void Invincible(void);	// 無敵
 	virtual void Controll(void);	// 操作
 	void MotionSet(void);	// モーションの設定

@@ -612,17 +612,19 @@ void CEnemy::CollisionPlayer(void)
 		}
 
 		// ƒqƒbƒgˆ—
-		pPlayer->Hit(1);
-		ANGLE setAngle = pMapManager->GetTargetAngle(GetMapIndex(), pPlayer->GetMapIndex(), GetMapMoveValue(), pPlayer->GetMapMoveValue());
+		if (pPlayer->Hit(1))
+		{// Ž€‚ñ‚Å‚È‚©‚Á‚½‚ç
+			ANGLE setAngle = pMapManager->GetTargetAngle(GetMapIndex(), pPlayer->GetMapIndex(), GetMapMoveValue(), pPlayer->GetMapMoveValue());
 
-		int nAngle = 1;
-		if (setAngle == ANGLE_LEFT)
-		{
-			nAngle = -1;
+			int nAngle = 1;
+			if (setAngle == ANGLE_LEFT)
+			{
+				nAngle = -1;
+			}
+
+			// ‚Á”ò‚ÑˆÚ“®—ÊÝ’è
+			pPlayer->SetMove(D3DXVECTOR3(8.0f * nAngle, 0.0f, 0.0f));
 		}
-
-		// ‚Á”ò‚ÑˆÚ“®—ÊÝ’è
-		pPlayer->SetMove(D3DXVECTOR3(8.0f * nAngle, 0.0f, 0.0f));
 	}
 
 }
