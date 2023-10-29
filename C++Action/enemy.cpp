@@ -75,7 +75,6 @@ CEnemy::CEnemy(int nPriority) : CObjectChara(nPriority)
 	m_nSurvivalLife = 0;	// 生存時間
 	m_nSurvivalLifeOrigin = 0;	// 生存時間
 	m_bAddScore = false;	// スコア加算するかの判定
-	m_AddType = CResultManager::ADDTYPE_NONE;	// スコアの加算量
 	m_nBallastEmission = 0;	// 瓦礫の発生カウンター
 	m_sMotionFrag.bJump = false;		// ジャンプ中かどうか
 	m_sMotionFrag.bKnockback = false;	// ノックバック中かどうか
@@ -341,18 +340,6 @@ void CEnemy::Uninit(void)
 //==========================================================================
 void CEnemy::Kill(void)
 {
-
-	// スコア加算
-	if (m_AddType != CResultManager::ADDTYPE_NONE && CManager::GetInstance()->GetMode() == CScene::MODE_GAME)
-	{
-		CGame::GetScore()->Add(m_AddType);
-
-		if (m_bAddScore == true)
-		{// スコア加算する判定だったら
-			CGame::GetScore()->Add(GetAddScoreValue());
-		}
-	}
-
 	for (int nCntEnemy = 0; nCntEnemy < mylib_const::MAX_ENEMY; nCntEnemy++)
 	{// 子の数分回す
 

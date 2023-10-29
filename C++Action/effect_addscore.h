@@ -31,7 +31,6 @@ public:
 	virtual void Update(void);
 	virtual void Draw(void);
 
-	static int GetNumAll(void);
 	static CEffectAddScore *Create(const D3DXVECTOR3 pos);
 
 private:
@@ -43,9 +42,6 @@ private:
 	};
 
 	void UpdatePos(void);		// 移動
-	
-	void StateNone(void);		// 何もない状態
-	void StateDamage(void);		// ダメージ状態処理
 
 	STATE m_state;				// 状態
 	int m_nCntState;			// 状態遷移カウンター

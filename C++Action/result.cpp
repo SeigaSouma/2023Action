@@ -10,14 +10,14 @@
 #include "renderer.h"
 #include "calculation.h"
 #include "debugproc.h"
-#include "result_screen.h"
 #include "player.h"
 #include "sound.h"
+#include "resultscore.h"
 
 //==========================================================================
 // 静的メンバ変数宣言
 //==========================================================================
-CResultScreen *CResult::m_pResultScreen = NULL;	// リザルトスクリーンのオブジェクト
+CResultScore *CResult::m_pResultScore = NULL;	// リザルトスクリーンのオブジェクト
 bool CResult::m_bAllArrival = false;		// 全て到着した判定
 
 //==========================================================================
@@ -53,7 +53,7 @@ HRESULT CResult::Init(void)
 	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_RESULT);
 
 	// リザルト画面
-	m_pResultScreen = CResultScreen::Create();
+	m_pResultScore = CResultScore::Create();
 
 	// 成功
 	return S_OK;
@@ -64,7 +64,7 @@ HRESULT CResult::Init(void)
 //==========================================================================
 void CResult::Uninit(void)
 {
-	m_pResultScreen = NULL;
+	m_pResultScore = NULL;
 
 	// 終了処理
 	CScene::Uninit();
@@ -104,7 +104,7 @@ void CResult::Update(void)
 		if (CManager::GetInstance()->GetFade()->GetState() == CFade::STATE_NONE)
 		{
 			// 全ての到着処理
-			m_pResultScreen->SetAllArrival();
+			m_pResultScore->SetAllArrival();
 			m_bAllArrival = true;
 		}
 	}
@@ -121,9 +121,9 @@ void CResult::Draw(void)
 //==========================================================================
 // リザルトスクリーンの情報取得
 //==========================================================================
-CResultScreen *CResult::GetResultScreen(void)
+CResultScore *CResult::GetResultScore(void)
 {
-	return m_pResultScreen;
+	return m_pResultScore;
 }
 
 //==========================================================================

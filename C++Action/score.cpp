@@ -15,12 +15,13 @@
 // マクロ定義
 //==========================================================================
 #define TEXTURE			"data\\TEXTURE\\number_blackclover_01.png"	// テクスチャのファイル
-#define MAX_VALUE		(999999)						// 値の最大値
-#define TEX_U			(0.1f)							// Uの分割
-#define WIDTH			(40.0f)							// 横幅
-#define HEIGHT			(50.0f)							// 縦幅
-#define DIS_X			(50.0f)							// 間隔
-#define SCROLL_SPEED	(-0.005f)						// スクロール速度
+#define NUM_SCORE		(6)			// 桁数
+#define MAX_VALUE		(999999)	// 値の最大値
+#define TEX_U			(0.1f)		// Uの分割
+#define WIDTH			(40.0f)		// 横幅
+#define HEIGHT			(50.0f)		// 縦幅
+#define DIS_X			(50.0f)		// 間隔
+#define SCROLL_SPEED	(-0.005f)	// スクロール速度
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -184,45 +185,6 @@ void CScore::Add(int nValue)
 
 	// スコアの加算
 	CManager::GetInstance()->GetResultManager()->AddScore(nValue);
-
-	if (m_nNum >= MAX_VALUE)
-	{// 最大値で固定
-		m_nNum = MAX_VALUE;
-	}
-
-	// 値の設定処理
-	SetValue();
-}
-
-//==========================================================================
-// 加算処理
-//==========================================================================
-void CScore::Add(CResultManager::ADDTYPE AddType)
-{
-	// 値加算
-	/*switch (AddType)
-	{
-	case CResultManager::ADDTYPE_NONE:
-		break;
-
-	case CResultManager::ADDTYPE_NORMAL:
-		m_nNum += mylib_const::COMBOBONUS_1;
-		break;
-
-	case CResultManager::ADDTYPE_BLUE:
-		m_nNum += mylib_const::COMBOBONUS_2;
-		break;
-
-	case CResultManager::ADDTYPE_GOLD:
-		m_nNum += mylib_const::COMBOBONUS_3;
-		break;
-
-	default:
-		break;
-	}*/
-
-	// スコアの加算
-	CManager::GetInstance()->GetResultManager()->AddScoreNum(AddType);
 
 	if (m_nNum >= MAX_VALUE)
 	{// 最大値で固定

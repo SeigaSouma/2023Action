@@ -163,8 +163,7 @@ protected:
 	CHP_Gauge *m_pHPGauge;					// HPゲージの情報
 	CMotion *m_pMotion;						// モーションの情報
 	COLORTYPE m_colorType;					// 色ごとの種類
-	ACTTYPE m_ActType;						// 行動の種類
-	CResultManager::ADDTYPE m_AddType;		// スコアの加算種類
+	ACTTYPE m_ActType;						// 行動の種
 	CEnemy *m_pParent;		// 親のポインタ
 	D3DXCOLOR m_mMatcol;	// マテリアルの色
 	CEnemyFixedMoveManager *m_pFixedMoveManager;	// 一定の動きマネージャ

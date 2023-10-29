@@ -10,7 +10,6 @@
 #include "renderer.h"
 #include "calculation.h"
 #include "debugproc.h"
-#include "result_screen.h"
 #include "rankingscore.h"
 #include "enemymanager.h"
 

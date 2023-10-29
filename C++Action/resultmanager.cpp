@@ -22,7 +22,6 @@
 CResultManager::CResultManager()
 {
 	// 値のクリア
-	memset(&m_nScoreNum[0], 0, sizeof(m_nScoreNum));	// スコアの種類
 	m_nBaseScore = 0;		// スコア
 	m_nToatalScore = 0;	// 最終スコア
 
@@ -90,7 +89,6 @@ void CResultManager::Uninit(void)
 void CResultManager::Reset(void)
 {
 	// 値のクリア
-	memset(&m_nScoreNum[0], 0, sizeof(m_nScoreNum));	// スコアの種類
 	m_nBaseScore = 0;		// スコア
 	m_nToatalScore = 0;	// 最終スコア
 }
@@ -110,26 +108,6 @@ void CResultManager::AddScore(int nValue)
 {
 	m_nBaseScore += nValue;
 	m_nToatalScore += nValue;
-}
-
-//==========================================================================
-// スコアの種類加算
-//==========================================================================
-void CResultManager::AddScoreNum(CResultManager::ADDTYPE type)
-{
-	// 引数の種類を加算
-	m_nScoreNum[type]++;
-
-	// 値加算
-	m_nToatalScore += 0;
-}
-
-//==========================================================================
-// 種類毎の数取得
-//==========================================================================
-int CResultManager::GetScoreTypeNum(ADDTYPE type)
-{
-	return m_nScoreNum[type];
 }
 
 //==========================================================================

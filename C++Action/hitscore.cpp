@@ -232,7 +232,7 @@ void CHitScore::CalScore(void)
 	int nMultiply = nNum / 100;
 
 	// スコア加算量
-	int nAddValue = (1.0f + ((float)nMultiply * 0.1f)) * nNum;
+	int nAddValue = (1.0f + ((float)nMultiply * 0.1f)) * (nNum * 10);
 
 	// スコア加算
 	CGame::GetScore()->Add(nAddValue);

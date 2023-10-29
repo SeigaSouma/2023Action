@@ -41,7 +41,7 @@
 #define TITLECAMERAROT_ENEMY	(D3DXVECTOR3(0.0f, -0.79f, -0.12f))
 #define TITLESTATE_CHANGE	(60 * 14)
 #define TITLESTATE_CHASE	(60 * 20)
-#define RESULT_LEN	(280.0f)
+#define RESULT_LEN	(2280.0f)
 //#define RESULT_LEN	(1000.0f)
 #define RANKINGROT_NONE		(D3DXVECTOR3(0.0f, -0.79f + D3DX_PI, -0.30f))
 #define ROTHOSEI	(0.01f)	// å¸Ç´ÇÃï‚ê≥åWêî

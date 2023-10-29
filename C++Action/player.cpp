@@ -188,7 +188,6 @@ HRESULT CPlayer::Init(void)
 
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
-	//m_atkRush = ATKRUSH_LEFT;	// 連続アタックの種類
 
 #if _DEBUG
 	SetMapIndex(39);
@@ -860,9 +859,6 @@ void CPlayer::Controll(void)
 			pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
 			pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f))
 	{// 攻撃
-
-		 // ヒットスコア加算
-		CGame::GetHitScore()->Add(1);
 
 		if (pInputGamepad->GetStickPositionRatioR(0).x >= 0.2f)
 		{

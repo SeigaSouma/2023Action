@@ -14,7 +14,7 @@
 //==========================================================================
 // 前方宣言
 //==========================================================================
-class CResultScreen;
+class CResultScore;
 
 //==========================================================================
 // クラス定義
@@ -33,12 +33,12 @@ public:
 	void Update(void);
 	void Draw(void);
 
-	static CResultScreen *GetResultScreen(void);
+	static CResultScore *GetResultScore(void);
 	static void SetEnableArrival(void);
 
 private:
 	static bool m_bAllArrival;		// 全て到着した判定
-	static CResultScreen *m_pResultScreen;
+	static CResultScore *m_pResultScore;
 };
 
 

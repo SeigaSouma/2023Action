@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/glass.jpg		# [14]
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 36
+NUM_MODEL = 43
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -65,7 +65,14 @@ MODEL_FILENAME = data/MODEL/map_object/rock_02_huge.x		# [31]
 MODEL_FILENAME = data/MODEL/map_object/rock_03_huge.x		# [32]
 MODEL_FILENAME = data/MODEL/map_object/rock_04_huge.x		# [33]
 MODEL_FILENAME = data/MODEL/map_object/rock_05_huge.x		# [34]
-MODEL_FILENAME = data/MODEL/arow.x		# [35]
+MODEL_FILENAME = data/MODEL/map_object/rock_06_huge.x		# [35]
+MODEL_FILENAME = data/MODEL/map_object/rock_02_superhuge.x		# [36]
+MODEL_FILENAME = data/MODEL/map_object/rock_03_superhuge.x		# [37]
+MODEL_FILENAME = data/MODEL/map_object/rock_04_superhuge.x		# [38]
+MODEL_FILENAME = data/MODEL/map_object/rock_05_superhuge.x		# [39]
+MODEL_FILENAME = data/MODEL/map_object/tree_03_huge.x		# [40]
+MODEL_FILENAME = data/MODEL/stage_01.x		# [41]
+MODEL_FILENAME = data/MODEL/arow.x		# [42]
 
 #==============================================================================
 # 空情報
@@ -169,6 +176,83 @@ MODELSET
 	TYPE = 34
 	POS = -443.29 -80.00 -694.98
 	ROT = 0.00 -0.63 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 35
+	POS = -1789.98 -800.00 -2831.76
+	ROT = 0.00 -2.83 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 35
+	POS = 7368.17 -250.00 4094.97
+	ROT = 0.00 -2.20 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 31
+	POS = 6087.76 -50.00 4101.18
+	ROT = 0.00 -2.20 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 30
+	POS = 6196.41 -50.00 4953.03
+	ROT = 0.00 -2.20 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 34
+	POS = 7267.51 -50.00 2769.88
+	ROT = 0.00 1.57 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 22
+	POS = 6266.07 -60.00 3652.12
+	ROT = 0.00 2.20 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 22
+	POS = 6518.72 -380.00 3280.90
+	ROT = 0.00 -0.00 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 37
+	POS = 10231.05 -250.00 -3610.12
+	ROT = 0.00 -0.31 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 39
+	POS = 9455.12 -720.00 -5312.07
+	ROT = 0.00 0.94 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 36
+	POS = 8618.14 -640.00 -4004.24
+	ROT = 0.00 0.00 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 40
+	POS = 8300.50 0.00 3495.74
+	ROT = 0.00 -1.57 0.00
 	SHADOW = 1
 END_MODELSET
 

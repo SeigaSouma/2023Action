@@ -231,9 +231,6 @@
     <ClCompile Include="result.cpp">
       <Filter>ソース ファイル\mode\result</Filter>
     </ClCompile>
-    <ClCompile Include="result_screen.cpp">
-      <Filter>ソース ファイル\mode\result</Filter>
-    </ClCompile>
     <ClCompile Include="resultmanager.cpp">
       <Filter>ソース ファイル\mode\result</Filter>
     </ClCompile>
@@ -495,9 +492,6 @@
       <Filter>ヘッダー ファイル\mode</Filter>
     </ClInclude>
     <ClInclude Include="result.h">
-      <Filter>ヘッダー ファイル\mode\result</Filter>
-    </ClInclude>
-    <ClInclude Include="result_screen.h">
       <Filter>ヘッダー ファイル\mode\result</Filter>
     </ClInclude>
     <ClInclude Include="resultmanager.h">

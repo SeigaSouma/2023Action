@@ -40,14 +40,9 @@ public:
 	void Draw(void);
 
 	void Add(int nValue);
-	void Add(CResultManager::ADDTYPE AddType);
 
 private:
-	//==============================
-	// マクロ定義
-	//=============================
-#define NUM_SCORE	(6)	// 桁数
-
+	
 	void SetValue(void);
 
 	int m_nNum;								// 値
