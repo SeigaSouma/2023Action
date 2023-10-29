@@ -173,6 +173,7 @@
     <ClCompile Include="edit_camerachasechanger.cpp" />
     <ClCompile Include="edit_controlpoint.cpp" />
     <ClCompile Include="edit_enemybase.cpp" />
+    <ClCompile Include="effect_addscore.cpp" />
     <ClCompile Include="effect_slashhit.cpp" />
     <ClCompile Include="effect_thunderring.cpp" />
     <ClCompile Include="elevation.cpp" />
@@ -271,6 +272,7 @@
     <ClInclude Include="edit_camerachasechanger.h" />
     <ClInclude Include="edit_controlpoint.h" />
     <ClInclude Include="edit_enemybase.h" />
+    <ClInclude Include="effect_addscore.h" />
     <ClInclude Include="effect_slashhit.h" />
     <ClInclude Include="effect_thunderring.h" />
     <ClInclude Include="elevation.h" />

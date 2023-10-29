@@ -12,6 +12,8 @@
 #include "multinumber.h"
 #include "calculation.h"
 #include "game.h"
+#include "score.h"
+#include "effect_addscore.h"
 
 //==========================================================================
 // マクロ定義
@@ -186,6 +188,9 @@ void CHitScore::UpdateMove(void)
 
 	if (m_nCntCooltime == MOVETIME)
 	{
+		// スコア計算後加算
+		CalScore();
+
 		// ヒット数リセット
 		CGame::GetHitScore()->Reset();
 	}
@@ -213,6 +218,28 @@ void CHitScore::UpdateMove(void)
 	// 位置設定
 	m_apNumber->SetPosition(pos);
 	m_pObj2D->SetPosition(Hitpos);
+}
+
+//==========================================================================
+// スコア計算
+//==========================================================================
+void CHitScore::CalScore(void)
+{
+	// 値の取得
+	int nNum = m_apNumber->GetValue();
+
+	// 倍率計算
+	int nMultiply = nNum / 100;
+
+	// スコア加算量
+	int nAddValue = (1.0f + ((float)nMultiply * 0.1f)) * nNum;
+
+	// スコア加算
+	CGame::GetScore()->Add(nAddValue);
+
+	// 加算エフェクト
+	CEffectAddScore::Create(m_apNumber->GetPosition());
+
 }
 
 //==========================================================================

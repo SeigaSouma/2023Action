@@ -40,6 +40,7 @@
 #include "instantfade.h"
 #include "hp_gauge_player.h"
 #include "fade.h"
+#include "hitscore.h"
 
 // ”h¶æ
 #include "tutorialplayer.h"
@@ -799,7 +800,7 @@ void CPlayer::Controll(void)
 		// î•ñæ“¾
 		D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(37, 0.0f);
 
-		if (CircleRange(pos, posMapIndex, GetRadius(), 900.0f) == false)
+		if (CircleRange3D(pos, posMapIndex, GetRadius(), 900.0f) == false)
 		{// ‰~‚©‚çŠO‚ê‚½‚ç
 
 			D3DXVECTOR3 posOld = GetOldPosition();
@@ -859,6 +860,9 @@ void CPlayer::Controll(void)
 			pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
 			pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f))
 	{// UŒ‚
+
+		 // ƒqƒbƒgƒXƒRƒA‰ÁZ
+		CGame::GetHitScore()->Add(1);
 
 		if (pInputGamepad->GetStickPositionRatioR(0).x >= 0.2f)
 		{
@@ -1422,13 +1426,13 @@ void CPlayer::CollisionChaseChanger(void)
 		D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(37, 0.0f);
 
 		// ‰~‚Ì”»’è
-		if (CircleRange(pos, posMapIndex, GetRadius(), 900.0f))
+		if (CircleRange3D(pos, posMapIndex, GetRadius(), 900.0f))
 		{
 			pCamera->SetChaseType(CCamera::CHASETYPE_NONE);
 			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 150.0f, posMapIndex.z));
 			pCamera->SetLenDest(pCamera->GetOriginDistance() + 500.0f);
 
-			if (CircleRange(pos, posMapIndex, GetRadius(), 300.0f))
+			if (CircleRange3D(pos, posMapIndex, GetRadius(), 300.0f))
 			{
 				// ’Ç]‚Ìí—Şİ’è
 				CGame::GetGameManager()->SetType(CGameManager::SCENE_RUSH);
@@ -1445,7 +1449,7 @@ void CPlayer::CollisionChaseChanger(void)
 		D3DXVECTOR3 posMapIndex = pMapManager->GetTargetPosition(40, 0.0f);
 
 		// ‰~‚Ì”»’è
-		if (CircleRange(pos, posMapIndex, GetRadius(), 400.0f))
+		if (CircleRange3D(pos, posMapIndex, GetRadius(), 400.0f))
 		{
 			// ’Ç]‚Ìí—Şİ’è
 			CGame::GetGameManager()->SetType(CGameManager::SCENE_TRANSITIONWAIT);
@@ -1453,7 +1457,7 @@ void CPlayer::CollisionChaseChanger(void)
 			pCamera->SetTargetPosition(D3DXVECTOR3(posMapIndex.x, posMapIndex.y + 150.0f, posMapIndex.z));
 			pCamera->SetLenDest(pCamera->GetOriginDistance() - 200.0f);
 
-			if (CircleRange(pos, posMapIndex, GetRadius(), 200.0f))
+			if (CircleRange3D(pos, posMapIndex, GetRadius(), 200.0f))
 			{// X‚É’†‰›
 
 				// ƒQ[ƒ€ƒpƒbƒhî•ñæ“¾

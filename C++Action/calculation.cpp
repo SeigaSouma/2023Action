@@ -224,10 +224,30 @@ float GetPosLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2)
 		+ (pos1.z - pos2.z) * (pos1.z - pos2.z));
 }
 
+
 //==================================================================================
-// ‰~‚Ì“–‚½‚è”»’è
+// ‰~‚Ì“–‚½‚è”»’è(2D)
 //==================================================================================
-bool CircleRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2)
+bool CircleRange2D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2)
+{
+	float fLength = 
+		(pos1.x - pos2.x) * (pos1.x - pos2.x) +
+		(pos1.y - pos2.y) * (pos1.y - pos2.y);
+
+	if (fLength <= (fRadius1 + fRadius2) * (fRadius1 + fRadius2))
+	{// ‰~‚Ì’†‚É“ü‚Á‚½‚ç
+
+		// “–‚½‚Á‚½”»’è•Ô‚·
+		return true;
+	}
+
+	return false;
+}
+
+//==================================================================================
+// ‰~‚Ì“–‚½‚è”»’è(3D)
+//==================================================================================
+bool CircleRange3D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2)
 {
 	float fLength = 
 		(pos1.x - pos2.x) * (pos1.x - pos2.x) +
@@ -576,7 +596,7 @@ bool CollisionFan(D3DXVECTOR3 posChar, D3DXVECTOR3 posLeft, D3DXVECTOR3 posRight
 		+ (posLeft.z - posChar.z) * (posLeft.z - posChar.z));
 
 	// ‰~‚Ì“–‚½‚è”»’è
-	if (CircleRange(posChar, TargetPos, fLen, fTargetRadius) == true)
+	if (CircleRange3D(posChar, TargetPos, fLen, fTargetRadius) == true)
 	{// “–‚½‚Á‚Ä‚¢‚½‚ç
 		bCircle = true;
 	}
@@ -787,19 +807,19 @@ bool CollisionCircleSquare2D(D3DXVECTOR3 &posCircle, D3DXVECTOR3 &posSquare, D3D
 	//***********************
 	// Še’¸“_–ˆ‚Ì‰~‚Ì”»’è
 	//***********************
-	if (CircleRange(posCircle, LeftUp, fCircleRadius, fCircleRadius) == true)
+	if (CircleRange3D(posCircle, LeftUp, fCircleRadius, fCircleRadius) == true)
 	{// ¶ã
 		return true;
 	}
-	if (CircleRange(posCircle, RightUp, fCircleRadius, fCircleRadius) == true)
+	if (CircleRange3D(posCircle, RightUp, fCircleRadius, fCircleRadius) == true)
 	{// ‰Eã
 		return true;
 	}
-	if (CircleRange(posCircle, LeftDown, fCircleRadius, fCircleRadius) == true)
+	if (CircleRange3D(posCircle, LeftDown, fCircleRadius, fCircleRadius) == true)
 	{// ¶‰º
 		return true;
 	}
-	if (CircleRange(posCircle, RightDown, fCircleRadius, fCircleRadius) == true)
+	if (CircleRange3D(posCircle, RightDown, fCircleRadius, fCircleRadius) == true)
 	{// ‰E‰º
 		return true;
 	}

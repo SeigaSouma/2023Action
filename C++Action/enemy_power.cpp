@@ -201,7 +201,7 @@ void CEnemyPower::ChangeToAttackState(void)
 	float fSearchCircle = 400.0f;
 
 	if (m_sMotionFrag.bATK == false &&
-		CircleRange(pos, posPlayer, fSearchCircle, pPlayer->GetRadius()) == true &&
+		CircleRange3D(pos, posPlayer, fSearchCircle, pPlayer->GetRadius()) == true &&
 		m_sMotionFrag.bJump == false)
 	{// ˆê’è‹——£ŠÔ‚ÉƒvƒŒƒCƒ„[‚ª“ü‚Á‚½‚ç
 

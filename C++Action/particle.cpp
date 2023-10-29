@@ -48,6 +48,7 @@ void NaaturalWaveSpawn(void);
 void WaterIn(void);
 void Move(void);
 void EnemyKillCombo(void);
+void AddScore(void);
 
 //==========================================================================
 // パーティクルの初期化処理
@@ -209,6 +210,12 @@ void my_particle::Create(D3DXVECTOR3 pos, TYPE nType)
 		m_nLife = 40;
 		EnemyKillCombo();
 		break;
+
+	case TYPE_ADDSCORE:
+		m_nLife = 40;
+		AddScore();
+		break;
+
 	}
 }
 
@@ -1351,5 +1358,60 @@ void EnemyKillCombo(void)
 			m_nLife,
 			CEffect3D::MOVEEFFECT_ADD, CEffect3D::TYPE_JUJI,
 			m_fRadius * 0.1f);
+	}
+}
+
+//==========================================================================
+// スコア加算
+//==========================================================================
+void AddScore(void)
+{
+	int nCircleDivision = 20;
+	float fff = (D3DX_PI * 2.0f) / nCircleDivision;
+
+	for (int nCntCircle = 0; nCntCircle < nCircleDivision; nCntCircle++)
+	{
+		float fRot = fff * nCntCircle;
+
+		for (int nCntUse = 0; nCntUse < 1; nCntUse++)
+		{
+			// バラバラ向き
+			float fRotRand = (float)Random(-10, 10) / 100.0f;
+
+			float fMove = Random(100, 200) * 0.1f;
+			fMove *= 1.5f;
+
+			//移動量の設定
+			m_move.x = sinf(fRot + fRotRand) * fMove;
+			m_move.z = 0.0f;
+			m_move.y = cosf(fRot + fRotRand) * fMove;
+
+			m_col = D3DXCOLOR(1.0f, 0.2f, 1.0f, 1.0f);
+
+			m_fRadius = 65.0f;
+
+			if (rand() % 3 == 0)
+			{
+				m_fRadius *= 0.95f;
+			}
+			else if (rand() % 3 == 1)
+			{
+				m_fRadius *= 0.98f;
+			}
+			else if (rand() % 3 == 2)
+			{
+				m_fRadius *= 0.92f;
+			}
+
+			//エフェクトの設定
+			CEffect2D::Create(
+				m_pos,
+				m_move,
+				D3DXVECTOR3(0.0f, 0.0f, fRot + fRotRand),
+				m_col,
+				m_fRadius,
+				m_nLife,
+				CEffect2D::MOVEEFFECT_GENSUI, CEffect2D::TYPE_JUJI2);
+		}
 	}
 }

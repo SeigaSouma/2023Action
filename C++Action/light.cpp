@@ -85,7 +85,7 @@ HRESULT CLight::Init(void)
 			m_aLight[nCntLight].Type = D3DLIGHT_DIRECTIONAL;
 
 			// スポットライトの拡散光を設定
-			m_aLight[nCntLight].Diffuse = D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f);
+			m_aLight[nCntLight].Diffuse = D3DXCOLOR(0.6f, 0.6f, 0.6f, 1.0f);
 
 			// スポットライトの方向を設定
 			vecDir = D3DXVECTOR3(0.0f, 0.0f, 0.0f);

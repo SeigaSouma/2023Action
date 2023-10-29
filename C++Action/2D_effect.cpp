@@ -21,13 +21,14 @@
 //==========================================================================
 // 静的メンバ変数宣言
 //==========================================================================
-const char *CEffect2D::m_apTextureFile[] =					// ファイル読み込み
+const char *CEffect2D::m_apTextureFile[] =		// ファイル読み込み
 {
 	"data\\TEXTURE\\effect\\effect000.jpg",	   // 通常エフェクト
 	"data\\TEXTURE\\effect\\smoke_05.tga",	   // 煙エフェクト
 	"data\\TEXTURE\\effect\\smoke_05.tga",	   // 黒煙
 	"data\\TEXTURE\\effect\\effect000.png",	   // 黒エフェクト
 	"data\\TEXTURE\\effect\\effect001.png",	   // 十字エフェクト
+	"data\\TEXTURE\\effect\\Star01.png",	   // 十字エフェクト
 };
 int CEffect2D::m_nNumAll = 0;	// 総数
 
@@ -113,18 +114,40 @@ CEffect2D *CEffect2D::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, cons
 		// メモリの確保
 		pEffect = DEBUG_NEW CEffect2D;
 
-		//if (pEffect->GetID() < 0)
-		//{// メモリ確保に失敗していたら
+		if (pEffect != NULL)
+		{// メモリの確保が出来ていたら
 
-		//	delete pEffect;
-		//	return NULL;
-		//}
+			// 初期化処理
+			pEffect->Init(pos, move, col, fRadius, nLife, moveType, type);
+		}
+
+		return pEffect;
+	}
+
+	return NULL;
+}
+
+
+//==========================================================================
+// 生成処理
+//==========================================================================
+CEffect2D *CEffect2D::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3DXVECTOR3 rot, const D3DXCOLOR col, const float fRadius, const int nLife, const int moveType, const TYPE type)
+{
+	// 生成用のオブジェクト
+	CEffect2D *pEffect = NULL;
+
+	if (pEffect == NULL)
+	{// NULLだったら
+
+		// メモリの確保
+		pEffect = DEBUG_NEW CEffect2D;
 
 		if (pEffect != NULL)
 		{// メモリの確保が出来ていたら
 
 			// 初期化処理
 			pEffect->Init(pos, move, col, fRadius, nLife, moveType, type);
+			pEffect->SetRotation(rot);
 		}
 
 		return pEffect;
@@ -218,6 +241,10 @@ HRESULT CEffect2D::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3D
 		m_bAddAlpha = true;
 		break;
 
+	case TYPE_JUJI2:
+		m_bAddAlpha = true;
+		break;
+
 	default:
 		m_bAddAlpha = true;
 		break;
@@ -226,14 +253,11 @@ HRESULT CEffect2D::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3D
 	// 種類の設定
 	SetType(TYPE_EFFECT2D);
 
-	// テクスチャデータの配列分繰り返す
-	
-		// テクスチャの割り当て
-		m_nTexIdx[m_nType] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_nType]);
+	// テクスチャの割り当て
+	m_nTexIdx[m_nType] = CManager::GetInstance()->GetTexture()->Regist(m_apTextureFile[m_nType]);
 
-		// テクスチャの割り当て
-		BindTexture(m_nTexIdx[m_nType]);
-	
+	// テクスチャの割り当て
+	BindTexture(m_nTexIdx[m_nType]);
 
 	// 初期化処理
 	hr = CObject2D::Init();
@@ -246,7 +270,6 @@ HRESULT CEffect2D::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3D
 
 	return S_OK;
 }
-
 
 //==================================================================================
 // エフェクトの終了処理
@@ -299,6 +322,10 @@ void CEffect2D::Update(void)
 
 		// 拡大処理
 		AddSize();
+	}
+	else if (m_moveType == MOVEEFFECT_GENSUI)
+	{
+		Gensui();
 	}
 
 	// 寿命の更新
@@ -374,6 +401,24 @@ void CEffect2D::AddSize(void)
 	{
 		m_fRadius += 0.0f;
 	}
+}
+
+//==================================================================================
+// エフェクトの減衰処理
+//==================================================================================
+void CEffect2D::Gensui(void)
+{
+	// 移動量取得
+	D3DXVECTOR3 move = GetMove();
+
+	move.x += (0.0f - move.x) * 0.15f;
+	move.y += (0.0f - move.y) * 0.15f;
+
+	// 移動量設定
+	SetMove(move);
+
+	m_fRadius = m_fMaxRadius * (float)m_nLife / (float)m_nMaxLife;
+
 }
 
 //==================================================================================

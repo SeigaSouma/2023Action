@@ -203,7 +203,7 @@ void CEnemyFly::ChangeToAttackState(void)
 
 	float fRadius = 700.0f;
 
-	if (m_pMotion->GetType() != MOTION_ATK && CircleRange(pos, posPlayer, fRadius, pPlayer->GetRadius()) == true)
+	if (m_pMotion->GetType() != MOTION_ATK && CircleRange3D(pos, posPlayer, fRadius, pPlayer->GetRadius()) == true)
 	{// ˆê’è‹——£ŠÔ‚ÉƒvƒŒƒCƒ„[‚ª“ü‚Á‚½‚ç
 
 		// UŒ‚ó‘Ô‚É‚·‚é

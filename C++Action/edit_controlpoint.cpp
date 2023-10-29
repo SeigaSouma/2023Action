@@ -363,7 +363,7 @@ void CEditControlPoint::Grab(void)
 	for (int i = 0; i < pMapManager->GetNumAll(); i++)
 	{
 		D3DXVECTOR3 TargetPoint = pMapManager->GetControlPoint(i);
-		if (bAll == true || CircleRange(m_pos, TargetPoint, 50.0f, 50.0f))
+		if (bAll == true || CircleRange3D(m_pos, TargetPoint, 50.0f, 50.0f))
 		{// ãÖÇ…ìñÇΩÇ¡ÇƒÇΩÇÁ
 
 			// ëÄçÏ
@@ -394,7 +394,7 @@ void CEditControlPoint::Delete(void)
 	for (int i = 0; i < pMapManager->GetNumAll(); i++)
 	{
 		D3DXVECTOR3 TargetPoint = pMapManager->GetControlPoint(i);
-		if (CircleRange(m_pos, TargetPoint, 50.0f, 50.0f))
+		if (CircleRange3D(m_pos, TargetPoint, 50.0f, 50.0f))
 		{// ãÖÇ…ìñÇΩÇ¡ÇƒÇΩÇÁ
 			pMapManager->DeletePos(i);
 		}

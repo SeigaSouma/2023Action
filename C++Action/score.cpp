@@ -232,3 +232,19 @@ void CScore::Add(CResultManager::ADDTYPE AddType)
 	// ’l‚ÌÝ’èˆ—
 	SetValue();
 }
+
+//==========================================================================
+// ˆÊ’uÝ’è
+//==========================================================================
+void CScore::SetPosition(const D3DXVECTOR3 pos)
+{
+	m_apNumber->SetPosition(pos);
+}
+
+//==========================================================================
+// ˆÊ’uŽæ“¾
+//==========================================================================
+D3DXVECTOR3 CScore::GetPosition(void) const
+{
+	return m_apNumber->GetPosition();
+}

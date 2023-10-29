@@ -332,7 +332,7 @@ void CEditCameraAxis::Grab(void)
 	for (int i = 0; i < pCameraAxis->GetNumAll(); i++)
 	{
 		D3DXVECTOR3 TargetPoint = pCameraAxis->GetAxis(i);
-		if (bAll == true || CircleRange(m_pos, TargetPoint, 50.0f, 50.0f))
+		if (bAll == true || CircleRange3D(m_pos, TargetPoint, 50.0f, 50.0f))
 		{// ‹…‚É“–‚½‚Á‚Ä‚½‚ç
 
 			// ‘€ì

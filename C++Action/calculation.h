@@ -48,7 +48,8 @@ int Random(int nMinNum, int nMaxNum);										// ランダム生成
 int GetDigit(int nNum);														// 桁数取得
 float GetRatio(D3DXVECTOR3 Mypos, D3DXVECTOR3 Targetpos);					// 割合取得
 float GetPosLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);						// 長さ取得
-bool CircleRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1と2の当たり判定(円)
+bool CircleRange2D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1と2の当たり判定(円)(3D)
+bool CircleRange3D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1と2の当たり判定(円)(3D)
 bool SphereRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1と2の当たり判定(球)
 bool CylinderRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2, float fHeight1, float fHeight2);	// 1と2の当たり判定(筒)
 void CheckVtx(float RotY, D3DXVECTOR3 *pVtxMax, D3DXVECTOR3 *pVtxMin, LPD3DXMESH pMesh, BYTE *pVtxBuff);	// 全頂点チェック

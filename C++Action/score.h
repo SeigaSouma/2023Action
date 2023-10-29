@@ -27,10 +27,10 @@ public:
 	CScore(int nPriority = 6);
 	~CScore();
 
-	static HRESULT Load(void);
-	static void Unload(void);
 	static CScore *Create(void);
 	static CScore *Create(D3DXVECTOR3 pos);
+	void SetPosition(const D3DXVECTOR3 pos);
+	D3DXVECTOR3 GetPosition(void) const;
 
 	// オーバーライドされた関数
 	HRESULT Init(void);

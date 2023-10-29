@@ -41,6 +41,7 @@ private:
 
 	// メンバ関数
 	void UpdateMove(void);
+	void CalScore(void);	// スコア計算
 
 	// メンバ変数
 	CMultiNumber *m_apNumber;	// 数字のオブジェクト

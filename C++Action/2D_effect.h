@@ -26,6 +26,7 @@ public:
 		MOVEEFFECT_SUB,			// 減算
 		MOVEEFFECT_SUPERSUB,	// 超減算
 		MOVEEFFECT_NONE,		// 変化なし
+		MOVEEFFECT_GENSUI,		// 減衰
 		MOVEEFFECT_MAX
 	}MOVEEFFECT;
 
@@ -36,6 +37,7 @@ public:
 		TYPE_SMOKEBLACK,	// 黒煙
 		TYPE_BLACK,			// 黒エフェクト
 		TYPE_JUJI,			// 十字エフェクト
+		TYPE_JUJI2,			// 十字エフェクト
 		TYPE_MAX
 	}TYPE;
 
@@ -46,6 +48,7 @@ public:
 	static void Unload(void);
 	static CEffect2D *Create(void);
 	static CEffect2D *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3DXCOLOR col, const float fRadius, const int nLife, const int moveType, const TYPE type);
+	static CEffect2D *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 move, const D3DXVECTOR3 rot, const D3DXCOLOR col, const float fRadius, const int nLife, const int moveType, const TYPE type);
 
 	//  オーバーライドされた関数
 	HRESULT Init(void);
@@ -61,6 +64,7 @@ private:
 	void SubSize(void);
 	void SuperSubSize(void);
 	void AddSize(void);
+	void Gensui(void);
 
 	D3DXCOLOR m_colOrigin;	// 色
 	float m_fRadius;		// 半径

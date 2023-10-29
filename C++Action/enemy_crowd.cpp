@@ -150,7 +150,7 @@ void CEnemyCrowd::ChangeToAttackState(void)
 
 	float fRadius = 500.0f;
 
-	if (CircleRange(pos, posPlayer, fRadius, pPlayer->GetRadius()) == true && m_sMotionFrag.bJump == false)
+	if (CircleRange3D(pos, posPlayer, fRadius, pPlayer->GetRadius()) == true && m_sMotionFrag.bJump == false)
 	{// ˆê’è‹——£ŠÔ‚ÉƒvƒŒƒCƒ„[‚ª“ü‚Á‚½‚ç
 
 		// UŒ‚ó‘Ô‚É‚·‚é

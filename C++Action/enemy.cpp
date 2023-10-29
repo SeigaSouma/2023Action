@@ -612,7 +612,7 @@ void CEnemy::CollisionPlayer(void)
 		}
 
 		// ヒット処理
-		if (pPlayer->Hit(1))
+		if (pPlayer->Hit(1) == false)
 		{// 死んでなかったら
 			ANGLE setAngle = pMapManager->GetTargetAngle(GetMapIndex(), pPlayer->GetMapIndex(), GetMapMoveValue(), pPlayer->GetMapMoveValue());
 
@@ -871,7 +871,7 @@ void CEnemy::StateNone(void)
 		//// 位置取得
 		//D3DXVECTOR3 pos = GetPosition();
 
-		//if (CircleRange(pos, PlayerPos, 200.0f, PLAYER_SERCH) == true)
+		//if (CircleRange3D(pos, PlayerPos, 200.0f, PLAYER_SERCH) == true)
 		//{// プレイヤーが視界に入った
 		//	m_state = STATE_PLAYERCHASE;
 		//}
@@ -1195,7 +1195,7 @@ void CEnemy::PlayerChase(void)
 			ChaseMove(fMove);
 		}
 
-		if (CircleRange(pos, pPlayer->GetPosition(), 200.0f, PLAYER_SERCH) == false)
+		if (CircleRange3D(pos, pPlayer->GetPosition(), 200.0f, PLAYER_SERCH) == false)
 		{// プレイヤーが視界から消えたら
 			m_state = STATE_NONE;
 		}
@@ -1287,7 +1287,7 @@ void CEnemy::ParentChase(void)
 		// 向き設定
 		SetRotation(rot);
 
-		if (CircleRange(pos, posDest, 25.0f, CHACE_DISTABCE) == true)
+		if (CircleRange3D(pos, posDest, 25.0f, CHACE_DISTABCE) == true)
 			{// 一定距離間に親が入ったら
 				bLen = true;	// 長さ判定
 			}
@@ -1442,7 +1442,7 @@ void CEnemy::StateAttack(void)
 	if (nType == MOTION_DEF && pPlayer != NULL)
 	{// ニュートラルに戻れば
 
-		if (CircleRange(pos, pPlayer->GetPosition(), 400.0f, PLAYER_SERCH) == false)
+		if (CircleRange3D(pos, pPlayer->GetPosition(), 400.0f, PLAYER_SERCH) == false)
 		{// プレイヤーと離れすぎていたら
 
 			// 間隔をあける状態にする
@@ -1553,7 +1553,7 @@ void CEnemy::TriggerChasePlayer(void)
 
 		float fRadius = PLAYER_SERCH;
 
-		if (CircleRange(pos, pPlayer->GetPosition(), 200.0f, fRadius) == true)
+		if (CircleRange3D(pos, pPlayer->GetPosition(), 200.0f, fRadius) == true)
 		{// プレイヤーが範囲に入れば
 			m_state = STATE_PLAYERCHASE;
 
@@ -1625,7 +1625,7 @@ void CEnemy::ChangeToAttackState(void)
 	// 親の位置取得
 	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
 
-	if (CircleRange(pos, posPlayer, 400.0f, pPlayer->GetRadius()) == true && m_sMotionFrag.bJump == false)
+	if (CircleRange3D(pos, posPlayer, 400.0f, pPlayer->GetRadius()) == true && m_sMotionFrag.bJump == false)
 	{// 一定距離間にプレイヤーが入ったら
 
 		// 攻撃状態にする

@@ -15,6 +15,7 @@
 #include "game.h"
 #include "player.h"
 #include "effect_thunderring.h"
+#include "hitscore.h"
 
 //==========================================================================
 // マクロ定義
@@ -303,6 +304,9 @@ void CBulletExplosion::CollisionEnemy(void)
 
 			// ヒット処理
 			ppEnemy[nCntEnemy]->Hit(mylib_const::DMG_BOUNCE);
+
+			// ヒットスコア加算
+			CGame::GetHitScore()->Add(1);
 		}
 	}
 
