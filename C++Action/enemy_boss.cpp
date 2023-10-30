@@ -12,6 +12,7 @@
 #include "input.h"
 #include "calculation.h"
 #include "bullet.h"
+#include "bullet_obstacle.h"
 #include "explosion.h"
 #include "particle.h"
 #include "motion.h"
@@ -32,6 +33,7 @@
 #include "fade.h"
 #include "enemybase.h"
 #include "effect_enemyspawn.h"
+#include "impactwave.h"
 
 //==========================================================================
 // マクロ定義
@@ -46,7 +48,8 @@
 #define PLAYERCHASETIME	(60 * 6)	// 親追い掛け時間
 #define WAITTIME	(60 * 2)	// 待機時間
 #define BULLETCOUNT		(3)		// 弾の回数
-#define PIYOPIYOTIME	(60 * 6)	// ピヨピヨの時間
+#define PIYOPIYOTIME	(60 * 5)	// ピヨピヨの時間
+#define STUNKNOCKBACK_TIME	(90)	// 拠点切り替え時間
 
 //==========================================================================
 // 静的メンバ変数宣言
@@ -61,9 +64,11 @@ CEnemyBoss::CEnemyBoss(int nPriority) : CEnemy(nPriority)
 	m_sAct.nBulletCnt = 0;		// 弾のカウンター
 	m_sAct.nAssultAngle = 1;	// 突進の向き
 	m_sAct.AtkType = ATKTYPE_BULLET;	// 攻撃の種類
+	m_sAct.StunPosDest = mylib_const::DEFAULT_VECTOR3;	// スタン時の目標の位置
 	m_BaseType = BASETYPE_ORIGIN;	// 拠点の種類
 	m_BaseTypeDest = BASETYPE_ORIGIN;	// 目標の拠点種類
 	m_nCntDamage = 0;			// ダメージカウンター
+	m_nCntEmission = 0;			// 発生物のカウンター
 }
 
 //==========================================================================
@@ -83,14 +88,55 @@ HRESULT CEnemyBoss::Init(void)
 	// 初期化処理
 	CEnemy::Init();
 
-	m_state = STATE_WAIT;	// 親追い掛け状態
+	m_state = STATE_NONE;	// 親追い掛け状態
 	m_Oldstate = STATE_NONE;
 	m_ActType = ACTTYPE_BOSS;
 
 	// 待機時間
 	m_nCntState = WAITTIME;
-	m_state = STATE_WAIT;
+	m_state = STATE_ATTACK;
 	m_sMotionFrag.bATK = false;
+	m_sAct.AtkType = ATKTYPE_APPEARANCE;
+
+	m_pMotion->Set(MOTION_APPEARANCE);
+
+
+
+
+
+
+
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+
+	// 向き取得
+	D3DXVECTOR3 rot = GetRotation();
+
+	// 目標の向き取得
+	float fRotDest = GetRotDest();
+
+	// プレイヤー情報
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	if (pPlayer == NULL)
+	{
+		return E_FAIL;
+	}
+
+	// 親の位置取得
+	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
+
+	// 目標の角度を求める
+	fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
+	rot.y = fRotDest;
+
+	// 目標の向き設定
+	SetRotDest(fRotDest);
+
+	// 向き設定
+	SetRotation(rot);
+
+
+
 	return S_OK;
 }
 
@@ -127,11 +173,18 @@ bool CEnemyBoss::Hit(const int nValue)
 	// 体力取得
 	int nLife = GetLife();
 
-	if (m_nCntDamage <= 0)
+	if (m_nCntDamage <= 0 && m_sAct.AtkType != ATKTYPE_STUNKNOCKBACK)
 	{// なにもない状態の時
 
 		// 体力減らす
-		nLife -= nValue;
+		if (nValue == mylib_const::DMG_SLASH)
+		{
+			nLife--;
+		}
+		else
+		{
+			nLife -= nValue;
+		}
 
 		// 体力設定
 		SetLife(nLife);
@@ -145,7 +198,7 @@ bool CEnemyBoss::Hit(const int nValue)
 			if (m_pHPGauge == NULL)
 			{
 				// 体力ゲージ
-				m_pHPGauge = CHP_Gauge::Create(350.0f, GetLifeOrigin(), 3.0f);
+				m_pHPGauge = CHP_Gauge::Create(650.0f, GetLifeOrigin(), 3.0f);
 
 				if (m_pHPGauge == NULL)
 				{// NULLだったら
@@ -185,6 +238,9 @@ bool CEnemyBoss::Hit(const int nValue)
 		// 補正
 		ValueNormalize(nLife, GetLifeOrigin(), 0);
 
+		// ノックバックの位置更新
+		m_posKnokBack = GetPosition();
+
 		// 遷移カウンター設定
 		if (nValue == mylib_const::DMG_SLASH)
 		{
@@ -192,6 +248,16 @@ bool CEnemyBoss::Hit(const int nValue)
 
 			// 振動
 			CManager::GetInstance()->GetCamera()->SetShake(5, 8.0f, 0.0f);
+
+			if (m_pMotion->GetType() == MOTION_STUN)
+			{
+				// ヒットストップ
+				CManager::GetInstance()->SetEnableHitStop(5);
+
+				// 振動
+				CManager::GetInstance()->GetCamera()->SetShake(10, 15.0f, 0.0f);
+			}
+
 		}
 		else
 		{// 弾撃ち返しのダメージの時
@@ -205,6 +271,47 @@ bool CEnemyBoss::Hit(const int nValue)
 				m_nCntState = PIYOPIYOTIME;
 				m_sAct.AtkType = ATKTYPE_STUN;
 			}
+			else if(m_sAct.AtkType == ATKTYPE_BULLET || m_sAct.AtkType == ATKTYPE_ENEMYSPAWN)
+			{
+				// マップマネージャの取得
+				CMapManager *pMapManager = CGame::GetMapManager();
+				if (pMapManager == NULL)
+				{// NULLだったら
+					return false;
+				}
+
+				// プレイヤー情報
+				CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+				if (pPlayer == NULL)
+				{// NULLだったら
+					return false;
+				}
+
+				// スタンノックバック状態にする
+				m_state = STATE_ATTACK;
+				m_nCntState = STUNKNOCKBACK_TIME;
+				m_sAct.AtkType = ATKTYPE_STUNKNOCKBACK;
+				m_BaseType = BASETYPE_MAP;
+				m_sAct.nKnockBackCnt = 0;
+
+				// スタンの目的地決定
+				float fMoveValue = pPlayer->GetMapMoveValue() + 200.0f;
+				float fRatio = 0.0f;
+				int nMapIdx = pPlayer->GetMapIndex();
+				m_sAct.StunPosDest = pMapManager->GetTargetPosition(pPlayer->GetMapIndex(), fMoveValue);
+				pMapManager->UpdateNowPosition(nMapIdx, fRatio, fMoveValue, 0.0f);
+
+				D3DXVECTOR3 move = GetMove();
+				move.y = 35.0f;
+				SetMove(move);
+
+				SetMapIndex(nMapIdx);
+				SetMapPointRatio(fRatio);
+				SetMapMoveValue(fMoveValue);
+
+				m_posKnokBack.y = m_sAct.StunPosDest.y;
+
+			}
 
 			// ヒットストップ
 			CManager::GetInstance()->SetEnableHitStop(5);
@@ -212,9 +319,6 @@ bool CEnemyBoss::Hit(const int nValue)
 			// 振動
 			CManager::GetInstance()->GetCamera()->SetShake(10, 15.0f, 0.0f);
 		}
-
-		// ノックバックの位置更新
-		m_posKnokBack = GetPosition();
 	}
 
 	// 死んでない
@@ -240,6 +344,32 @@ void CEnemyBoss::Update(void)
 		return;
 	}
 
+
+	// 攻撃別処理
+	//UpdateByAttack();
+
+	// 発生物のカウンター更新
+	m_nCntEmission = (m_nCntEmission + 1) % 14;
+	if (m_nCntEmission == 0)
+	{
+		// 位置取得
+		D3DXVECTOR3 pos = GetPosition();
+
+		// 衝撃波生成
+		CImpactWave::Create
+		(
+			D3DXVECTOR3(pos.x, pos.y, pos.z),	// 位置
+			D3DXVECTOR3(0.0f, 0.0f, 0.0f),		// 向き
+			D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f),	// 色
+			100.0f,								// 幅
+			100.0f,								// 高さ
+			8,									// 寿命
+			40.0f,								// 幅の移動量
+			CImpactWave::TYPE_SMOKE,			// テクスチャタイプ
+			false								// 加算合成するか
+		);
+	}
+
 	// ダメージカウンター
 	m_nCntDamage--;
 
@@ -251,6 +381,75 @@ void CEnemyBoss::Update(void)
 	{
 		// 色設定
 		m_mMatcol = D3DXCOLOR(1.0f, 0.0f, 0.0f, m_mMatcol.a);
+	}
+
+	// デバッグ表示
+	CManager::GetInstance()->GetDebugProc()->Print(
+		"------------------[ボスの情報]------------------\n"
+		"体力：【%d】\n", GetLife());
+
+}
+
+//==========================================================================
+// プレイヤーとの当たり判定
+//==========================================================================
+void CEnemyBoss::CollisionPlayer(void)
+{
+	// プレイヤーの取得
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	if (pPlayer == NULL)
+	{
+		return;
+	}
+
+	if (m_state == STATE_SPAWN || m_state == STATE_DEAD || m_state == STATE_FADEOUT)
+	{
+		return;
+	}
+
+	// 自分の情報取得
+	D3DXVECTOR3 pos = GetPosition();
+	float fRadius = GetRadius();
+
+	if (m_sAct.AtkType == ATKTYPE_STUN ||
+		m_sAct.AtkType == ATKTYPE_STUNKNOCKBACK)
+	{
+		fRadius *= 0.5f;
+	}
+
+	// プレイヤー情報取得
+	D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
+	float PlayerRadius = pPlayer->GetRadius();
+	CPlayer::STATE PlayerState = (CPlayer::STATE)pPlayer->GetState();
+
+	// 球の判定
+	if (SphereRange(pos, PlayerPos, fRadius, PlayerRadius) &&
+		PlayerState != CPlayer::STATE_DEAD &&
+		PlayerState != CPlayer::STATE_DMG &&
+		PlayerState != CPlayer::STATE_KNOCKBACK &&
+		PlayerState != CPlayer::STATE_INVINCIBLE)
+	{
+		// マップマネージャの取得
+		CMapManager *pMapManager = CGame::GetMapManager();
+		if (pMapManager == NULL)
+		{// NULLだったら
+			return;
+		}
+
+		// ヒット処理
+		if (pPlayer->Hit(1) == false)
+		{// 死んでなかったら
+			ANGLE setAngle = pMapManager->GetTargetAngle(GetMapIndex(), pPlayer->GetMapIndex(), GetMapMoveValue(), pPlayer->GetMapMoveValue());
+
+			int nAngle = 1;
+			if (setAngle == ANGLE_LEFT)
+			{
+				nAngle = -1;
+			}
+
+			// 吹っ飛び移動量設定
+			pPlayer->SetMove(D3DXVECTOR3(8.0f * nAngle, 0.0f, 0.0f));
+		}
 	}
 
 }
@@ -337,13 +536,44 @@ void CEnemyBoss::UpdateByAttack(void)
 		UpdateChildSpawn();
 		break;
 
+	case ATKTYPE_STUNKNOCKBACK:
+		UpdateKnockBackStun();
+		break;
+
 	case ATKTYPE_STUN:
 		UpdateStun();
+		break;
+
+	case ATKTYPE_APPEARANCE:
+		UpdateAppearance();
 		break;
 
 	default:
 		break;
 	}
+}
+
+//==========================================================================
+// 登場
+//==========================================================================
+void CEnemyBoss::UpdateAppearance(void)
+{
+	int nType = m_pMotion->GetType();
+	if (nType == MOTION_APPEARANCE && m_pMotion->IsFinish() == true)
+	{// 登場演出が終わってたら
+
+		m_state = STATE_WAIT;	// 親追い掛け状態
+		m_Oldstate = STATE_NONE;
+
+		// 待機時間
+		m_nCntState = WAITTIME;
+		m_state = STATE_WAIT;
+		m_sMotionFrag.bATK = false;
+		return;
+	}
+
+	// 登場モーション設定
+	m_pMotion->Set(MOTION_APPEARANCE);
 }
 
 //==========================================================================
@@ -408,7 +638,68 @@ void CEnemyBoss::UpdateAttackAssult(void)
 		m_pMotion->Set(MOTION_DEF);
 		return;
 	}
-	
+
+	// 衝撃波生成
+	if (m_nCntState % 15 == 0)
+	{
+
+		// 位置取得
+		D3DXVECTOR3 weponpos = GetPosition();
+
+		// モーションの情報取得
+		CMotion::Info aInfo = m_pMotion->GetInfo(m_pMotion->GetType());
+
+		// 攻撃情報の総数取得
+		int nNumAttackInfo = aInfo.nNumAttackInfo;
+
+		for (int nCntAttack = 0; nCntAttack < nNumAttackInfo; nCntAttack++)
+		{
+			if (aInfo.AttackInfo[nCntAttack] == NULL)
+			{// NULLだったら
+				continue;
+			}
+
+			// モデル情報取得
+			CModel **pModel = GetObjectChara()->GetModel();
+			D3DXMATRIX mtxTrans;	// 計算用マトリックス宣言
+
+			// 武器のマトリックス取得
+			D3DXMATRIX mtxWepon;
+			D3DXMatrixIdentity(&mtxWepon);
+
+			if (pModel[aInfo.AttackInfo[nCntAttack]->nCollisionNum] == NULL)
+			{// NULLだったら
+				return;
+			}
+
+			// 判定するパーツのマトリックス取得
+			mtxWepon = pModel[aInfo.AttackInfo[nCntAttack]->nCollisionNum]->GetWorldMtx();
+
+			// 位置を反映する
+			D3DXMatrixTranslation(&mtxTrans, aInfo.AttackInfo[nCntAttack]->Offset.x, aInfo.AttackInfo[nCntAttack]->Offset.y, aInfo.AttackInfo[nCntAttack]->Offset.z);
+			D3DXMatrixMultiply(&mtxWepon, &mtxTrans, &mtxWepon);
+
+			// 武器の位置
+			weponpos = D3DXVECTOR3(mtxWepon._41, mtxWepon._42, mtxWepon._43);
+		}
+
+		// 向き取得
+		D3DXVECTOR3 rot = GetRotation();
+
+		CImpactWave::Create
+		(
+			weponpos,	// 位置
+			D3DXVECTOR3(D3DX_PI * 0.5f, D3DX_PI + rot.y, 0.0f),		// 向き
+			D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.6f),	// 色
+			150.0f,								// 幅
+			150.0f,								// 高さ
+			15,									// 寿命
+			25.0f,								// 幅の移動量
+			CImpactWave::TYPE_ORANGE2,			// テクスチャタイプ
+			true								// 加算合成するか
+		);
+	}
+
 	// 弾攻撃モーション設定
 	m_pMotion->Set(MOTION_ASSULTATK);
 }
@@ -456,14 +747,45 @@ void CEnemyBoss::UpdateStun(void)
 
 		// 通常モーション設定
 		m_pMotion->Set(MOTION_DEF);
-
-		// 通常モーション設定
-		m_pMotion->Set(MOTION_DEF);
 		return;
 	}
 	
 	// スタンモーション設定
 	m_pMotion->Set(MOTION_STUN);
+}
+
+//==========================================================================
+// スタンのノックバック
+//==========================================================================
+void CEnemyBoss::UpdateKnockBackStun(void)
+{
+
+	// 状態遷移カウンター減算
+	m_nCntState--;
+
+	if (m_nCntState <= 0)
+	{
+		// スタン状態にする
+		m_state = STATE_ATTACK;
+		m_nCntState = PIYOPIYOTIME;
+		m_sAct.AtkType = ATKTYPE_STUN;
+		return;
+	}
+
+	// スタンモーション設定
+	m_pMotion->Set(MOTION_STUN);
+
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+
+	// ノックバック時間加算
+	m_sAct.nKnockBackCnt++;
+
+	// 放物線移動
+	pos = GetParabola(m_posKnokBack, m_sAct.StunPosDest, 600.0f, (float)m_sAct.nKnockBackCnt / (float)STUNKNOCKBACK_TIME);
+
+	// 位置設定
+	SetPosition(pos);
 }
 
 //==========================================================================
@@ -1062,6 +1384,8 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	}
 
 	CObject *pBullet = NULL;
+	CObject *pBulletObstacle = NULL;
+	D3DXVECTOR3 spawnpos = D3DXVECTOR3(pos.x, pos.y + 300.0f, pos.z);
 	switch (nType)
 	{
 	case MOTION_BULLETATK:
@@ -1071,19 +1395,37 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		{
 			float fRot = ((D3DX_PI * 2.0f) / (float)nCircleDivision) * i;
 
-			// 弾の生成
-			pBullet = CBullet::Create(
-				CBullet::TYPE_ENEMY,
-				CBullet::MOVETYPE_NORMAL,
-				D3DXVECTOR3(pos.x, pos.y + 50.0f, pos.z),
-				rot,
-				D3DXVECTOR3(sinf(D3DX_PI + fRot) * 10.0f, 0.0f, cosf(D3DX_PI + fRot) * 10.0f),
-				80.0f);
+			// どの種類の弾を出すか抽選
+			if (Random(0, 3) == 0)
+			{
+				// 弾の生成
+				pBullet = CBullet::Create(
+					CBullet::TYPE_ENEMY,
+					CBullet::MOVETYPE_NORMAL,
+					spawnpos,
+					rot,
+					D3DXVECTOR3(sinf(D3DX_PI + fRot) * 10.0f, 0.0f, cosf(D3DX_PI + fRot) * 10.0f),
+					80.0f);
 
-			pBullet->SetMapIndex(GetMapIndex());
-			pBullet->SetMapMoveValue(GetMapMoveValue());
-			pBullet->SetMapPointRatio(GetMapPointRatio());
-			pBullet->SetMoveAngle(ANGLE_UP);
+				pBullet->SetMapIndex(GetMapIndex());
+				pBullet->SetMapMoveValue(GetMapMoveValue());
+				pBullet->SetMapPointRatio(GetMapPointRatio());
+				pBullet->SetMoveAngle(ANGLE_UP);
+			}
+			else
+			{
+				// 障害物弾の生成
+				pBulletObstacle = CBulletObstacle::Create(
+					spawnpos,
+					rot,
+					D3DXVECTOR3(sinf(D3DX_PI + fRot) * 10.0f, 0.0f, cosf(D3DX_PI + fRot) * 10.0f),
+					80.0f);
+
+				pBulletObstacle->SetMapIndex(GetMapIndex());
+				pBulletObstacle->SetMapMoveValue(GetMapMoveValue());
+				pBulletObstacle->SetMapPointRatio(GetMapPointRatio());
+				pBulletObstacle->SetMoveAngle(ANGLE_UP);
+			}
 		}
 	}
 		break;

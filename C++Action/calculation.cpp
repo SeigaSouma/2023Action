@@ -5,6 +5,7 @@
 // 
 //==================================================================================
 #include "calculation.h"
+#include "constans.h"
 
 // ƒOƒ[ƒoƒ‹•Ï”éŒ¾
 MOVELOG g_aMoveLog[MOVE_LOG];		// ƒƒSŠgk‚Ì\‘¢‘Ì
@@ -158,6 +159,59 @@ float Lerp(float start, float end, float time)
 }
 
 //==================================================================================
+// HSV•ÏŠ·
+//==================================================================================
+D3DXCOLOR HSVtoRGB(float H, float S, float V)
+{
+	if (H > 360.0f)
+	{
+		H -= 360.0f;
+	}
+	else if (H < 0.0f)
+	{
+		H += 360.0f;
+	}
+	float C = V * S;
+	float X = C * (1 - abs(fmod(H / 60.0f, 2) - 1));
+	float m = V - C;
+
+	// RGB•Ê‚Ì”’l
+	float R = 0.0f, G = 0.0f, B = 0.0f;
+	if (H >= 0 && H < 60) {
+		R = C;
+		G = X;
+		B = 0;
+	}
+	else if (H >= 60 && H < 120) {
+		R = X;
+		G = C;
+		B = 0;
+	}
+	else if (H >= 120 && H < 180) {
+		R = 0;
+		G = C;
+		B = X;
+	}
+	else if (H >= 180 && H < 240) {
+		R = 0;
+		G = X;
+		B = C;
+	}
+	else if (H >= 240 && H < 300) {
+		R = X;
+		G = 0;
+		B = C;
+	}
+	else {
+		R = C;
+		G = 0;
+		B = X;
+	}
+
+	return D3DXCOLOR(R + m, G + m, B + m, 1.0f);
+}
+
+//==================================================================================
 // ƒ‰ƒ“ƒ_ƒ€
 //==================================================================================
 int Random(int nMinNum, int nMaxNum)
@@ -224,6 +278,24 @@ float GetPosLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2)
 		+ (pos1.z - pos2.z) * (pos1.z - pos2.z));
 }
 
+//==================================================================================
+// •ú•¨üˆÚ“®
+//==================================================================================
+D3DXVECTOR3 GetParabola(D3DXVECTOR3 start, D3DXVECTOR3 end, float fMaxHeight, float time)
+{
+	// ˆÊ’u
+	D3DXVECTOR3 pos = mylib_const::DEFAULT_VECTOR3;
+
+	// XZˆÚ“®
+	pos.x = start.x + (end.x - start.x) * time;
+	pos.z = start.z + (end.z - start.z) * time;
+
+	// ‚‚³
+	pos.y = start.y + (end.y - start.y) * time + sinf(D3DX_PI * time) * fMaxHeight;
+	//pos.y = start.y + (end.y - start.y) * time + (0.5f * fMaxHeight * time * time);
+
+	return pos;
+}
 
 //==================================================================================
 // ‰~‚Ì“–‚½‚è”»’è(2D)

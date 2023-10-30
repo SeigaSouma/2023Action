@@ -415,7 +415,7 @@ void  CSlash::Collision(void)
 		nUse++;
 
 		// “G‚Ìî•ñæ“¾
-		D3DXVECTOR3 EnemyPosition = ppEnemy[nCntEnemy]->GetPosition();
+		D3DXVECTOR3 EnemyPosition = ppEnemy[nCntEnemy]->GetCenterPosition();
 		D3DXVECTOR3 EnemyRotation = ppEnemy[nCntEnemy]->GetRotation();
 		float fEnemyRadius = ppEnemy[nCntEnemy]->GetRadius();
 		CEnemy::STATE EnemyState = (CEnemy::STATE)ppEnemy[nCntEnemy]->GetState();

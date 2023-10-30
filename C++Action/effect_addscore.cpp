@@ -93,7 +93,7 @@ HRESULT CEffectAddScore::Init(void)
 	m_nTexIdx = CManager::GetInstance()->GetTexture()->Regist(TEXTURE);
 
 	// éÌóﬁÇÃê›íË
-	CObject::SetType(TYPE_BULLET);
+	CObject::SetType(TYPE_BALLAST);
 
 	// å©ÇΩñ⁄ÇæÇØÇÃíe
 	float fff = (D3DX_PI * 2.0f) / ADDSCORE_CIRCLE;
@@ -154,6 +154,16 @@ HRESULT CEffectAddScore::Init(void)
 //==========================================================================
 void CEffectAddScore::Uninit(void)
 {
+	for (int nCntCircle = 0; nCntCircle < ADDSCORE_CIRCLE; nCntCircle++)
+	{
+		if (m_pEffect[nCntCircle] == NULL)
+		{
+			continue;
+		}
+		m_pEffect[nCntCircle]->Uninit();
+		m_pEffect[nCntCircle] = NULL;
+	}
+
 	// èIóπèàóù
 	Release();
 }

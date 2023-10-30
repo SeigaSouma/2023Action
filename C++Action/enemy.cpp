@@ -28,6 +28,8 @@
 #include "bullet.h"
 #include "mapmanager.h"
 #include "enemyfixedmove_manager.h"
+#include "stage.h"
+#include "objectX.h"
 
 // 子クラス
 #include "enemy_boss.h"
@@ -898,6 +900,12 @@ void CEnemy::StateNone(void)
 //==========================================================================
 void CEnemy::FixedMove(void)
 {
+	if (m_state == STATE_DEAD ||
+		m_state == STATE_FADEOUT)
+	{
+		return;
+	}
+
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
 
@@ -1032,11 +1040,62 @@ void CEnemy::Dead(void)
 	// 状態遷移カウンター減算
 	m_nCntState--;
 
+	if (m_nCntState % 6 == 0)
+	{
+		CEffect3D::Create(pos, D3DXVECTOR3(Random(-10, 10) * 0.1f, -move.y, Random(-10, 10) * 0.1f), D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), (float)Random(80, 120), 20, CEffect3D::MOVEEFFECT_ADD, CEffect3D::TYPE_SMOKEBLACK);
+	}
+
 	// 色設定
 	m_mMatcol = D3DXCOLOR(1.0f, 1.0f, 1.0f, m_mMatcol.a);
 	m_mMatcol.a -= 1.0f / 80.0f;
 
-	if (m_nCntState <= 0)
+	// 重力で落下
+	move.y += -mylib_const::GRAVITY * 0.25f;
+	pos.y += move.y;
+
+	// 回転
+	rot.y += D3DX_PI * 0.025f;
+	rot.x += D3DX_PI * (Random(5, 25) * 0.001f);
+
+	// Xファイルとの判定
+	CStage *pStage = CGame::GetStage();
+	if (pStage == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	// ステージに当たった判定
+	bool bLandStage = false;
+	for (int nCntStage = 0; nCntStage < pStage->GetNumAll(); nCntStage++)
+	{
+		// オブジェクト取得
+		CObjectX *pObjX = pStage->GetObj(nCntStage);
+
+		if (pObjX == NULL)
+		{// NULLだったら
+			continue;
+		}
+
+		// 高さ取得
+		bool bLand = false;
+		float fHeight = pObjX->GetHeight(pos, bLand);
+
+		if (bLand == true && fHeight > pos.y)
+		{// 地面の方が自分より高かったら
+
+			// ステージの高さに補正
+			pos.y = fHeight;
+
+			if (bLand == true)
+			{// 着地してたら
+
+				move.y = 0.0f;
+				bLandStage = true;
+			}
+		}
+	}
+
+	if (bLandStage == true)
 	{// 遷移カウンターが0になったら or 地面に接触
 
 		// パーティクル生成

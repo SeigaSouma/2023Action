@@ -66,6 +66,7 @@ public:
 	D3DXMATRIX GetmtxWorld(void) const;			// ワールドマトリックス取得
 	void SetPosition(const D3DXVECTOR3 pos);	// 位置設定
 	D3DXVECTOR3 GetPosition(void) const;		// 位置取得
+	D3DXVECTOR3 GetCenterPosition(void) const;		// 中心の位置取得
 	void SetOriginPosition(const D3DXVECTOR3 pos);	// 最初の位置設定
 	D3DXVECTOR3 GetOriginPosition(void) const;		// 最初の位置取得
 	void SetOldPosition(const D3DXVECTOR3 pos);	// 前回の位置設定

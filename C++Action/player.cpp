@@ -158,7 +158,8 @@ HRESULT CPlayer::Init(void)
 
 	m_state = STATE_NONE;	// 状態
 	m_nCntState = 0;		// 状態遷移カウンター
-	m_bLandOld = true;
+	m_bLandOld = true;		// 前回の着地状態
+	SetMoveAngle(ANGLE_RIGHT);
 
 	// キャラ作成
 	HRESULT hr = SetCharacter(CHARAFILE);
@@ -189,8 +190,9 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 
+	SetMapIndex(39);
 #if _DEBUG
-	//SetMapIndex(39);
+	SetMapIndex(39);
 #endif
 	return S_OK;
 }
@@ -210,6 +212,7 @@ void CPlayer::Uninit(void)
 	// HPゲージを消す
 	if (m_pHPGauge != NULL)
 	{
+		m_pHPGauge->Uninit();
 		m_pHPGauge = NULL;
 	}
 
@@ -274,6 +277,11 @@ void CPlayer::Kill(void)
 //==========================================================================
 void CPlayer::Update(void)
 {
+	if (IsDeath() == true)
+	{
+		return;
+	}
+
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 	if (pInputKeyboard->GetTrigger(DIK_F5) == true)
@@ -466,6 +474,7 @@ void CPlayer::Update(void)
 
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
+	D3DXVECTOR3 posCenter = GetCenterPosition();
 
 	// 移動量取得
 	D3DXVECTOR3 move = GetMove();
@@ -482,16 +491,17 @@ void CPlayer::Update(void)
 	// HPゲージの位置更新
 	if (m_pHPGauge != NULL)
 	{
+		m_pHPGauge->Update();
 		m_pHPGauge->SetLife(GetLife());
 	}
 
 	// デバッグ表示
 	CManager::GetInstance()->GetDebugProc()->Print(
 		"------------------[プレイヤーの操作]------------------\n"
-		"位置：【X：%f, Y：%f, Z：%f】 【W / A / S / D】\n"
+		"位置：【X：%f, Y：%f, Z：%f】【X：%f, Y：%f, Z：%f】 【W / A / S / D】\n"
 		"向き：【X：%f, Y：%f, Z：%f】 【Z / C】\n"
 		"移動量：【X：%f, Y：%f, Z：%f】\n"
-		"体力：【%d】", pos.x, pos.y, pos.z, rot.x, rot.y, rot.y, move.x, move.y, move.z, GetLife());
+		"体力：【%d】", pos.x, pos.y, pos.z, posCenter.x, posCenter.y, posCenter.z, rot.x, rot.y, rot.y, move.x, move.y, move.z, GetLife());
 }
 
 //==========================================================================
@@ -499,6 +509,7 @@ void CPlayer::Update(void)
 //==========================================================================
 void CPlayer::Controll(void)
 {
+
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
@@ -533,7 +544,9 @@ void CPlayer::Controll(void)
 	CObject::ANGLE MoveAngle = GetMoveAngle();
 	SetOldMoveAngle(MoveAngle);
 
-	if (m_pMotion->IsGetMove(nMotionType) == 1)
+	if (m_pMotion->IsGetMove(nMotionType) == 1 &&
+		m_state != STATE_DEAD &&
+		m_state != STATE_FADEOUT)
 	{// 移動可能モーションの時
 
 		// 移動中にする
@@ -630,7 +643,7 @@ void CPlayer::Controll(void)
 			move.y += 17.0f;
 		}
 	}
-	else
+	else if(m_state != STATE_DEAD && m_state != STATE_FADEOUT)
 	{// 移動可能モーションじゃない場合
 
 		if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
@@ -673,7 +686,14 @@ void CPlayer::Controll(void)
 	float fMoveValue = GetMapMoveValue();
 
 	// 移動した量加算
-	fMoveValue += move.x;
+	if (m_pMotion->GetType() == MOTION_ATK || m_pMotion->GetType() == MOTION_ATK2)
+	{// 攻撃中
+		fMoveValue += move.x * 0.4f;
+	}
+	else
+	{
+		fMoveValue += move.x;
+	}
 
 	// 曲線作る為の4点
 	int nIdxMapPoint = GetMapIndex();
@@ -787,7 +807,15 @@ void CPlayer::Controll(void)
 		pos.z = posOld.z;
 		pos = posOld;
 		move.x = 0.0f;
+		pos.y -= mylib_const::GRAVITY * 7.0f;
 		fMoveValue = GetOldMapMoveValue();
+
+		if (m_bJump == false)
+		{
+			m_bJump = true;
+		}
+
+		Collision(pos, move);
 
 		// 前回は乗ってなかったってことにする
 		//m_bLandOld = false;
@@ -2016,6 +2044,12 @@ void CPlayer::Draw(void)
 	else
 	{
 		CObjectChara::Draw();
+	}
+
+	// HPゲージ
+	if (m_pHPGauge != NULL)
+	{
+		m_pHPGauge->Draw();
 	}
 }
 

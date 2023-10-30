@@ -8,6 +8,7 @@
 #include "texture.h"
 #include "manager.h"
 #include "renderer.h"
+#include "calculation.h"
 
 //==========================================================================
 // マクロ定義
@@ -42,6 +43,7 @@ CHP_GaugePlayer::CHP_GaugePlayer(int nPriority) : CObject(nPriority)
 
 	m_nLife = 0;	// 体力
 	m_nMaxLife = 0;	// 最大体力
+	m_nCntTkTk = 0;	// チカチカのカウント
 }
 
 //==========================================================================
@@ -79,7 +81,7 @@ CHP_GaugePlayer *CHP_GaugePlayer::Create(D3DXVECTOR3 pos, int nMaxLife)
 			pHPGauge->Init();
 
 			// 種類の設定
-			pHPGauge->SetType(TYPE_HPGAUGE);
+			//pHPGauge->SetType(TYPE_HPGAUGE);
 		}
 
 		return pHPGauge;
@@ -221,6 +223,9 @@ void CHP_GaugePlayer::Update(void)
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
 
+	// チカチカのカウント
+	m_nCntTkTk = (m_nCntTkTk + 1) % 120;
+
 	for (int nCntGauge = 0; nCntGauge < VTXTYPE_MAX; nCntGauge++)
 	{
 		if (m_HPGauge[nCntGauge].pObj2D != NULL)
@@ -228,6 +233,14 @@ void CHP_GaugePlayer::Update(void)
 
 			if (nCntGauge == VTXTYPE_PINK)
 			{// ゲージ部分だけ　
+
+				// 色取得
+				D3DXCOLOR col = m_HPGauge[nCntGauge].pObj2D->GetColor();
+
+				col = HSVtoRGB(0.0f, 0.0f, 1.0f + sinf(D3DX_PI * ((float)m_nCntTkTk / 60.0f)) * 0.3f);
+
+				// 色設定
+				m_HPGauge[nCntGauge].pObj2D->SetColor(col);
 
 				// 減少処理
 				GaugeDecrement(nCntGauge);
@@ -238,6 +251,9 @@ void CHP_GaugePlayer::Update(void)
 
 			// サイズ設定
 			//m_HPGauge[nCntGauge].pObj2D->SetSize(D3DXVECTOR2(m_sizeGauge.x - (m_HPGauge[nCntGauge].fMaxWidth - m_sizeGauge.x), size.y));
+
+			// 更新処理
+			m_HPGauge[nCntGauge].pObj2D->Update();
 
 			// 頂点座標設定
 			SetVtx(nCntGauge);

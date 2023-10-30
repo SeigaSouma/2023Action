@@ -49,6 +49,7 @@
 #define POSR_HOSEI	(0.08f * 0.8f)
 #define CHASEDISTANCE_DEST	(250.0f)
 #define ROTCHANGEHOSEI		(0.3f)
+#define RANKNIG_LEN_DEST	(7500.0f)
 
 //==========================================================================
 // コンストラクタ
@@ -1641,9 +1642,9 @@ void CCamera::ResetRanking(void)
 	m_vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);				// 上方向ベクトル
 	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);				// 移動量
 	m_TargetPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		// 目標の位置
-	m_fDistance = TITLE_LEN_DEST;						// 距離
-	m_fDestDistance = TITLE_LEN_DEST;					// 目標の距離
-	m_fOriginDistance = TITLE_LEN_DEST;					// 元の距離
+	m_fDistance = RANKNIG_LEN_DEST;						// 距離
+	m_fDestDistance = RANKNIG_LEN_DEST;					// 目標の距離
+	m_fOriginDistance = RANKNIG_LEN_DEST;				// 元の距離
 	m_fDiffHeight = 0.0f;								// 高さの差分
 	m_fDiffHeightSave = 0.0f;							// 高さの差分保存用
 	m_fDiffHeightDest = 0.0f;							// 目標の高さの差分

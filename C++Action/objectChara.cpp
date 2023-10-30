@@ -661,6 +661,17 @@ D3DXVECTOR3 CObjectChara::GetPosition(void) const
 	return m_pos;
 }
 
+//==========================================================================
+// íÜêSÇÃà íuéÊìæ
+//==========================================================================
+D3DXVECTOR3 CObjectChara::GetCenterPosition(void) const
+{
+	if (m_apModel[0] == NULL)
+	{
+		return mylib_const::DEFAULT_VECTOR3;
+	}
+	return m_pos + m_apModel[0]->GetPosition();
+}
 
 //==========================================================================
 // à íuê›íË

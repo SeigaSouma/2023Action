@@ -62,6 +62,7 @@ private:
 	// メンバ変数
 	static const char *m_apTextureFile[];	// テクスチャのファイル
 	SHP_Gauge m_HPGauge[VTXTYPE_MAX];		// HPゲージの情報
+	int m_nCntTkTk;							// チカチカのカウント
 	int m_nLife;							// 体力
 	int m_nMaxLife;							// 最大体力
 	int m_nTexIdx[VTXTYPE_MAX];				// テクスチャのインデックス番号

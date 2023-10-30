@@ -162,6 +162,7 @@
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="bulletexplosion.cpp" />
     <ClCompile Include="bulletmanager.cpp" />
+    <ClCompile Include="bullet_obstacle.cpp" />
     <ClCompile Include="calculation.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="cameraaxis.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="bullet.h" />
     <ClInclude Include="bulletexplosion.h" />
     <ClInclude Include="bulletmanager.h" />
+    <ClInclude Include="bullet_obstacle.h" />
     <ClInclude Include="calculation.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cameraaxis.h" />

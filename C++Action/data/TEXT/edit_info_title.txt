@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/glass.jpg		# [14]
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 43
+NUM_MODEL = 44
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -72,7 +72,8 @@ MODEL_FILENAME = data/MODEL/map_object/rock_04_superhuge.x		# [38]
 MODEL_FILENAME = data/MODEL/map_object/rock_05_superhuge.x		# [39]
 MODEL_FILENAME = data/MODEL/map_object/tree_03_huge.x		# [40]
 MODEL_FILENAME = data/MODEL/stage_01.x		# [41]
-MODEL_FILENAME = data/MODEL/arow.x		# [42]
+MODEL_FILENAME = data/MODEL/bossstage_01.x		# [42]
+MODEL_FILENAME = data/MODEL/arow.x		# [43]
 
 #==============================================================================
 # 空情報

@@ -46,6 +46,7 @@ private:
 		MOTION_STUN,		// スタン
 		MOTION_KNOCKBACK,	// やられモーション
 		MOTION_FADEOUT,		// 帰還モーション
+		MOTION_APPEARANCE,	// 登場モーション
 		MOTION_MAX
 	}MOTION;
 
@@ -54,7 +55,9 @@ private:
 		ATKTYPE_BULLET = 0,	// 弾発射攻撃
 		ATKTYPE_ASSULT,		// 突進
 		ATKTYPE_ENEMYSPAWN,	// 敵出現
+		ATKTYPE_STUNKNOCKBACK,		// スタンノックバック
 		ATKTYPE_STUN,		// スタン
+		ATKTYPE_APPEARANCE,		// 登場
 		ATKTYPE_MAX
 	};
 
@@ -62,8 +65,10 @@ private:
 	struct BOSSACT
 	{
 		int nBulletCnt;		// 弾のカウンター
+		int nKnockBackCnt;	// ノック縛のカウンタ
 		int nAssultAngle;	// 突進の向き
 		ATKTYPE AtkType;	// 攻撃の種類
+		D3DXVECTOR3 StunPosDest;	// スタン時の目標の位置
 	};
 
 	// オーバーライドされた関数
@@ -75,6 +80,7 @@ private:
 	void StateWait(void) override;		// 待機処理
 	void PlayerChase(void) override;			// プレイヤー追従
 	void ChangeBase(void) override;			// 拠点切り替え
+	void CollisionPlayer(void) override;	// プレイヤーとの当たり判定
 
 	// 状態更新系
 	void Damage(void) override;		// ダメージ
@@ -84,10 +90,12 @@ private:
 	void ChaseMove(float fMove);		// 追い掛け移動
 	void ChangeToAttackState(void);		// 攻撃状態移行処理
 	void UpdateByAttack(void);			// 攻撃別処理
+	void UpdateAppearance(void);		// 登場
 	void UpdateAttackBullet(void);		// 弾攻撃
 	void UpdateAttackAssult(void);		// 突進攻撃
 	void UpdateChildSpawn(void);		// 子分出現攻撃
 	void UpdateStun(void);				// ピヨピヨ攻撃(?)
+	void UpdateKnockBackStun(void);		// スタンのノックバック
 	void DrawingACT(void);				// 行動抽選
 	void RotPlayer(void);				// プレイヤーの方を見る
 
@@ -96,6 +104,7 @@ private:
 	eBaseType m_BaseType;	// 拠点の種類
 	eBaseType m_BaseTypeDest;	// 目標の拠点種類
 	int m_nCntDamage;			// ダメージカウンター
+	int m_nCntEmission;			// 発生物のカウンター
 };
 
 

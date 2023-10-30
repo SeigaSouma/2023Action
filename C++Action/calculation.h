@@ -44,10 +44,12 @@ template<class T> void ValueNormalize(T &Value, T MaxValue, T MinValue);	// ’l‚Ì
 void InertiaCorrection(float &fMain, float fTarget, float fCntCorrection);	// Šµ«•â³
 float Lerp(float start, float end, float time);								// üŒ`•â³
 template<class T> void CuadricCurveComp(T& Value, const int nRange, T RangeOrigin, T Max, int& nAlphaCnt);	// “ñŸ‹Èü•â³
+D3DXCOLOR HSVtoRGB(float H, float S, float V);								// HSV•ÏŠ·
 int Random(int nMinNum, int nMaxNum);										// ƒ‰ƒ“ƒ_ƒ€¶¬
 int GetDigit(int nNum);														// Œ…”æ“¾
 float GetRatio(D3DXVECTOR3 Mypos, D3DXVECTOR3 Targetpos);					// Š„‡æ“¾
 float GetPosLength(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2);						// ’·‚³æ“¾
+D3DXVECTOR3 GetParabola(D3DXVECTOR3 start, D3DXVECTOR3 end, float fMaxHeight, float time);				// •ú•¨üˆÚ“®
 bool CircleRange2D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1‚Æ2‚Ì“–‚½‚è”»’è(‰~)(3D)
 bool CircleRange3D(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1‚Æ2‚Ì“–‚½‚è”»’è(‰~)(3D)
 bool SphereRange(D3DXVECTOR3 pos1, D3DXVECTOR3 pos2, float fRadius1, float fRadius2);						// 1‚Æ2‚Ì“–‚½‚è”»’è(‹…)

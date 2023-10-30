@@ -543,7 +543,7 @@ void CBullet::CollisionPlayer(void)
 	}
 
 	// ƒvƒŒƒCƒ„[‚Ìî•ñŽæ“¾
-	D3DXVECTOR3 PlayerPosition = pPlayer->GetPosition();
+	D3DXVECTOR3 PlayerPosition = pPlayer->GetCenterPosition();
 	D3DXVECTOR3 PlayerRotation = pPlayer->GetRotation();
 	float fPlayerRadius = pPlayer->GetRadius();
 
@@ -605,7 +605,7 @@ void CBullet::CollisionEnemy(void)
 		nUse++;
 
 		// “G‚Ìî•ñŽæ“¾
-		D3DXVECTOR3 EnemyPosition = ppEnemy[nCntEnemy]->GetPosition();
+		D3DXVECTOR3 EnemyPosition = ppEnemy[nCntEnemy]->GetCenterPosition();
 		float fEnemyRadius = ppEnemy[nCntEnemy]->GetRadius();
 
 		if (SphereRange(pos, EnemyPosition, fRadius, fEnemyRadius))

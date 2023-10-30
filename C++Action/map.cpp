@@ -589,7 +589,7 @@ HRESULT map::ReadText(const char *pTextFile)
 		break;
 
 	case CScene::MODE_RANKING:
-		pFile = fopen("data\\TEXT\\edit_info_title.txt", "r");
+		pFile = fopen("data\\TEXT\\edit_info_ranking.txt", "r");
 		break;
 
 	default:
