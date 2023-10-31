@@ -80,9 +80,6 @@ CEffectSlashHit *CEffectSlashHit::Create(const D3DXVECTOR3 pos)
 
 			// ‰Šú‰»ˆ—
 			pExplosion->Init();
-
-			// ”š”­‰¹
-			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_EXPLOSION);
 		}
 
 		return pExplosion;

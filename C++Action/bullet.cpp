@@ -362,9 +362,6 @@ void CBullet::Update(void)
 	if (m_nLife <= 0)
 	{// Žõ–½‚ªs‚«‚½‚ç
 
-		// ”š”­‚Ì¶¬
-		CExplosion::Create(GetPosition());
-
 		// ’e‚Ìíœ
 		if (m_pMeshSphereEffect != NULL)
 		{
@@ -382,6 +379,11 @@ void CBullet::Update(void)
 		{
 			// ’e‚Ì¶¬ˆ—
 			CBulletExplosion::Create(GetPosition(), GetWidthLen() + 200.0f);
+		}
+		else
+		{
+			// ”š”­‚Ì¶¬
+			CExplosion::Create(GetPosition());
 		}
 
 		Uninit();

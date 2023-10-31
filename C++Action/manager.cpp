@@ -19,6 +19,7 @@
 #include "pause.h"
 #include "fade.h"
 #include "instantfade.h"
+#include "blackframe.h"
 #include "light.h"
 #include "camera.h"
 #include "bg.h"
@@ -54,6 +55,7 @@ CManager::CManager()
 	m_pScene = NULL;				// シーンのオブジェクト
 	m_pFade = NULL;					// フェードのオブジェクト
 	m_pInstantFade = NULL;			// 遷移なしフェードのオブジェクト
+	m_pBlackFrame = NULL;			// 黒フレームのオブジェクト
 	m_pPause = NULL;				// ポーズのオブジェクト
 	m_pResultManager = NULL;		// リザルトマネージャのオブジェクト
 	m_pRankingManager = NULL;		// ランキングマネージャのオブジェクト
@@ -347,6 +349,15 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	}
 
 	//**********************************
+	// 黒フレーム
+	//**********************************
+	m_pBlackFrame = CBlackFrame::Create();
+	if (m_pBlackFrame == NULL)
+	{
+		return E_FAIL;
+	}
+
+	//**********************************
 	// ポーズ
 	//**********************************
 	m_pPause = CPause::Create();
@@ -634,6 +645,16 @@ void CManager::Uninit(void)
 		m_pInstantFade = NULL;
 	}
 
+	// 黒フレームの破棄
+	if (m_pBlackFrame != NULL)
+	{// メモリの確保がされていたら
+
+		// 終了処理
+		m_pBlackFrame->Uninit();
+		delete m_pBlackFrame;
+		m_pBlackFrame = NULL;
+	}
+
 	if (m_pPause != NULL)
 	{// メモリの確保がされていたら
 
@@ -693,6 +714,12 @@ void CManager::Update(void)
 
 	// 遷移なしフェードの更新処理
 	m_pInstantFade->Update();
+
+	// 黒フレーム
+	if (m_pBlackFrame != NULL)
+	{
+		m_pBlackFrame->Update();
+	}
 
 	// キーボードの更新処理
 	m_pInputKeyboard->Update();
@@ -915,6 +942,14 @@ CFade *CManager::GetFade(void)
 CInstantFade *CManager::GetInstantFade(void)
 {
 	return m_pInstantFade;
+}
+
+//==========================================================================
+// 黒フレームの取得
+//==========================================================================
+CBlackFrame *CManager::GetBlackFrame(void)
+{
+	return m_pBlackFrame;
 }
 
 //==========================================================================

@@ -26,13 +26,12 @@ public:
 		LABEL_SE_EXPLOSION,	// 爆発
 		LABEL_SE_KYUPIIN,	// キュピーン
 		LABEL_SE_WALK,		// 歩行
+		LABEL_SE_JUMP,		// ジャンプ
 		LABEL_SE_FIELD,		// 地面
 		LABEL_SE_SWING,		// スイング
 		LABEL_SE_IMPACT01,	// 衝撃
 		LABEL_SE_DMG01,		// ダメージ
 		LABEL_SE_COMBOIN,		// ダメージ
-		LABEL_SE_STAGESWITCH,		// ダメージ
-		LABEL_SE_WATERIN,		// ダメージ
 		LABEL_SE_TUTORIALWINDOW,		// ダメージ
 		LABEL_SE_SPAWN,		// ダメージ
 		LABEL_SE_SPAWNEN,		// ダメージ
@@ -48,6 +47,16 @@ public:
 		LABEL_SE_CURSOR,		// カーソル移動
 		LABEL_SE_DONE,		// カーソル移動
 		LABEL_SE_STEPCLEAR,		// カーソル移動
+		LABEL_SE_SLASHHIT,		// 斬撃ヒット
+		LABEL_SE_BOUNCE,		// 跳ね返し
+		LABEL_SE_BOUNCEHIT,		// 跳ね返しヒット
+		LABEL_SE_ENEMYEXPLOSION,		// 敵爆発
+		LABEL_SE_TITLESLASH,		// タイトル斬撃
+		LABEL_BGM_HOBARING,		// ホバリング
+		LABEL_SE_ASSULT,		// 突進
+		LABEL_SE_ASSULTEND,		// 突進終了
+		LABEL_SE_STUN,			// スタン
+		LABEL_SE_STUNHEAL,		// スタン回復
 		LABEL_MAX,
 	} LABEL;
 

@@ -697,7 +697,7 @@ MOTIONSET
 	END_ATTACKINFO
 
 	KEYSET			# --- << KEY : 0 / 6 >> ---
-		FRAME = 6
+		FRAME = 120
 		PARTS	# ----- [ 0 ] -----
 			ROT = 2.10 0.00 0.00
 			POS = 0.00 0.00 0.00

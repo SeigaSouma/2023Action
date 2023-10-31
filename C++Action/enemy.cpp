@@ -672,8 +672,8 @@ bool CEnemy::Hit(const int nValue)
 		if (nLife > 0)
 		{// 体力がなくなってなかったら
 
-			// ダメージ音再生
-			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_DMG01);
+			//// ダメージ音再生
+			//CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_DMG01);
 
 			if (m_pHPGauge == NULL)
 			{
@@ -711,7 +711,10 @@ bool CEnemy::Hit(const int nValue)
 			// やられモーション
 			//m_pMotion->Set(MOTION_KNOCKBACK);
 
-			// 死んだ
+			// 爆発再生
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_ENEMYEXPLOSION);
+
+			// 当たった
 			return true;
 		}
 
@@ -748,6 +751,9 @@ bool CEnemy::Hit(const int nValue)
 
 		// ノックバックの位置更新
 		m_posKnokBack = GetPosition();
+
+		// 当たった
+		return true;
 	}
 
 	// 死んでない

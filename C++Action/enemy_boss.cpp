@@ -34,6 +34,7 @@
 #include "enemybase.h"
 #include "effect_enemyspawn.h"
 #include "impactwave.h"
+#include "blackframe.h"
 
 //==========================================================================
 // マクロ定義
@@ -45,7 +46,7 @@
 #define CHACE_DISTABCE	(50.0f)		// 追い掛ける時の間隔
 #define JUMP			(18.0f)					// ジャンプ力初期値
 #define BASECHANGETIME	(120)	// 拠点切り替え時間
-#define PLAYERCHASETIME	(60 * 6)	// 親追い掛け時間
+#define PLAYERCHASETIME	(60 * 6 + 120)	// 親追い掛け時間
 #define WAITTIME	(60 * 2)	// 待機時間
 #define BULLETCOUNT		(3)		// 弾の回数
 #define PIYOPIYOTIME	(60 * 5)	// ピヨピヨの時間
@@ -100,9 +101,12 @@ HRESULT CEnemyBoss::Init(void)
 
 	m_pMotion->Set(MOTION_APPEARANCE);
 
+	// ホバリング音
+	CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_BGM_HOBARING);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_HOBARING);
 
 
-
+	CManager::GetInstance()->GetBlackFrame()->SetState(CBlackFrame::STATE_IN);
 
 
 
@@ -150,6 +154,7 @@ void CEnemyBoss::Uninit(void)
 
 	// モード設定
 	CManager::GetInstance()->GetFade()->SetFade(CScene::MODE_RESULT);
+	CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_BGM_HOBARING);
 }
 
 //==========================================================================
@@ -159,6 +164,7 @@ void CEnemyBoss::Kill(void)
 {
 	// 死亡処理
 	CEnemy::Kill();
+	CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_BGM_HOBARING);
 }
 
 //==========================================================================
@@ -231,7 +237,7 @@ bool CEnemyBoss::Hit(const int nValue)
 			// やられモーション
 			//m_pMotion->Set(MOTION_KNOCKBACK);
 
-			// 死んだ
+			// 当たった
 			return true;
 		}
 
@@ -319,6 +325,9 @@ bool CEnemyBoss::Hit(const int nValue)
 			// 振動
 			CManager::GetInstance()->GetCamera()->SetShake(10, 15.0f, 0.0f);
 		}
+
+		// 当たった
+		return true;
 	}
 
 	// 死んでない
@@ -639,18 +648,17 @@ void CEnemyBoss::UpdateAttackAssult(void)
 		return;
 	}
 
-	// 衝撃波生成
-	if (m_nCntState % 15 == 0)
-	{
+	// モーションの情報取得
+	CMotion::Info aInfo = m_pMotion->GetInfo(m_pMotion->GetType());
 
+	// 攻撃情報の総数取得
+	int nNumAttackInfo = aInfo.nNumAttackInfo;
+
+	// 衝撃波生成
+	if (m_nCntState % 15 == 0 && m_nCntState <= PLAYERCHASETIME - 120)
+	{
 		// 位置取得
 		D3DXVECTOR3 weponpos = GetPosition();
-
-		// モーションの情報取得
-		CMotion::Info aInfo = m_pMotion->GetInfo(m_pMotion->GetType());
-
-		// 攻撃情報の総数取得
-		int nNumAttackInfo = aInfo.nNumAttackInfo;
 
 		for (int nCntAttack = 0; nCntAttack < nNumAttackInfo; nCntAttack++)
 		{
@@ -736,6 +744,13 @@ void CEnemyBoss::UpdateChildSpawn(void)
 //==========================================================================
 void CEnemyBoss::UpdateStun(void)
 {
+	if (m_nCntState == PIYOPIYOTIME)
+	{
+		// スタン音
+		CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_SE_STUN);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_STUN);
+	}
+
 	m_nCntState--;
 	if (m_nCntState <= 0)
 	{// 遷移カウンターが0になったら
@@ -744,6 +759,10 @@ void CEnemyBoss::UpdateStun(void)
 		m_nCntState = WAITTIME;
 		m_state = STATE_WAIT;
 		m_sMotionFrag.bATK = false;
+
+		// スタン音
+		CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_SE_STUN);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_STUNHEAL);
 
 		// 通常モーション設定
 		m_pMotion->Set(MOTION_DEF);
@@ -942,15 +961,26 @@ void CEnemyBoss::PlayerChase(void)
 	// オブジェクト情報
 	CObject *pObj = NULL;
 
+	if (m_nCntState == PLAYERCHASETIME)
+	{
+		// 突進開始音
+		CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_SE_ASSULTEND);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_ASSULT);
+	}
+
 	// 状態遷移カウンター減算
 	m_nCntState--;
 
 	if (m_nCntState <= 0)
 	{// 遷移カウンターが0になったら
-		
+
 		// 待機時間
 		m_nCntState = WAITTIME;
 		m_state = STATE_WAIT;
+
+		// 突進終了音
+		CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_SE_ASSULT);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_ASSULTEND);
 
 		// 通常モーション設定
 		m_pMotion->Set(MOTION_DEF);
@@ -963,8 +993,12 @@ void CEnemyBoss::PlayerChase(void)
 	// 攻撃別処理
 	UpdateByAttack();
 
-	// 追い掛け移動処理
-	ChaseMove(fMove);
+	if (m_nCntState <= PLAYERCHASETIME - 120)
+	{// 遷移カウンターが0になったら
+
+		// 追い掛け移動処理
+		ChaseMove(fMove);
+	}
 
 	// 目標の向き設定
 	SetRotDest(fRotDest);

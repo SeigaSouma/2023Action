@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "fade.h"
 #include "instantfade.h"
+#include "blackframe.h"
 #include "pause.h"
 #include "input.h"
 
@@ -164,12 +165,12 @@ void CRenderer::Draw(void)
 	// キーボード情報取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
-//#if _DEBUG
+#if _DEBUG
 	if (pInputKeyboard->GetTrigger(DIK_F1) == true)
 	{// F1でデバッグ表示切替
 		bDisp = bDisp ? false : true;
 	}
-//#endif
+#endif
 
 	// 画面クリア(バックバッファとZバッファのクリア)
 	m_pD3DDevice->Clear
@@ -206,6 +207,9 @@ void CRenderer::Draw(void)
 		{
 			CManager::GetInstance()->GetPause()->Draw();
 		}
+
+		// 黒フレーム
+		CManager::GetInstance()->GetBlackFrame()->Draw();
 
 		// 遷移なしフェード描画処理
 		CManager::GetInstance()->GetInstantFade()->Draw();

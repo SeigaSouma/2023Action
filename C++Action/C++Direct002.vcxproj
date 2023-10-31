@@ -159,6 +159,7 @@
     <ClCompile Include="3D_effect.cpp" />
     <ClCompile Include="ballast.cpp" />
     <ClCompile Include="bg.cpp" />
+    <ClCompile Include="blackframe.cpp" />
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="bulletexplosion.cpp" />
     <ClCompile Include="bulletmanager.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="3D_effect.h" />
     <ClInclude Include="ballast.h" />
     <ClInclude Include="bg.h" />
+    <ClInclude Include="blackframe.h" />
     <ClInclude Include="block.h" />
     <ClInclude Include="bullet.h" />
     <ClInclude Include="bulletexplosion.h" />

@@ -17,6 +17,7 @@
 #include "enemy.h"
 #include "effect_slashhit.h"
 #include "hitscore.h"
+#include "sound.h"
 
 //==========================================================================
 // マクロ定義
@@ -283,6 +284,8 @@ void CSlash::Update(void)
 //==========================================================================
 void  CSlash::Collision(void)
 {
+	// 情報取得
+	bool bHit = false;
 
 	// 外側の幅
 	float fOutWidth = GetOutWidth();
@@ -294,6 +297,7 @@ void  CSlash::Collision(void)
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
 	int nUse = 0;
+	bHit = false;
 	for (int nCntBullet = 0; nUse < nNumAll; nCntBullet++)
 	{
 		if (ppBullet[nCntBullet] == NULL)
@@ -375,6 +379,8 @@ void  CSlash::Collision(void)
 			ppBullet[nCntBullet]->SetState(CBullet::STATE_DMG, 3);
 			ppBullet[nCntBullet]->SetMoveAngle(GetMoveAngle());
 
+			bHit = true;
+
 			// ヒットストップ
 			CManager::GetInstance()->SetEnableHitStop(8);
 
@@ -389,7 +395,17 @@ void  CSlash::Collision(void)
 		}
 	}
 
+	if (bHit == true)
+	{
+		// 斬撃再生
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_BOUNCE);
+	}
 
+
+	if (m_nPatternAnim >= 10)
+	{
+		return;
+	}
 
 	// 敵マネージャ取得
 	CEnemyManager *pEnemyManager = CGame::GetEnemyManager();
@@ -403,7 +419,7 @@ void  CSlash::Collision(void)
 	int nNumEnemy = pEnemyManager->GetNumAll();
 
 	// 情報取得
-	bool bHit = false;
+	bHit = false;
 
 	nUse = 0;
 	for (int nCntEnemy = 0; nUse < nNumEnemy; nCntEnemy++)
@@ -441,16 +457,24 @@ void  CSlash::Collision(void)
 			}
 
 			if (ppEnemy[nCntEnemy]->GetState() != CEnemy::STATE_DMG && ppEnemy[nCntEnemy]->GetState() != CEnemy::STATE_DEAD)
-			{
+			{// ダメージ与えれてる時
 				// ヒットスコア加算
 				CGame::GetHitScore()->Add(1);
 			}
 
 			// ヒット処理
-			ppEnemy[nCntEnemy]->Hit(mylib_const::DMG_SLASH);
+			if (ppEnemy[nCntEnemy]->Hit(mylib_const::DMG_SLASH))
+			{
+				bHit = true;
+			}
 
-			bHit = true;
 		}
+	}
+
+	if (bHit == true)
+	{
+		// 斬撃再生
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_SLASHHIT);
 	}
 
 }

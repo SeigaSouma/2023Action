@@ -80,6 +80,9 @@ CBulletExplosion *CBulletExplosion::Create(const D3DXVECTOR3 pos, const float fS
 			pBullet->SetWidthBlock(16);
 			pBullet->SetHeightBlock(16);
 
+			// ’µ‚Ë•Ô‚µƒqƒbƒg
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_BOUNCEHIT);
+
 			// ‰Šú‰»ˆ—
 			pBullet->Init();
 		}

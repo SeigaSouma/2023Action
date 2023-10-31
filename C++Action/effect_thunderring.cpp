@@ -85,9 +85,6 @@ CThunderRing *CThunderRing::Create(const D3DXVECTOR3 pos, const D3DXVECTOR2 size
 
 			// ‰Šú‰»ˆ—
 			pExplosion->Init();
-
-			// ”š”­‰¹
-			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_EXPLOSION);
 		}
 
 		return pExplosion;

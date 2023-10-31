@@ -8,6 +8,7 @@
 #include "renderer.h"
 #include "texture.h"
 #include "manager.h"
+#include "sound.h"
 
 //==========================================================================
 // マクロ定義
@@ -56,6 +57,9 @@ CTitleSlash *CTitleSlash::Create(const D3DXVECTOR3 pos)
 
 		if (pEffect != NULL)
 		{// メモリの確保が出来ていたら
+
+			// タイトル斬撃
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_TITLESLASH);
 
 			// 初期化処理
 			pEffect->Init();

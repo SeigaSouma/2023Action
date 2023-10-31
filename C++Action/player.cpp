@@ -192,7 +192,7 @@ HRESULT CPlayer::Init(void)
 
 	SetMapIndex(39);
 #if _DEBUG
-	SetMapIndex(39);
+	//SetMapIndex(39);
 #endif
 	return S_OK;
 }
@@ -641,6 +641,9 @@ void CPlayer::Controll(void)
 			m_bJump = true;
 			m_sMotionFrag.bJump = true;
 			move.y += 17.0f;
+
+			// サウンド再生
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_JUMP);
 		}
 	}
 	else if(m_state != STATE_DEAD && m_state != STATE_FADEOUT)
@@ -1182,7 +1185,7 @@ void CPlayer::Atack(void)
 				pSlash->SetMapMoveValue(GetMapMoveValue());
 
 				// 歩行音再生
-				CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_IMPACT01);
+				CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_SWING);
 				break;
 			}
 		}

@@ -28,13 +28,12 @@ CSound::SOUNDINFO CSound::m_aSoundInfo[LABEL_MAX] =
 	{ "data/SE/explosion000moto.wav", 0 },		// 爆発
 	{ "data/SE/game_clear.wav", 0 },			// キュピーン
 	{ "data/SE/walk_glass.wav", 0 },			// 歩行
+	{ "data/SE/jump.wav", 0 },			// ジャンプ
 	{ "data/SE/field_01.wav", 0 },			// 地面
 	{ "data/SE/swing_01.wav", 0 },			// スイング
 	{ "data/SE/impact_01.wav", 0 },			// 衝撃
 	{ "data/SE/kill_01.wav", 0 },			// ダメージ
 	{ "data/SE/comboin_01.wav", 0 },			// ダメージ
-	{ "data/SE/stageswitch_03.wav", 0 },			// ダメージ
-	{ "data/SE/water.wav", -1 },			// ダメージ
 	{ "data/SE/tutorialwindow.wav", 0 },			// ダメージ
 	{ "data/SE/spawn.wav", 0 },			// ダメージ
 	{ "data/SE/spawnemey.wav", 0 },			// ダメージ
@@ -50,6 +49,17 @@ CSound::SOUNDINFO CSound::m_aSoundInfo[LABEL_MAX] =
 	{ "data/SE/cursor.wav", 0 },			// ダメージ
 	{ "data/SE/done.wav", 0 },			// ダメージ
 	{ "data/SE/tutorial_clear.wav", 0 },			// ダメージ
+	{ "data/SE/slashHit.wav", 0 },			// 斬撃ヒット
+	{ "data/SE/bounce.wav", 0 },			// 跳ね返し
+	{ "data/SE/bounceHit.wav", 0 },		// 跳ね返しヒット
+	{ "data/SE/enemy_explosion.wav", 0 },		// 敵爆発
+	{ "data/SE/titleslash.wav", 0 },		// タイトル斬撃
+	{ "data/SE/hobaring.wav", -1 },		// ホバリング
+	{ "data/SE/assult.wav", 0 },		// 突進
+	{ "data/SE/assultend.wav", 0 },		// 突進終了
+	{ "data/SE/stun.wav", -1 },			// スタン
+	{ "data/SE/stunheal.wav", 0 },		// スタン回復
+
 };	// サウンドの情報
 
 //==========================================================================
