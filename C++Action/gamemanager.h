@@ -45,6 +45,8 @@ public:
 	SceneType GetType(void);		// シーンの種類取得
 	void SetEnableRush(void) { m_bEndRush = true; }		// ラッシュの終了フラグを有効にする
 	bool IsRushEnd(void) { return m_bEndRush; }			// 終了のフラグ取得
+	void SetEnableControll(bool bControll) { m_bControll = bControll; }		// 操作フラグを切り替えする
+	bool IsControll(void) { return m_bControll; }			// 操作のフラグ取得
 	static CGameManager *Create(void);
 
 private:
@@ -54,6 +56,7 @@ private:
 	// メンバ変数
 	SceneType m_SceneType;	// シーンの種類
 	bool m_bEndRush;		// ラッシュが終了したか
+	bool m_bControll;		// 操作できるか
 };
 
 

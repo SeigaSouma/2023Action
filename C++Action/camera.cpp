@@ -41,7 +41,7 @@
 #define TITLECAMERAROT_ENEMY	(D3DXVECTOR3(0.0f, -0.79f, -0.12f))
 #define TITLESTATE_CHANGE	(60 * 14)
 #define TITLESTATE_CHASE	(60 * 20)
-#define RESULT_LEN	(2280.0f)
+#define RESULT_LEN	(6700.0f)
 //#define RESULT_LEN	(1000.0f)
 #define RANKINGROT_NONE		(D3DXVECTOR3(0.0f, -0.79f + D3DX_PI, -0.30f))
 #define ROTHOSEI	(0.01f)	// 向きの補正係数
@@ -647,6 +647,13 @@ void CCamera::SetCameraVGame(void)
 	}
 	else if (m_bFollow == true)
 	{// 追従ON
+
+		//現在と目標の差分を求める
+		float fRotDiff = m_rotVDest.z - m_rot.z;
+		RotNormalize(fRotDiff);
+
+		m_rot.z += fRotDiff * 0.1f;
+		RotNormalize(m_rot.z);
 
 		switch (m_ChaseType)
 		{
@@ -1559,6 +1566,29 @@ void CCamera::ResetBoss(void)
 	m_fHeightMaxDest = 0.0f;					// カメラの最大高さの目標
 	m_ChaseType = CHASETYPE_MAP;				// 追従の種類
 	m_OldChaseType = m_ChaseType;			// 前回の追従の種類
+
+	// プレイヤーの情報取得
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	if (pPlayer == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	D3DXVECTOR3 PlayerPos = pPlayer->GetPosition();
+
+	// 注視点の代入
+	m_posR = D3DXVECTOR3(PlayerPos.x, PlayerPos.y + 100.0f, PlayerPos.z);	// 注視点(見たい場所)
+
+	// 目標の視点の向き
+	m_rot.y = atan2f((m_TargetPos.x - PlayerPos.x), (m_TargetPos.z - PlayerPos.z));
+	m_rotVDest.y = m_rot.y;
+
+	// 視点の代入
+	m_posV.x = m_posR.x + cosf(m_rot.z) * sinf(m_rot.y) * -m_fDistance;
+	m_posV.z = m_posR.z + cosf(m_rot.z) * cosf(m_rot.y) * -m_fDistance;
+	m_posV.y = m_posR.y + sinf(m_rot.z) * -m_fDistance;
+	m_posVDest = m_posV;								// 目標の視点
+	m_posRDest = m_posR;								// 目標の注視点
 }
 
 //==========================================================================
@@ -1702,6 +1732,30 @@ void CCamera::SetRotation(const D3DXVECTOR3 rot)
 D3DXVECTOR3 CCamera::GetRotation(void) const
 {
 	return m_rot;
+}
+
+//==========================================================================
+// 目標の向き設定
+//==========================================================================
+void CCamera::SetDestRotation(const D3DXVECTOR3 rot)
+{
+	m_rotVDest = rot;
+}
+
+//==========================================================================
+// 目標の向き取得
+//==========================================================================
+D3DXVECTOR3 CCamera::GetDestRotation(void)
+{
+	return m_rotVDest;
+}
+
+//==========================================================================
+// 元になるカメラの距離設定
+//==========================================================================
+void CCamera::SetOriginDistance(float fDistance)
+{
+	m_fOriginDistance = fDistance;
 }
 
 //==========================================================================

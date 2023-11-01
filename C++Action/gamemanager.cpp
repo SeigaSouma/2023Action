@@ -12,6 +12,9 @@
 #include "instantfade.h"
 #include "player.h"
 #include "camera.h"
+#include "sound.h"
+#include "mapmanager.h"
+#include "blackframe.h"
 
 //==========================================================================
 // マクロ定義
@@ -29,6 +32,7 @@ CGameManager::CGameManager()
 	// 値のクリア
 	m_SceneType = SCENE_MAIN;	// シーンの種類
 	m_bEndRush = false;			// ラッシュが終了したか
+	m_bControll = false;		// 操作できるか
 }
 
 //==========================================================================
@@ -76,6 +80,7 @@ CGameManager *CGameManager::Create(void)
 //==========================================================================
 HRESULT CGameManager::Init(void)
 {
+	m_bControll = true;		// 操作できるか
 	return S_OK;
 }
 
@@ -100,7 +105,11 @@ void CGameManager::Update(void)
 
 		if (fadestate == CInstantFade::STATE_FADECOMPLETION)
 		{// 完了した瞬間
-			
+
+
+			// BGMストップ
+			CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_BGM_GAME);
+
 			// 追従の種類設定
 			m_SceneType = SCENE_BOSS;
 
@@ -110,14 +119,36 @@ void CGameManager::Update(void)
 			// シーンのリセット
 			CManager::GetInstance()->GetScene()->ResetScene();
 
+			// プレイヤー情報
+			CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+			if (pPlayer == NULL)
+			{
+				return;
+			}
+			// マップマネージャの取得
+			CMapManager *pMapManager = CGame::GetMapManager();
+			if (pMapManager == NULL)
+			{// NULLだったら
+				return;
+			}
+
+			D3DXVECTOR3 pos = pMapManager->GetTargetPosition(0, 0.0f);
+			pPlayer->SetPosition(pos);
+			pPlayer->SetMapIndex(0);
+			pPlayer->SetMapMoveValue(0.0f);
+
 			// カメラの情報取得
 			CCamera *pCamera = CManager::GetInstance()->GetCamera();
 			pCamera->ResetBoss();
 
-			CManager::GetInstance()->GetScene()->GetPlayer()->SetPosition(D3DXVECTOR3(0.0f, 2000.0f, 0.0f));
+			// 黒フレーム侵入
+			CManager::GetInstance()->GetBlackFrame()->SetState(CBlackFrame::STATE_IN);
+
+			// 操作不能状態にする
+			m_bControll = false;
 		}
 	}
-	
+
 }
 
 //==========================================================================

@@ -52,11 +52,11 @@ private:
 
 	enum ATKTYPE
 	{
-		ATKTYPE_BULLET = 0,	// 弾発射攻撃
-		ATKTYPE_ASSULT,		// 突進
-		ATKTYPE_ENEMYSPAWN,	// 敵出現
-		ATKTYPE_STUNKNOCKBACK,		// スタンノックバック
-		ATKTYPE_STUN,		// スタン
+		ATKTYPE_BULLET = 0,		// 弾発射攻撃
+		ATKTYPE_ASSULT,			// 突進
+		ATKTYPE_ENEMYSPAWN,		// 敵出現
+		ATKTYPE_STUNKNOCKBACK,	// スタンノックバック
+		ATKTYPE_STUN,			// スタン
 		ATKTYPE_APPEARANCE,		// 登場
 		ATKTYPE_MAX
 	};

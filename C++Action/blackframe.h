@@ -51,6 +51,7 @@ public:
 	void Draw(void);
 
 	void SetState(STATE state);	// 状態設定
+	void Reset(void);			// リセット
 private:
 	// 列挙型定義
 	enum VTX

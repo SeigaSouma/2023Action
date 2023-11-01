@@ -136,9 +136,6 @@ HRESULT CGame::Init(void)
 		return E_FAIL;
 	}
 
-	// BGMÄ¶
-	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_GAME);
-
 	//**********************************
 	// ƒvƒŒƒCƒ„[
 	//**********************************
@@ -163,6 +160,9 @@ HRESULT CGame::Init(void)
 	m_pHitScore = CHitScore::Create(D3DXVECTOR3(1300.0f, 600.0f, 0.0f));
 
 	CManager::GetInstance()->GetCamera()->Reset(CScene::MODE_GAME);
+
+	// BGMÄ¶
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_GAME);
 
 	// ¬Œ÷
 	return S_OK;

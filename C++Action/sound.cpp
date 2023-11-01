@@ -23,7 +23,8 @@
 CSound::SOUNDINFO CSound::m_aSoundInfo[LABEL_MAX] = 
 {
 	{ "data/BGM/title.wav", -1 },			// タイトル
-	{ "data/BGM/game.wav", -1 },			// タイトル
+	{ "data/BGM/gameBGM.wav", -1 },			// ゲーム中
+	{ "data/BGM/bossBGM.wav", -1 },			// ゲーム中
 	{ "data/BGM/result.wav", -1 },			// タイトル
 	{ "data/SE/explosion000moto.wav", 0 },		// 爆発
 	{ "data/SE/game_clear.wav", 0 },			// キュピーン
@@ -59,6 +60,9 @@ CSound::SOUNDINFO CSound::m_aSoundInfo[LABEL_MAX] =
 	{ "data/SE/assultend.wav", 0 },		// 突進終了
 	{ "data/SE/stun.wav", -1 },			// スタン
 	{ "data/SE/stunheal.wav", 0 },		// スタン回復
+	{ "data/SE/boss_bullet.wav", 0 },	// ボスの弾攻撃
+	{ "data/SE/boss_bulletcharge.wav", 0 },	// ボスの弾チャージ
+	{ "data/SE/boss_talk.wav", 0 },		// ボストーク
 
 };	// サウンドの情報
 

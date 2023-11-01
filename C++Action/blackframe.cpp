@@ -115,6 +115,36 @@ HRESULT CBlackFrame::Init(void)
 }
 
 //==========================================================================
+// リセット
+//==========================================================================
+void CBlackFrame::Reset(void)
+{
+	m_state = STATE_OUTCOMPLETION;
+	m_nCntMove = 0;
+
+	for (int nCntVtx = 0; nCntVtx < VTX_MAX; nCntVtx++)
+	{
+		if (m_pObj2D[nCntVtx] != NULL)
+		{// NULLじゃなかったら
+
+			D3DXVECTOR3 pos = mylib_const::DEFAULT_VECTOR3;
+			if (nCntVtx == VTX_UP)
+			{
+				pos = START_UP;
+			}
+			else if (nCntVtx == VTX_DOWN)
+			{
+				pos = START_DOWN;
+			}
+
+			// 情報設定
+			m_pObj2D[nCntVtx]->SetPosition(pos);
+		}
+	}
+
+}
+
+//==========================================================================
 // 終了処理
 //==========================================================================
 void CBlackFrame::Uninit(void)
@@ -186,7 +216,7 @@ void CBlackFrame::UpdateState(int nCntVtx)
 //==========================================================================
 void CBlackFrame::StateIn(int nCntVtx)
 {
-	if (m_nCntMove >= MOVETIME)
+	if (m_nCntMove > MOVETIME)
 	{// 移動時間が規定値超えたら
 		m_nCntMove = MOVETIME;
 		m_state = STATE_INCOMPLETION;
@@ -223,7 +253,7 @@ void CBlackFrame::StateIn(int nCntVtx)
 //==========================================================================
 void CBlackFrame::StateOut(int nCntVtx)
 {
-	if (m_nCntMove >= MOVETIME)
+	if (m_nCntMove > MOVETIME)
 	{// 移動時間が規定値超えたら
 		m_nCntMove = MOVETIME;
 		m_state = STATE_OUTCOMPLETION;

@@ -190,9 +190,9 @@ HRESULT CPlayer::Init(void)
 	// ポーズのリセット
 	m_pMotion->ResetPose(MOTION_DEF);
 
-	SetMapIndex(39);
-#if _DEBUG
 	//SetMapIndex(39);
+#if _DEBUG
+	SetMapIndex(39);
 #endif
 	return S_OK;
 }
@@ -501,7 +501,8 @@ void CPlayer::Update(void)
 		"位置：【X：%f, Y：%f, Z：%f】【X：%f, Y：%f, Z：%f】 【W / A / S / D】\n"
 		"向き：【X：%f, Y：%f, Z：%f】 【Z / C】\n"
 		"移動量：【X：%f, Y：%f, Z：%f】\n"
-		"体力：【%d】", pos.x, pos.y, pos.z, posCenter.x, posCenter.y, posCenter.z, rot.x, rot.y, rot.y, move.x, move.y, move.z, GetLife());
+		"体力：【%d】\n"
+		"位置：【%d】\n", pos.x, pos.y, pos.z, posCenter.x, posCenter.y, posCenter.z, rot.x, rot.y, rot.y, move.x, move.y, move.z, GetLife(), GetMapIndex());
 }
 
 //==========================================================================
@@ -544,136 +545,140 @@ void CPlayer::Controll(void)
 	CObject::ANGLE MoveAngle = GetMoveAngle();
 	SetOldMoveAngle(MoveAngle);
 
-	if (m_pMotion->IsGetMove(nMotionType) == 1 &&
-		m_state != STATE_DEAD &&
-		m_state != STATE_FADEOUT)
-	{// 移動可能モーションの時
+	if (CGame::GetGameManager()->IsControll())
+	{// 行動できるとき
 
-		// 移動中にする
-		m_sMotionFrag.bMove = true;
-
-		// スティックの向き
-		float fStickRot = pInputGamepad->GetStickRotL(0);
-
-		if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
-		{//←キーが押された,左移動
+		if (m_pMotion->IsGetMove(nMotionType) == 1 &&
+			m_state != STATE_DEAD &&
+			m_state != STATE_FADEOUT)
+		{// 移動可能モーションの時
 
 			// 移動中にする
 			m_sMotionFrag.bMove = true;
 
-			move.x -= fMove;
+			// スティックの向き
+			float fStickRot = pInputGamepad->GetStickRotL(0);
 
-			// 左向き
-			MoveAngle = ANGLE_LEFT;
-			m_nAngle = -1;	// 向き
-		}
-		else if (pInputKeyboard->GetPress(DIK_D) == true || pInputGamepad->GetStickMoveL(0).x > 0)
-		{//Dキーが押された,右移動
+			if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
+			{//←キーが押された,左移動
 
-			// 移動中にする
-			m_sMotionFrag.bMove = true;
+				// 移動中にする
+				m_sMotionFrag.bMove = true;
 
-			move.x += fMove;
+				move.x -= fMove;
 
-			// 右向き
-			MoveAngle = ANGLE_RIGHT;
-			m_nAngle = 1;	// 向き
-		}
-		else if (pInputKeyboard->GetPress(DIK_W) == true || pInputGamepad->GetStickMoveL(0).y > 0)
-		{//Wが押された、上移動
-
-			// 移動中にする
-			m_sMotionFrag.bMove = true;
-
-			// 上向き
-			MoveAngle = ANGLE_UP;
-		}
-		else if (pInputKeyboard->GetPress(DIK_S) == true || pInputGamepad->GetStickMoveL(0).y < 0)
-		{//Sが押された、下移動
-
-			// 移動中にする
-			m_sMotionFrag.bMove = true;
-
-			// 上向き
-			MoveAngle = ANGLE_DOWN;
-		}
-		else
-		{
-			// 移動中かどうか
-			m_sMotionFrag.bMove = false;
-		}
-
-
-		if (pInputGamepad->GetStickPositionRatioL(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioL(0).y <= -0.5f ||
-			pInputGamepad->GetStickPositionRatioL(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioL(0).x <= -0.5f)
-		{// 攻撃
-
-			if ((fStickRot >= 0.0f && fStickRot < D3DX_PI * 0.25f) ||
-				(fStickRot <= 0.0f && fStickRot > -D3DX_PI * 0.25f))
-			{// 上方向
-				MoveAngle = ANGLE_UP;
-				m_nAngle = 1;	// 向き
-			}
-			else if (fStickRot >= D3DX_PI * 0.25f && fStickRot < D3DX_PI * 0.75f)
-			{// 右方向
-				MoveAngle = ANGLE_RIGHT;
-				m_nAngle = 1;	// 向き
-			}
-			else if (
-				fStickRot >= -D3DX_PI * 0.75f &&
-				fStickRot < -D3DX_PI * 0.25f)
-			{// 左方向
+				// 左向き
 				MoveAngle = ANGLE_LEFT;
 				m_nAngle = -1;	// 向き
 			}
-			else if (
-				(fStickRot > D3DX_PI * 0.75f && fStickRot <= D3DX_PI) ||
-				(fStickRot < -D3DX_PI * 0.75f && fStickRot >= -D3DX_PI))
-			{// 下方向
+			else if (pInputKeyboard->GetPress(DIK_D) == true || pInputGamepad->GetStickMoveL(0).x > 0)
+			{//Dキーが押された,右移動
+
+				// 移動中にする
+				m_sMotionFrag.bMove = true;
+
+				move.x += fMove;
+
+				// 右向き
+				MoveAngle = ANGLE_RIGHT;
+				m_nAngle = 1;	// 向き
+			}
+			else if (pInputKeyboard->GetPress(DIK_W) == true || pInputGamepad->GetStickMoveL(0).y > 0)
+			{//Wが押された、上移動
+
+				// 移動中にする
+				m_sMotionFrag.bMove = true;
+
+				// 上向き
+				MoveAngle = ANGLE_UP;
+			}
+			else if (pInputKeyboard->GetPress(DIK_S) == true || pInputGamepad->GetStickMoveL(0).y < 0)
+			{//Sが押された、下移動
+
+				// 移動中にする
+				m_sMotionFrag.bMove = true;
+
+				// 上向き
 				MoveAngle = ANGLE_DOWN;
 			}
+			else
+			{
+				// 移動中かどうか
+				m_sMotionFrag.bMove = false;
+			}
+
+
+			if (pInputGamepad->GetStickPositionRatioL(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioL(0).y <= -0.5f ||
+				pInputGamepad->GetStickPositionRatioL(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioL(0).x <= -0.5f)
+			{// 攻撃
+
+				if ((fStickRot >= 0.0f && fStickRot < D3DX_PI * 0.25f) ||
+					(fStickRot <= 0.0f && fStickRot > -D3DX_PI * 0.25f))
+				{// 上方向
+					MoveAngle = ANGLE_UP;
+					m_nAngle = 1;	// 向き
+				}
+				else if (fStickRot >= D3DX_PI * 0.25f && fStickRot < D3DX_PI * 0.75f)
+				{// 右方向
+					MoveAngle = ANGLE_RIGHT;
+					m_nAngle = 1;	// 向き
+				}
+				else if (
+					fStickRot >= -D3DX_PI * 0.75f &&
+					fStickRot < -D3DX_PI * 0.25f)
+				{// 左方向
+					MoveAngle = ANGLE_LEFT;
+					m_nAngle = -1;	// 向き
+				}
+				else if (
+					(fStickRot > D3DX_PI * 0.75f && fStickRot <= D3DX_PI) ||
+					(fStickRot < -D3DX_PI * 0.75f && fStickRot >= -D3DX_PI))
+				{// 下方向
+					MoveAngle = ANGLE_DOWN;
+				}
+			}
+
+			if (m_bJump == false &&
+				(pInputKeyboard->GetTrigger(DIK_SPACE) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_LB, 0)))
+			{//SPACEが押された,ジャンプ
+
+				m_bJump = true;
+				m_sMotionFrag.bJump = true;
+				move.y += 17.0f;
+
+				// サウンド再生
+				CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_JUMP);
+			}
 		}
+		else if (m_state != STATE_DEAD && m_state != STATE_FADEOUT)
+		{// 移動可能モーションじゃない場合
 
-		if (m_bJump == false &&
-			(pInputKeyboard->GetTrigger(DIK_SPACE) == true || pInputGamepad->GetTrigger(CInputGamepad::BUTTON_LB, 0)))
-		{//SPACEが押された,ジャンプ
+			if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
+			{//←キーが押された,左移動
 
-			m_bJump = true;
-			m_sMotionFrag.bJump = true;
-			move.y += 17.0f;
+				// 左向き
+				MoveAngle = ANGLE_LEFT;
+				m_nAngle = -1;	// 向き
+			}
+			else if (pInputKeyboard->GetPress(DIK_D) == true || pInputGamepad->GetStickMoveL(0).x > 0)
+			{//Dキーが押された,右移動
 
-			// サウンド再生
-			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_JUMP);
-		}
-	}
-	else if(m_state != STATE_DEAD && m_state != STATE_FADEOUT)
-	{// 移動可能モーションじゃない場合
+				// 右向き
+				MoveAngle = ANGLE_RIGHT;
+				m_nAngle = 1;	// 向き
+			}
+			else if (pInputKeyboard->GetPress(DIK_W) == true || pInputGamepad->GetStickMoveL(0).y > 0)
+			{//Wが押された、上移動
 
-		if (pInputKeyboard->GetPress(DIK_A) == true || pInputGamepad->GetStickMoveL(0).x < 0)
-		{//←キーが押された,左移動
+				// 上向き
+				MoveAngle = ANGLE_UP;
+			}
+			else if (pInputKeyboard->GetPress(DIK_S) == true || pInputGamepad->GetStickMoveL(0).y < 0)
+			{//Sが押された、下移動
 
-			// 左向き
-			MoveAngle = ANGLE_LEFT;
-			m_nAngle = -1;	// 向き
-		}
-		else if (pInputKeyboard->GetPress(DIK_D) == true || pInputGamepad->GetStickMoveL(0).x > 0)
-		{//Dキーが押された,右移動
-
-			// 右向き
-			MoveAngle = ANGLE_RIGHT;
-			m_nAngle = 1;	// 向き
-		}
-		else if (pInputKeyboard->GetPress(DIK_W) == true || pInputGamepad->GetStickMoveL(0).y > 0)
-		{//Wが押された、上移動
-
-			// 上向き
-			MoveAngle = ANGLE_UP;
-		}
-		else if (pInputKeyboard->GetPress(DIK_S) == true || pInputGamepad->GetStickMoveL(0).y < 0)
-		{//Sが押された、下移動
-
-			// 下向き
-			MoveAngle = ANGLE_DOWN;
+				// 下向き
+				MoveAngle = ANGLE_DOWN;
+			}
 		}
 	}
 
@@ -876,104 +881,107 @@ void CPlayer::Controll(void)
 	// 移動方向設定
 	SetMoveAngle(MoveAngle);
 
+	if (CGame::GetGameManager()->IsControll())
+	{// 行動できるとき
 
-	if (pInputGamepad->GetStickPositionRatioR(0).y <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).y >= -0.5f &&
-		pInputGamepad->GetStickPositionRatioR(0).x <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).x >= -0.5f)
-	{
+		if (pInputGamepad->GetStickPositionRatioR(0).y <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).y >= -0.5f &&
+			pInputGamepad->GetStickPositionRatioR(0).x <= 0.5f && pInputGamepad->GetStickPositionRatioR(0).x >= -0.5f)
+		{
 
-		// スティック倒した判定
-		m_bStick = false;
-	}
-	
-	if (/*m_sMotionFrag.bATK == false &&*/
-		(
-			pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
-			pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f))
-	{// 攻撃
-
-		if (pInputGamepad->GetStickPositionRatioR(0).x >= 0.2f)
-		{
-			m_StickAngle = ANGLE_RIGHT;		// スティックの向き
-		}
-		else if (pInputGamepad->GetStickPositionRatioR(0).x <= -0.2f)
-		{
-			m_StickAngle = ANGLE_LEFT;		// スティックの向き
-		}
-		else if (pInputGamepad->GetStickPositionRatioR(0).y >= 0.2f)
-		{
-			m_StickAngle = ANGLE_UP;		// スティックの向き
-		}
-		else if (pInputGamepad->GetStickPositionRatioR(0).y <= -0.2f)
-		{
-			m_StickAngle = ANGLE_DOWN;		// スティックの向き
+			// スティック倒した判定
+			m_bStick = false;
 		}
 
-		// 攻撃判定ON
-		if (m_StickAngle != m_OldStickAngle)
-		{
-			// スティックの向き
-			m_fAtkStickRot = pInputGamepad->GetStickRotR(0);
+		if (/*m_sMotionFrag.bATK == false &&*/
+			(
+				pInputGamepad->GetStickPositionRatioR(0).y >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).y <= -0.5f ||
+				pInputGamepad->GetStickPositionRatioR(0).x >= 0.5f || pInputGamepad->GetStickPositionRatioR(0).x <= -0.5f))
+		{// 攻撃
 
-			switch (MoveAngle)
+			if (pInputGamepad->GetStickPositionRatioR(0).x >= 0.2f)
 			{
-			case CPlayer::ANGLE_UP:
+				m_StickAngle = ANGLE_RIGHT;		// スティックの向き
+			}
+			else if (pInputGamepad->GetStickPositionRatioR(0).x <= -0.2f)
+			{
+				m_StickAngle = ANGLE_LEFT;		// スティックの向き
+			}
+			else if (pInputGamepad->GetStickPositionRatioR(0).y >= 0.2f)
+			{
+				m_StickAngle = ANGLE_UP;		// スティックの向き
+			}
+			else if (pInputGamepad->GetStickPositionRatioR(0).y <= -0.2f)
+			{
+				m_StickAngle = ANGLE_DOWN;		// スティックの向き
+			}
 
-				if (m_fAtkStickRot <= 0.0f)
-				{// 左半分
-					m_fAtkStickRot *= -1;
-				}
-				m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
-				break;
+			// 攻撃判定ON
+			if (m_StickAngle != m_OldStickAngle)
+			{
+				// スティックの向き
+				m_fAtkStickRot = pInputGamepad->GetStickRotR(0);
 
-			case CPlayer::ANGLE_RIGHT:
-				m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
-				break;
-
-			case CPlayer::ANGLE_DOWN:
-
-				if (m_fAtkStickRot >= 0.0f)
-				{// 右半分
-					m_fAtkStickRot *= -1;
-					m_fAtkStickRot += D3DX_PI * 0.5f;
-				}
-				else
+				switch (MoveAngle)
 				{
+				case CPlayer::ANGLE_UP:
+
+					if (m_fAtkStickRot <= 0.0f)
+					{// 左半分
+						m_fAtkStickRot *= -1;
+					}
 					m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
+					break;
+
+				case CPlayer::ANGLE_RIGHT:
+					m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
+					break;
+
+				case CPlayer::ANGLE_DOWN:
+
+					if (m_fAtkStickRot >= 0.0f)
+					{// 右半分
+						m_fAtkStickRot *= -1;
+						m_fAtkStickRot += D3DX_PI * 0.5f;
+					}
+					else
+					{
+						m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
+					}
+					break;
+
+				case CPlayer::ANGLE_LEFT:
+					m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
+					break;
+
+				default:
+					break;
 				}
-				break;
+				RotNormalize(m_fAtkStickRot);
 
-			case CPlayer::ANGLE_LEFT:
-				m_fAtkStickRot -= D3DX_PI * 0.5f;	// 半周分
-				break;
+				int nType = m_pMotion->GetType();
+				if (nType == MOTION_JUMP || nType == MOTION_FALL)
+				{
+					m_pMotion->ToggleFinish(true);
+				}
 
-			default:
-				break;
-			}
-			RotNormalize(m_fAtkStickRot);
+				m_sMotionFrag.bJump = false;
+				m_sMotionFrag.bATK = true;
 
-			int nType = m_pMotion->GetType();
-			if (nType == MOTION_JUMP || nType == MOTION_FALL)
-			{
-				m_pMotion->ToggleFinish(true);
 			}
 
-			m_sMotionFrag.bJump = false;
-			m_sMotionFrag.bATK = true;
+			// スティック倒した判定
+			m_bStick = true;
 
+			m_OldStickAngle = m_StickAngle;	// 前回のスティックの向き
 		}
+		else
+		{
+			//m_atkRush = ATKRUSH_LEFT;
+			m_OldStickAngle = ANGLE_MAX;
 
-		// スティック倒した判定
-		m_bStick = true;
-
-		m_OldStickAngle = m_StickAngle;	// 前回のスティックの向き
-	}
-	else
-	{
-		//m_atkRush = ATKRUSH_LEFT;
-		m_OldStickAngle = ANGLE_MAX;
-
-		// スティック倒した判定
-		m_bStick = false;
+			// スティック倒した判定
+			m_bStick = false;
+		}
 	}
 }
 

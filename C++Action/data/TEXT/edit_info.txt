@@ -25,7 +25,7 @@ TEXTURE_FILENAME = data/TEXTURE/glass.jpg		# [14]
 #------------------------------------------------------------------------------
 # モデル数
 #------------------------------------------------------------------------------
-NUM_MODEL = 45
+NUM_MODEL = 47
 
 #------------------------------------------------------------------------------
 # モデルファイル名
@@ -73,8 +73,10 @@ MODEL_FILENAME = data/MODEL/map_object/rock_05_superhuge.x		# [39]
 MODEL_FILENAME = data/MODEL/map_object/tree_03_huge.x		# [40]
 MODEL_FILENAME = data/MODEL/stage_01.x		# [41]
 MODEL_FILENAME = data/MODEL/bossstage_01.x		# [42]
-MODEL_FILENAME = data/MODEL/heart_01.x		# [42]
-MODEL_FILENAME = data/MODEL/arow.x		# [43]
+MODEL_FILENAME = data/MODEL/heart_01.x		# [43]
+MODEL_FILENAME = data/MODEL/tutorial.x		# [44]
+MODEL_FILENAME = data/MODEL/tutorial_02.x		# [44]
+MODEL_FILENAME = data/MODEL/arow.x		# [45]
 
 #==============================================================================
 # 空情報
@@ -255,6 +257,20 @@ MODELSET
 	TYPE = 40
 	POS = 8300.50 0.00 3495.74
 	ROT = 0.00 -1.57 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 44
+	POS = -1265.64 860.00 -3732.41
+	ROT = 0.00 0.00 0.00
+	SHADOW = 1
+END_MODELSET
+
+MODELSET
+	TYPE = 45
+	POS = -865.64 860.00 -3732.41
+	ROT = 0.00 0.00 0.00
 	SHADOW = 1
 END_MODELSET
 

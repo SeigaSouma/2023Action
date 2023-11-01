@@ -453,6 +453,9 @@ void CManager::SetMode(CScene::MODE mode)
 		}
 	}
 
+	// 黒フレームリセット
+	m_pBlackFrame->Reset();
+
 	// カメラの情報リセット
 	if (m_pCamera != NULL)
 	{

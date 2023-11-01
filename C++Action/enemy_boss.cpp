@@ -35,6 +35,7 @@
 #include "effect_enemyspawn.h"
 #include "impactwave.h"
 #include "blackframe.h"
+#include "gamemanager.h"
 
 //==========================================================================
 // マクロ定義
@@ -62,10 +63,13 @@
 CEnemyBoss::CEnemyBoss(int nPriority) : CEnemy(nPriority)
 {
 	// 値のクリア
+	memset(&m_sAct, 0, sizeof(m_sAct));
+	m_sAct.nKnockBackCnt = 0;
 	m_sAct.nBulletCnt = 0;		// 弾のカウンター
 	m_sAct.nAssultAngle = 1;	// 突進の向き
 	m_sAct.AtkType = ATKTYPE_BULLET;	// 攻撃の種類
 	m_sAct.StunPosDest = mylib_const::DEFAULT_VECTOR3;	// スタン時の目標の位置
+	m_sAct.nKnockBackCnt = 0;
 	m_BaseType = BASETYPE_ORIGIN;	// 拠点の種類
 	m_BaseTypeDest = BASETYPE_ORIGIN;	// 目標の拠点種類
 	m_nCntDamage = 0;			// ダメージカウンター
@@ -105,10 +109,7 @@ HRESULT CEnemyBoss::Init(void)
 	CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_BGM_HOBARING);
 	CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_HOBARING);
 
-
-	CManager::GetInstance()->GetBlackFrame()->SetState(CBlackFrame::STATE_IN);
-
-
+	SetPosition(D3DXVECTOR3(-1500.0f, 3000.0f, 1500.0f));
 
 	// 位置取得
 	D3DXVECTOR3 pos = GetPosition();
@@ -126,11 +127,20 @@ HRESULT CEnemyBoss::Init(void)
 		return E_FAIL;
 	}
 
+	// マップマネージャの取得
+	CMapManager *pMapManager = CGame::GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return false;
+	}
+
+	D3DXVECTOR3 posTarget = pMapManager->GetTargetPosition(0, 0.0f);
+
 	// 親の位置取得
 	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
 
 	// 目標の角度を求める
-	fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
+	fRotDest = atan2f((pos.x - posTarget.x), (pos.z - posTarget.z));
 	rot.y = fRotDest;
 
 	// 目標の向き設定
@@ -139,7 +149,7 @@ HRESULT CEnemyBoss::Init(void)
 	// 向き設定
 	SetRotation(rot);
 
-
+	m_posKnokBack = pos;
 
 	return S_OK;
 }
@@ -578,8 +588,74 @@ void CEnemyBoss::UpdateAppearance(void)
 		m_nCntState = WAITTIME;
 		m_state = STATE_WAIT;
 		m_sMotionFrag.bATK = false;
+		m_sAct.nKnockBackCnt = 0;
+
+		// 黒フレーム捌ける
+		CManager::GetInstance()->GetBlackFrame()->SetState(CBlackFrame::STATE_OUT);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_BGM_BOSSGAME);
+
+		// カメラ取得
+		CCamera *pCamera = CManager::GetInstance()->GetCamera();
+		D3DXVECTOR3 CameraRotation = pCamera->GetDestRotation();
+
+		pCamera->SetDestRotation(D3DXVECTOR3(CameraRotation.x, CameraRotation.y, -0.25f));
+
+		// 操作可能状態にする
+		CGame::GetGameManager()->SetEnableControll(true);
 		return;
 	}
+
+	// カメラ取得
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
+	pCamera->SetLenDest(pCamera->GetOriginDistance() - 500.0f, 10, 2.0f, 0.01f);
+	D3DXVECTOR3 CameraRotation = pCamera->GetDestRotation();
+	pCamera->SetDestRotation(D3DXVECTOR3(CameraRotation.x, CameraRotation.y, -0.1f));
+
+	// 向き取得
+	D3DXVECTOR3 rot = GetRotation();
+
+	// 目標の向き取得
+	float fRotDest = GetRotDest();
+
+	// 位置取得
+	D3DXVECTOR3 pos = GetPosition();
+
+	// プレイヤー情報
+	CPlayer *pPlayer = CManager::GetInstance()->GetScene()->GetPlayer();
+	if (pPlayer == NULL)
+	{
+		return;
+	}
+	// 親の位置取得
+	D3DXVECTOR3 posPlayer = pPlayer->GetPosition();
+
+	// 目標の角度を求める
+	fRotDest = atan2f((pos.x - posPlayer.x), (pos.z - posPlayer.z));
+	rot.y += (fRotDest - rot.y) * 0.1f;
+	SetRotation(rot);
+	
+
+
+	// マップマネージャの取得
+	CMapManager *pMapManager = CGame::GetMapManager();
+	if (pMapManager == NULL)
+	{// NULLだったら
+		return;
+	}
+
+	m_sAct.nKnockBackCnt++;
+
+	if (m_sAct.nKnockBackCnt >= 100)
+	{
+		m_sAct.nKnockBackCnt = 100;
+	}
+
+	pos.x = Lerp(m_posKnokBack.x, 0.0f, (float)m_sAct.nKnockBackCnt / (float)100);
+	pos.y = Lerp(m_posKnokBack.y, 1800.0f, (float)m_sAct.nKnockBackCnt / (float)100);
+	pos.z = Lerp(m_posKnokBack.z, 0.0f, (float)m_sAct.nKnockBackCnt / (float)100);
+
+	SetPosition(pos);
+
 
 	// 登場モーション設定
 	m_pMotion->Set(MOTION_APPEARANCE);
@@ -626,6 +702,9 @@ void CEnemyBoss::UpdateAttackBullet(void)
 		case ATKTYPE_BULLET:
 			// 弾攻撃モーション設定
 			m_pMotion->Set(MOTION_BULLETATK);
+
+			// 弾発射
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_BOSSBULLET_CHARGE);
 			break;
 		}
 	}
@@ -749,6 +828,7 @@ void CEnemyBoss::UpdateStun(void)
 		// スタン音
 		CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_SE_STUN);
 		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_STUN);
+		CManager::GetInstance()->GetSound()->StopSound(CSound::LABEL_SE_ASSULT);
 	}
 
 	m_nCntState--;
@@ -1424,6 +1504,9 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 	{
 	case MOTION_BULLETATK:
 	{
+		// 弾発射
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_BOSSBULLET);
+
 		int nCircleDivision = 15;
 		for (int i = 0; i < nCircleDivision + 1; i++)
 		{
@@ -1465,6 +1548,10 @@ void CEnemyBoss::AttackAction(int nModelNum, CMotion::AttackInfo ATKInfo)
 		break;
 
 	case MOTION_CHILDSPAWN:
+
+		// ボストーク
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::LABEL_SE_BOSSTALK);
+
 		int nNumAll = CGame::GetEnemyBase()->GetNumAll();
 		int nRandom = Random(0, nNumAll - 1);
 

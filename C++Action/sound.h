@@ -21,7 +21,8 @@ public:
 	typedef enum
 	{
 		LABEL_BGM_TITLE = 0,	// タイトル
-		LABEL_BGM_GAME,		// タイトル
+		LABEL_BGM_GAME,		// ゲーム
+		LABEL_BGM_BOSSGAME,		// ボス
 		LABEL_BGM_RESULT,	// リザルト
 		LABEL_SE_EXPLOSION,	// 爆発
 		LABEL_SE_KYUPIIN,	// キュピーン
@@ -57,6 +58,9 @@ public:
 		LABEL_SE_ASSULTEND,		// 突進終了
 		LABEL_SE_STUN,			// スタン
 		LABEL_SE_STUNHEAL,		// スタン回復
+		LABEL_SE_BOSSBULLET,	// ボスの弾攻撃
+		LABEL_SE_BOSSBULLET_CHARGE,	// ボスの弾チャージ
+		LABEL_SE_BOSSTALK,		// ボストーク
 		LABEL_MAX,
 	} LABEL;
 
